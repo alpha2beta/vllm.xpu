@@ -43,7 +43,8 @@ def main() -> int:
     expected: dict[str, str | None] = {}
     for s in meta["siblings"]:
         lfs = s.get("lfs") or {}
-        oid = lfs.get("oid")  # sha256 for LFS-tracked files
+        # HF serves the LFS object id as `sha256` (older clients used `oid`)
+        oid = lfs.get("sha256") or lfs.get("oid")
         expected[s["rfilename"]] = oid
 
     out: list[str] = []
