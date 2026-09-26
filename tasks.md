@@ -425,6 +425,7 @@ eager, `gpu_memory_utilization 0.77`:
 | 32,768 | auto | **fail**: same (`0.44 GiB needed > 0.25 GiB available`; vLLM's own estimate: max ≈ **12,672**) | — |
 | 32,768 | 1.0 GiB pin | **works**: 0 errors, init ~47 s | **72,983 tokens** (2.23× @32768) |
 | **65,536** | **2.0 GiB pin** | **works**: 0 errors, init ~46 s | **170,738 tokens** (2.61× @65536) |
+| **32,768 + MTP** (`server-07-mtp-fp8`: draft + fp8 KV + 0.75 GiB pin) | **works**: 0 errors, init ~47 s, weights **20.81 GiB** | **43,253 tokens** (1.32× @32768) |
 
 Per-token KV at fp8 ≈ **12.6–14.7 KB** (vs ~54.6 KB measured at bf16) — roughly a **4×** saving,
 meaning the GDN state compresses too, not just the FA attention KV. End-to-end validation: a
@@ -435,7 +436,12 @@ on identical retry, so classified as compiler flake under memory pressure, not a
 
 **Demonstrated maximum: 65,536 tokens** (KV headroom to ~170 K tokens exists, so ~131 K is
 plausible but untested; prefill at 65 K would cost ~60 s and host headroom is thin). Weights
-stay 19.24 GiB; total device ≈ 21.3 GiB of the 22.0 GiB budget.
+stay 19.24 GiB; total device ≈ 21.3 GiB of the 22.0 GiB budget. **MTP + fp8 combined**
+(`server-07-mtp-fp8`): decode **26.29 tok/s** (fp8 KV costs nothing vs MTP/bf16-KV's 26.83),
+7,500-token prompt in 9.1 s with coherent output, 0 errors, memory stable
+(GPUActive 23.04 GiB, GPUReclaim 0, swap flat) — host `MemAvailable` 1.95–1.98 GiB, the thinnest
+yet. First try at 0.5 GiB pin failed (`0.55 GiB needed > 0.48 available`, vLLM estimated max
+25,344); 0.75 GiB pin succeeded.
 
 **Gate 8:** A repeatable operating envelope is documented with no swap and no OOM in three consecutive runs.
 **Gate 8 state: PASS (with a caveat)** — envelope = **4096-token context, 2 concurrent sequences,

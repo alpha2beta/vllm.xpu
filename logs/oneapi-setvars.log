@@ -1,7 +1,7 @@
  
 :: initializing oneAPI environment ...
    launch_vllm.sh: BASH_VERSION = 5.3.15(1)-release
-   args: Using "$@" for setvars.sh arguments: --kv-cache-dtype fp8 --kv-cache-memory-bytes 2147483648
+   args: Using "$@" for setvars.sh arguments: --kv-cache-dtype fp8 --kv-cache-memory-bytes 805306368 --speculative-config {"method":"mtp","num_speculative_tokens":1}
 :: compiler -- latest
 :: debugger -- latest
 :: mkl -- latest
