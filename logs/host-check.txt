@@ -1,0 +1,128 @@
+=== 2026-09-25T22:14:41+02:00 host-check ===
+Linux cachyos-x8664 7.2.3-3-cachyos-deckify #1 SMP PREEMPT_DYNAMIC Fri, 11 Sep 2026 21:39:36 +0000 x86_64 GNU/Linux
+NAME="CachyOS Linux"
+PRETTY_NAME="CachyOS"
+ID=cachyos
+ID_LIKE=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;23;147;209"
+HOME_URL="https://cachyos.org/"
+DOCUMENTATION_URL="https://wiki.cachyos.org/"
+SUPPORT_URL="https://discuss.cachyos.org/"
+BUG_REPORT_URL="https://github.com/cachyos"
+PRIVACY_POLICY_URL="https://terms.archlinux.org/docs/privacy-policy/"
+LOGO=cachyos
+
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           42 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  8
+On-line CPU(s) list:                     0-7
+Vendor ID:                               GenuineIntel
+Model name:                              Intel(R) Core(TM) Ultra 7 258V
+CPU family:                              6
+Model:                                   189
+Thread(s) per core:                      1
+Core(s) per socket:                      8
+Socket(s):                               1
+Stepping:                                1
+Microcode version:                       0x128
+CPU(s) scaling MHz:                      57%
+CPU max MHz:                             4800.0000
+CPU min MHz:                             400.0000
+BogoMIPS:                                6604.80
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdt_a rdseed adx smap clflushopt clwb intel_pt sha_ni xsaveopt xsavec xgetbv1 xsaves split_lock_detect user_shstk avx_vnni lass lam wbnoinvd dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req hfi vnmi umip pku ospke waitpkg gfni vaes vpclmulqdq rdpid bus_lock_detect movdiri movdir64b fsrm md_clear serialize pconfig arch_lbr ibt flush_l1d arch_capabilities
+Virtualization:                          VT-x
+L1d cache:                               320 KiB (8 instances)
+L1i cache:                               512 KiB (8 instances)
+L2 cache:                                14 MiB (5 instances)
+L3 cache:                                12 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-7
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Ghostwrite:                Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Old microcode:             Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS Not affected; BHI BHI_DIS_S
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Mitigation; IBPB before exit to userspace
+
+               total        used        free      shared  buff/cache   available
+Mem:            30Gi       8.4Gi        16Gi       100Mi       6.9Gi        22Gi
+Swap:           30Gi       1.8Gi        29Gi
+
+NAME        MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS
+sda           8:0    1     0B  0 disk 
+mmcblk0     179:0    0 476.9G  0 disk 
+└─mmcblk0p1 179:1    0 476.9G  0 part /run/media/yanchun/9C33-6BBD
+zram0       253:0    0  30.9G  0 disk [SWAP]
+nvme0n1     259:0    0 953.9G  0 disk 
+├─nvme0n1p1 259:1    0   260M  0 part 
+├─nvme0n1p2 259:2    0   128M  0 part 
+├─nvme0n1p3 259:3    0 476.2G  0 part 
+├─nvme0n1p4 259:4    0     1G  0 part 
+├─nvme0n1p5 259:5    0 472.2G  0 part /var/tmp
+│                                     /var/log
+│                                     /var/cache
+│                                     /srv
+│                                     /root
+│                                     /home
+│                                     /
+└─nvme0n1p6 259:6    0     4G  0 part /boot
+
+00:02.0 VGA compatible controller [0300]: Intel Corporation Core Ultra 200V Series Processors Arc Graphics 130V/140V GPU [8086:64a0] (rev 04)
+
+total 0
+drwxr-xr-x  2 root root         80 Sep 21 14:46 by-path
+crw-rw----+ 1 root video  226,   0 Sep 25 21:50 card0
+crw-rw-rw-  1 root render 226, 128 Sep 25 21:50 renderD128
+
+uid=1000(yanchun) gid=1000(yanchun) groups=1000(yanchun),3(sys),90(network),967(nopasswdlogin),980(rfkill),982(users),983(video),985(storage),989(lp),995(audio),998(wheel)
+
+
+=== GPU visibility & runtime (2026-09-25T22:31:30+02:00) ===
+/usr/bin/clinfo
+--- sycl-ls ---
+=== Rusticl warning: Patched Mesa libclc not detected. Upstream libclc may contain known bugs or breaking changes and isn't guaranteed to work reliably. Please visit https://gitlab.freedesktop.org/karolherbst/mesa-libclc for more information. ===
+[level_zero:gpu][level_zero:0] Intel(R) oneAPI Unified Runtime over Level-Zero V2, Intel(R) Arc(TM) Graphics 20.4.4 [1.17.39758]
+[opencl:cpu][opencl:0] Intel(R) OpenCL, Intel(R) Core(TM) Ultra 7 258V OpenCL 3.0 (Build 0) [2026.21.3.0.31_160000]
+[opencl:gpu][opencl:1] rusticl, Mesa Intel(R) Graphics (LNL) OpenCL 3.1  [26.2.3-arch3.1]
+[opencl:gpu][opencl:2] Intel(R) OpenCL Graphics (integrated), Intel(R) Arc(TM) Graphics OpenCL 3.0 NEO  [26.35.39758]
+--- clinfo ---
+  Platform Name                                   rusticl
+  Platform Name                                   Intel(R) OpenCL Graphics (integrated)
+  Platform Name                                   Intel(R) OpenCL
+  Platform Name                                   rusticl
+  Device Name                                     Mesa Intel(R) Graphics (LNL)
+  Device Version                                  OpenCL 3.1 
+  Error Correction support                        No
+  Platform Name                                   Intel(R) OpenCL Graphics (integrated)
+  Device Name                                     Intel(R) Arc(TM) Graphics
+  Device Version                                  OpenCL 3.0 NEO 
+--- intel_gpu_top (1 sample) ---
+timeout: failed to run command ‘intel_gpu_top’: No such file or directory
+--- kernel driver ---
+--- dri devices ---
+total 0
+drwxr-xr-x  2 root root         80 Sep 21 14:46 by-path
+crw-rw----+ 1 root video  226,   0 Sep 25 21:50 card0
+crw-rw-rw-  1 root render 226, 128 Sep 25 21:50 renderD128
+--- groups ---
+uid=1000(yanchun) gid=1000(yanchun) groups=1000(yanchun),3(sys),90(network),967(nopasswdlogin),980(rfkill),982(users),983(video),985(storage),989(lp),995(audio),998(wheel)
+BIOS version: E1T52IMS.112
+BIOS date: 12/04/2025
+Board: MS-1T52
+Product: Claw 8 AI+ A2VM

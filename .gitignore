@@ -1,0 +1,11 @@
+# Large / derived / environment-specific artifacts — not tracked.
+# Reproduce via scripts/download_model.sh, scripts/setup_level_zero_headers.sh,
+# and the install command in environment.md.
+models/
+.venv/
+tools/sysroot/
+__pycache__/
+*.pyc
+*.pyo
+.nohup
+*.out

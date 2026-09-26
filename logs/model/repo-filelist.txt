@@ -1,0 +1,43 @@
+repo pahajokiconsulting/Qwen3.6-35B-A3B-MXFP4
+sha 7eceff3a9f7e6f916c824d197266d86676bce695
+lastModified 2026-04-17T20:51:44.000Z
+        1570  .gitattributes
+       69315  README.md
+        7764  chat_template.jinja
+       71470  config.json
+          58  configuration.json
+         202  generation_config.json
+     3353259  merges.txt
+  1926675584  model-00001-of-00026.safetensors
+   890330568  model-00002-of-00026.safetensors
+   943267096  model-00003-of-00026.safetensors
+   906702176  model-00004-of-00026.safetensors
+   943267096  model-00005-of-00026.safetensors
+  1052228832  model-00006-of-00026.safetensors
+   307825976  model-00007-of-00026.safetensors
+  1088930760  model-00008-of-00026.safetensors
+   307692248  model-00009-of-00026.safetensors
+  1088930872  model-00010-of-00026.safetensors
+   307692232  model-00011-of-00026.safetensors
+   946252448  model-00012-of-00026.safetensors
+   450370008  model-00013-of-00026.safetensors
+   909552216  model-00014-of-00026.safetensors
+   450505328  model-00015-of-00026.safetensors
+  1088932296  model-00016-of-00026.safetensors
+   307690696  model-00017-of-00026.safetensors
+  1088930872  model-00018-of-00026.safetensors
+   307692232  model-00019-of-00026.safetensors
+   946252448  model-00020-of-00026.safetensors
+   450370016  model-00021-of-00026.safetensors
+   906705296  model-00022-of-00026.safetensors
+   943270208  model-00023-of-00026.safetensors
+   906705296  model-00024-of-00026.safetensors
+  1812518184  model-00025-of-00026.safetensors
+  1837257384  model-00026-of-00026.safetensors
+     7066063  model.safetensors.index.json
+         390  preprocessor_config.json
+    12807982  tokenizer.json
+       16718  tokenizer_config.json
+         385  video_preprocessor_config.json
+     6722759  vocab.json
+TOTAL 23146666303 bytes 23.147 GB

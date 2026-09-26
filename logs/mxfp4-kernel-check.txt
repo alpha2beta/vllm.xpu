@@ -1,0 +1,20 @@
+=== Rusticl warning: Patched Mesa libclc not detected. Upstream libclc may contain known bugs or breaking changes and isn't guaranteed to work reliably. Please visit https://gitlab.freedesktop.org/karolherbst/mesa-libclc for more information. ===
+torch=2.13.0+xpu
+[PASS] torch.xpu.is_available()
+device=Intel(R) Arc(TM) Graphics
+vllm=0.30.0
+[PASS] import vllm_xpu_kernels
+[PASS] import vllm._xpu_ops (registers torch.ops.vllm.* ops)
+[PASS] op torch.ops.vllm.xpu_mxfp4_quantize registered
+[PASS] op torch.ops._xpu_C.fp4_gemm registered
+[PASS] op torch.ops._xpu_C.is_xe2_arch registered
+[PASS] is_xe2_arch() returns True (Arc 140V = Xe2)
+[PASS] xpu_mxfp4_quantize shapes/packing :: x_q=(64, 256)/torch.float4_e2m1fn_x2 x_s=(64, 16)/torch.float8_e8m0fnu w_q=(384, 256)/torch.float4_e2m1fn_x2 w_s=(384, 16)/torch.float8_e8m0fnu
+[PASS] fp4_gemm executes :: out=(64, 384)/torch.bfloat16 (expected (64, 384))
+[PASS] fp4_gemm matches dequant reference (rel err < 2e-2) :: rel_err=0.00117 ref_mean_abs=18.0656
+[PASS] XPUExpertsMxFp4._supports_current_device()
+[PASS] XPUExpertsMxFp4 accepts (mxfp4-static weight, dynamic act)
+[PASS] XPUExpertsMxFp4 accepts (mxfp4-static weight, no act quant)
+[PASS] bf16 matmul on XPU
+
+RESULT: PASS — MXFP4 ops registered and numerically correct on XPU

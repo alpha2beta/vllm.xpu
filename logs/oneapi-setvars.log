@@ -1,0 +1,12 @@
+ 
+:: initializing oneAPI environment ...
+   launch_vllm.sh: BASH_VERSION = 5.3.15(1)-release
+   args: Using "$@" for setvars.sh arguments: --kv-cache-memory-bytes 1073741824
+:: compiler -- latest
+:: debugger -- latest
+:: mkl -- latest
+:: tbb -- latest
+:: tcm -- latest
+:: umf -- latest
+:: oneAPI environment initialized ::
+ 

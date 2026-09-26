@@ -1,0 +1,55 @@
+{
+  "description": "Fixed prompt suite for Phase 6 correctness baseline. Same prompts are replayed against the fallback backend (llama.cpp/SYCL) for the Phase 10 comparison.",
+  "sampling": {
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "max_tokens": 256,
+    "seed": 0
+  },
+  "prompts": [
+    {
+      "id": "p1_short_factual",
+      "kind": "short factual",
+      "chat": [
+        {"role": "user", "content": "What is the capital of Australia? Answer in one sentence."}
+      ],
+      "max_tokens": 64
+    },
+    {
+      "id": "p2_instruction_following",
+      "kind": "instruction following",
+      "chat": [
+        {"role": "user", "content": "List exactly three benefits of unit testing, as a numbered list. Do not add any introduction or closing remarks."}
+      ],
+      "max_tokens": 160
+    },
+    {
+      "id": "p3_small_coding",
+      "kind": "small coding",
+      "chat": [
+        {"role": "user", "content": "Write a Python function `is_palindrome(s: str) -> bool` that ignores case and non-alphanumeric characters, plus two assertions. Output only code."}
+      ],
+      "max_tokens": 256
+    },
+    {
+      "id": "p4_multi_turn",
+      "kind": "multi-turn",
+      "chat": [
+        {"role": "user", "content": "I want to store daily temperature readings. Which data structure should I use?"},
+        {"role": "assistant", "content": "A list of dictionaries (or a dataclass list) works well when readings are appended in order; a dict keyed by date is better for random access by day."},
+        {"role": "user", "content": "Good. Now show me the dict-keyed version with a 3-line example and nothing else."}
+      ],
+      "max_tokens": 160
+    },
+    {
+      "id": "p5_long_context",
+      "kind": "near initial context limit",
+      "chat": [
+        {"role": "user", "content": "The following is a repetitive text block used to fill context. Read all of it, then answer the final question.\n\nBLOCK_START\n<REPEAT_ME>\nBLOCK_END\n\nQuestion: what was the very first word of the block? Reply with one word."}
+      ],
+      "repeat_placeholder": "<REPEAT_ME>",
+      "repeat_unit": "alpha beta gamma delta epsilon zeta eta theta ",
+      "note": "Expanded at runtime to (target_tokens - margin) tokens; see scripts/run_prompt_suite.py"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+=== Rusticl warning: Patched Mesa libclc not detected. Upstream libclc may contain known bugs or breaking changes and isn't guaranteed to work reliably. Please visit https://gitlab.freedesktop.org/karolherbst/mesa-libclc for more information. ===
+torch: 2.13.0+xpu
+xpu available: True
+device: Intel(R) Arc(TM) Graphics
+properties: _XpuDeviceProperties(name='Intel(R) Arc(TM) Graphics', platform_name='Intel(R) oneAPI Unified Runtime over Level-Zero V2', type='gpu', device_id=0x64A0, uuid=8680a064-0400-0000-0002-000000000000, driver_version='1.17.39758', total_memory=29270MB, local_mem_size=128KB, last_level_cache_size=8192KB, max_compute_units=64, memory_clock_rate=0MHz, memory_bus_width=64-bit, gpu_eu_count=64, gpu_subslice_count=8, max_work_group_size=1024, max_num_sub_groups=64, sub_group_sizes=[16 32], has_fp16=1, has_fp64=1, has_atomic64=1, is_integrated_gpu=1)
+device total memory: 28.58 GiB
+arange sum = 523776 (expected 523776)
+bf16 matmul finite: True, shape (256, 256)
+host->device->host roundtrip: [1.0, 2.0, 3.0]
+RESULT: PASS
