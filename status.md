@@ -229,6 +229,7 @@ aggregate **22.51 tok/s**, engine init **50.99 s**, host `MemAvailable` ~2.9 GiB
 |---|---|---|---|---|---|---|
 | A | `--enforce-eager` removed → `mode=VLLM_COMPILE` (inductor; XPU graph still off) | 19.20 tok/s (−0.4 %) | 22.94 tok/s (+1.9 %) | 95.47 s (**+41.8 s compile**) | **2.36 GiB** (worse) | **Rejected** — gain is within noise, startup nearly doubles, host headroom shrinks. 0 errors, so the path itself is healthy. |
 | B | `VLLM_XPU_ENABLE_XPU_GRAPH=1` (on top of A) → `cudagraph_mode=FULL_AND_PIECEWISE`, capture sizes [1,2,4] | **19.84 tok/s (+3.0 %)** | **23.09 tok/s (+2.6 %)** | 93.60 s (compile 41.4 s) | **1.48–1.77 GiB** (vs 2.9) | **Rejected for this host** — correct and stable (0 errors, swap flat at 3.61 GiB) and a real but small gain, yet it nearly halves host memory headroom on a 32 GB shared-memory box. Keep as the documented option for a machine with more RAM. |
+| C | MTP speculative decoding: `--speculative-config '{"method":"mtp","num_speculative_tokens":1}'`, `gpu_memory_utilization` 0.74→0.77, KV pinned 1 GiB→0.5 GiB (`server-05-mtp`) | **26.83 tok/s (+39 % vs eager baseline)** | n/a (conc 1) | init ~47 s, weights **20.81 GiB** (19.24 + 1.57 draft) | **2.11–2.16 GiB** | **Accepted with caveats** — 0 errors, swap flat (4.47→4.46 GiB), output verified coherent/correct (Canberra probe). Draft (`Qwen3_5MoeMTP`, BF16) dispatches on XPU fine. Caveats: host headroom thinnest yet; KV capacity drops to 6,616 tokens (1.62× @4096); one warning (`no KV cache group could be identified as the draft model's`) needs a follow-up read; acceptance rate not directly measured (metrics off) but +39% implies healthy acceptance. New best decode config. |
 
 **Gate 9 decision — selected configuration:** **eager mode + concurrency 2**
 (`--enforce-eager`, `--max-num-seqs 2`, `gpu_memory_utilization 0.74`, KV pinned 1 GiB,
@@ -242,6 +243,7 @@ memory. Both compile/graph variants were measured and rejected on memory/startup
 |---|---|---|
 | 15 | 00:19 | Phase 9 test A (`server-server-02-eager-off.log`): 6 requests across 2 points, **0 errors**, swap flat at 4.08 GiB. One request stopped early at 94 tokens (`finish_reason=stop`) — normal EOS, not a failure |
 | 16 | 00:27 | Phase 9 test B (`server-server-03-xpugraph.log`): 6 requests, **0 errors**, XPU graphs actually captured (`cudagraph_mode FULL_AND_PIECEWISE`), `GPUReclaim` non-zero at 0.68–0.97 GiB (graph memory held), host `MemAvailable` down to 1.48 GiB |
+| 17 | 07:25 | **MTP test PASS** (`server-server-05-mtp.log`): draft `Qwen3_5MoeMTP` resolved from the same checkpoint, weights 20.81 GiB / ~36 s, KV 6,616 tokens, init ~47 s, **0 errors**; bench point (1026 in / 128 out, conc 1) → decode **26.83 tok/s (+39 % vs 19.27 baseline)**, TTFT median 1.55 s (first run 1.95 s incl. draft warmup); output verified correct; memory stable (GPUActive 22.53 GiB, GPUReclaim 0, swap 4.47→4.46 GiB), host `MemAvailable` 2.11–2.16 GiB — thinnest headroom yet |
 
 ## Next action — Phase 10 (needs a decision)
 
