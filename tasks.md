@@ -413,6 +413,30 @@ prefix cache, overhead-subtracted): **~1,100 tok/s** — n=1780 → 1155, n=2220
 (repeated/similar prompts, 45.9% hit rate observed) effective TTFT drops to ~0.8–1.0 s
 regardless of size. Row appended to `results.csv`.
 
+### Long context with fp8 KV cache (follow-up, `server-06-fp8kv`)
+
+`--kv-cache-dtype fp8` is supported on XPU (`flash_attn.py` lists it; `fa_utils.py` short-circuits
+`is_xpu() → True`; `vllm_xpu_kernels` has a native `is_fp8kv` path). Measured, text-only,
+eager, `gpu_memory_utilization 0.77`:
+
+| `max_model_len` | KV pin | Result | `XPU KV cache size` |
+|---|---|---|---|
+| 65,536 | auto (no pin) | **fail**: `No available memory for the cache blocks` (profile peak eats the budget) | — |
+| 32,768 | auto | **fail**: same (`0.44 GiB needed > 0.25 GiB available`; vLLM's own estimate: max ≈ **12,672**) | — |
+| 32,768 | 1.0 GiB pin | **works**: 0 errors, init ~47 s | **72,983 tokens** (2.23× @32768) |
+| **65,536** | **2.0 GiB pin** | **works**: 0 errors, init ~46 s | **170,738 tokens** (2.61× @65536) |
+
+Per-token KV at fp8 ≈ **12.6–14.7 KB** (vs ~54.6 KB measured at bf16) — roughly a **4×** saving,
+meaning the GDN state compresses too, not just the FA attention KV. End-to-end validation: a
+**7,500-token prompt completed in 9.4 s** with coherent output (~1,000 tok/s prefill, consistent
+with the 1,100 tok/s figure). One transient failure seen once at 64 K (`IGC Internal Compiler
+Error` in `torch.topk` during warmup — op inputs identical to the successful run; passed cleanly
+on identical retry, so classified as compiler flake under memory pressure, not a config defect).
+
+**Demonstrated maximum: 65,536 tokens** (KV headroom to ~170 K tokens exists, so ~131 K is
+plausible but untested; prefill at 65 K would cost ~60 s and host headroom is thin). Weights
+stay 19.24 GiB; total device ≈ 21.3 GiB of the 22.0 GiB budget.
+
 **Gate 8:** A repeatable operating envelope is documented with no swap and no OOM in three consecutive runs.
 **Gate 8 state: PASS (with a caveat)** — envelope = **4096-token context, 2 concurrent sequences,
 eager mode, `gpu_memory_utilization 0.74`, KV pinned 1 GiB (19,660 tokens)**, demonstrated over
