@@ -22,7 +22,7 @@ MODEL=${MODEL:-models/Qwen3.6-35B-A3B-MXFP4}
 SERVED=${SERVED:-Qwen3.6-35B-A3B-MXFP4}
 HOST=${HOST:-127.0.0.1}
 PORT=${PORT:-8000}
-MAX_LEN=${MAX_LEN:-4096}
+MAX_LEN=${MAX_LEN:-32768}
 MAX_SEQS=${MAX_SEQS:-1}
 BATCHED_TOKENS=${BATCHED_TOKENS:-4096}
 # Measured ceiling: Level-Zero reports 22.03/28.58 GiB free at startup with a
