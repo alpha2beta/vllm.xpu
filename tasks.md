@@ -407,6 +407,11 @@ Observations: decode is **flat at ~19.3 tok/s** from 1 K to 4 K context (attenti
 bottleneck at these sizes); TTFT is ~1 s regardless of prompt length, i.e. **dominated by fixed
 scheduling overhead, not prefill compute** (so `prefill_tps` derived from TTFT is not meaningful);
 concurrency 2 raises aggregate throughput **+35 %** while dropping per-request decode only 11 %.
+**True prefill, measured separately** (`max_tokens=1`, distinct filler per run to defeat the
+prefix cache, overhead-subtracted): **~1,100 tok/s** — n=1780 → 1155, n=2220 → 1064, n=2660 →
+1098 tok/s. So a cold full prefill of a 4 K prompt costs ~3.5 s; with prefix-cache hits
+(repeated/similar prompts, 45.9% hit rate observed) effective TTFT drops to ~0.8–1.0 s
+regardless of size. Row appended to `results.csv`.
 
 **Gate 8:** A repeatable operating envelope is documented with no swap and no OOM in three consecutive runs.
 **Gate 8 state: PASS (with a caveat)** — envelope = **4096-token context, 2 concurrent sequences,
