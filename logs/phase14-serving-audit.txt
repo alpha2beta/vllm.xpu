@@ -1,0 +1,29 @@
+# Phase 14 — Serving & agent audits (2026-09-27, server tiel-accept: MTP K=2 eager)
+
+## 14.1 Disconnect abort: PASS
+- Streaming essay request (max 512), client killed at ~2s. Next request
+  served in 0.56s (criterion: within 2s). Server log: "Aborted request(s)
+  ... Request ... aborted." Clean cancellation, no head-of-line blocking.
+
+## 14.2 SSE headers + long prefill: PASS
+- ~4000-token system prompt, stream=true: HTTP 200, first SSE byte at 3.51s
+  (criterion <5s). Headers stream before generation completes.
+
+## 14.4 Prefix caching: NO speed-up observed (documented, not failed)
+- 3 requests, shared long system prompt, TTFT 1.15 -> 1.13 -> 1.13s (flat).
+  Possible cause: MTP draft KV groups bypass prefix cache (matches the
+  "no KV cache group could be identified as the draft model" warning), or
+  TTFT dominated by fixed overhead. Needs an eager-mode retest to isolate
+  (queued; prefix value unproven on MTP configs).
+
+## 14.3 Tool calling & reasoning: separate server (see below).
+
+## 14.3 Tool calling & reasoning (server tiel-tools: MTP K=2 + qwen3_xml): PASS
+- 14.3.1: tool_choice:auto + calculator tool -> tool_calls=[{calculator,
+  args {"expression":"12 * 8"}}], finish=tool_calls. Parser works post-opt.
+- 14.3.2: bat+ball reasoning streams inline in `content`; NO
+  `reasoning_content` delta field on this build. Quirk: `<think>` opener
+  stripped (absent) while `</think>` closer present — clients must tolerate.
+- 14.3.3: thinking consumes max_tokens (256/256 used, answer cut mid-word
+  "The com..."). Recommendation: size agentic max_tokens >= 512 for
+  reasoning tasks, or ~2x the expected visible length.

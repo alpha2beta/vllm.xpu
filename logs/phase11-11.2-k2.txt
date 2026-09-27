@@ -31,3 +31,14 @@
   Clean isolation needs same-shell back-to-back runs (12.1 experiment).
 - Gate 1 (28.0 tok/s) still not met by any config. Path forward: 12.x dispatch
   (graph batch=1 + pinning, +5-10% hoped) stacked with K=2.
+
+## 11.2.3 Acceptance per domain (K=2 MXFP4, /metrics deltas, 2026-09-27)
+# logs/bench-tiel-mtp-acceptance.log, script scripts/measure_acceptance.py
+- factual:     alpha=0.738 (pos0 17/21=0.81, pos1|0 14/17=0.82)
+- code:        alpha=0.787 (pos0 44/47=0.94, pos1|0 30/44=0.68)
+- reasoning:   alpha=0.664 (pos0 48/55=0.87, pos1|0 25/48=0.52)
+- instruction: alpha=0.557 (pos0 43/61=0.70, pos1|0 25/43=0.58)
+- long-context:alpha=0.725 (pos0 17/20=0.85, pos1|0 12/17=0.71)
+- Range 0.56-0.79 brackets AInfer's 0.55-0.94. Code highest, instruction
+  lowest. 2nd-position penalty confirms single-layer-reuse warning.
+  11.2.3 DONE via --per-request-spec-decode-metrics summary + /metrics.

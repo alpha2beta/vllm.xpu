@@ -1,0 +1,10 @@
+# Phase 13.3 — max_num_batched_tokens sweep (2026-09-27, eager Tiel, 1024/128/1)
+# Baseline 4096 (existing): TTFT ~1.1-1.4s, prefill ~904-1426 tok/s, decode ~19.2-19.9.
+- bt=1024: TTFT 1.20s, prefill 858, decode 19.21, MemAvail 1.15, swap flat.
+- bt=2048: TTFT 1.04s, prefill 984, decode 19.50, MemAvail 1.02-1.10, swap +0.12.
+- bt=8192: TTFT 1.06s, prefill 966, decode 19.39, MemAvail 0.69-0.72 (lowest),
+  swap flat. Starts fine (workspace fits), but host headroom thinnest.
+- 13.3.5 DECISION: KEEP default 4096. No setting dominates: 2048's TTFT edge
+  (1.04 vs 1.1-1.4) is within run noise and small vs MTP's needs — the spec
+  warning already flags 4096 as tight for draft slots, so lowering the default
+  would hurt the production MTP config. No launcher change.

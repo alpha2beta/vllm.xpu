@@ -1,0 +1,5 @@
+factual: {'drafts': 21.0, 'draft_tokens': 42.0, 'accepted': 31.0} per_pos={0: 17.0, 1: 14.0} alpha=0.7381 t=2.21s chars=266 finish=stop
+code: {'drafts': 47.0, 'draft_tokens': 94.0, 'accepted': 74.0} per_pos={0: 44.0, 1: 30.0} alpha=0.7872 t=4.45s chars=487 finish=stop
+reasoning: {'drafts': 55.0, 'draft_tokens': 110.0, 'accepted': 73.0} per_pos={0: 48.0, 1: 25.0} alpha=0.6636 t=5.08s chars=302 finish=length
+instruction: {'drafts': 61.0, 'draft_tokens': 122.0, 'accepted': 68.0} per_pos={0: 43.0, 1: 25.0} alpha=0.5574 t=5.54s chars=646 finish=stop
+long-context: {'drafts': 20.0, 'draft_tokens': 40.0, 'accepted': 29.0} per_pos={0: 17.0, 1: 12.0} alpha=0.7250 t=4.56s chars=201 finish=stop
