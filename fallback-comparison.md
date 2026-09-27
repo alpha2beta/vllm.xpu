@@ -17,6 +17,24 @@ batch 1**. Backends ran serialized (one resident at a time).
 Raw logs: `logs/bench-tiel-01.log` (vLLM), `/tmp/opencode/ainfer_tiel_1024.{log,json}`,
 `/tmp/opencode/llama_tiel_1024.{log,json}`.
 
+## Long context (~6.7–7.2K prompt → 128 tokens, batch 1)
+
+| backend | prompt | decode tok/s | prefill tok/s | notes |
+|---|---|---|---|---|
+| **vLLM XPU** | 6660 | **18.81** (−2% vs 1K) | 2028 | util 0.78, maxlen 7168 (`logs/bench-tiel-04.log`) |
+| **llama.cpp Vulkan** | 7168 | **29.12** (+1.5% vs 1K) | 204.0 | `/tmp/opencode/llama_tiel_7k.json` |
+| **AInfer** | 7168 | **11.54** (−58% vs 1K) | 63.3 | `/tmp/opencode/ainfer_tiel_7k.{log,json}` |
+
+The long-context ranking **inverts the short-context story**: vLLM and llama
+hold their decode rates flat into 7K (18.8 / 29.1), while AInfer's recorded
+decode loop falls off a cliff (27.3 → 11.5) — its full-attention KV traffic
+over 7K positions dominates, and prefill drops 295 → 63 for the same reason.
+vLLM's prefill actually *improves* with length (950 → 2028 tok/s: chunked
+prefill amortizes launch overhead). Operational cost of vLLM at 7K: needs
+util 0.78 + maxlen 7168 (8192-len config OOMs the KV block planner at 0.74),
+GPUActive 22.7 GiB, MemAvailable dipping to 2.3 GiB — workable but tighter
+than the 4K envelope.
+
 ## Reading the table
 
 - **llama.cpp Vulkan edges out AInfer on decode here (28.69 vs 27.34, +4.9%)**
