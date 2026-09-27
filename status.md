@@ -65,6 +65,39 @@ None yet. Principal risks recorded in `compatibility.md` §4:
 - `intel-gpu-tools` not installed (sudo needs a password) → no `intel_gpu_top`; use
   `scripts/mem_monitor.sh` for swap/memory evidence instead.
 
+## Tiel-Coder-35B-A3B-Genesis-Hermes MXFP4 (2026-09-27, new workstream)
+
+**Deliverable:** `models/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4/` (local only,
+gitignored) — 62,555 tensors, 31 shards, **21.56 GiB**, SHA256SUMS verified.
+MXFP4 (`compressed-tensors` `mxfp4-pack-quantized`, E2M1 group-32 symmetric,
+E8M0 scales) in the byte-exact safetensors schema of
+`pahajokiconsulting/Qwen3.6-35B-A3B-MXFP4`, for the validated
+`CompressedTensorsW4A4Mxfp4` + `XPUExpertsMxFp4` XPU path. Source:
+`symrex/...-GGUF-dequantized` BF16 (17 shards, 72 GB, streamed one at a time,
+deleted after use; arch identical to Qwen3.6: 40L/256 experts/8 active/2048h).
+
+**Pipeline** (`scripts/quantize_tiel_mxfp4.py` + `finalize_tiel_mxfp4.py` +
+`audit_tiel_mxfp4.py`, `logs/quantize-tiel.log`):
+- Fused `experts.gate_up_proj [256,1024,2048]` → per-expert gate/up halves;
+  stacked `experts.down_proj [256,2048,512]` → per-expert; linear_attn
+  `in_proj_qkv/z/out_proj/a/b` quantized (note: Tiel `out_proj` is
+  **[2048,4096]**, unlike Qwen3.6's [2048,2048] — same GDN loader, wider matmul).
+  MTP fused experts + visual + everything else copied BF16 unchanged (vLLM
+  drops `mtp.` via its prefix mapper; `--language-model-only` skips vision).
+- Quantizer `torch.ops.vllm.xpu_mxfp4_quantize` (kernel package's own op).
+  In-conversion spot checks (kernel `dequant_mxfp4`, 1-in-64): max rel-err
+  0.119–0.123; independent post-hoc CPU audit of 1,797 fresh pairs
+  (`--shard 9`): mean 0.118, max 0.145. `config.json` = Tiel config +
+  reference `quantization_config` (815-entry Tiel ignore list).
+- `get_quantization_config('compressed-tensors')` → `CompressedTensorsConfig` ✓.
+
+**Blocked: engine smoke test** — needs 21.56 GiB free (`-util 0.74` = 21.15
+budget) but only ~19 GiB is free (desktop/Steam hold the rest; no orphans).
+`logs/smoke-tiel-02.log` fails fast at the startup free-memory check, before
+any weight load — checkpoint bytes untouched by this. Resume when memory is
+free:
+`./.venv/bin/python scripts/smoke_offline.py --model models/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4 --language-model-only --max-model-len 1024 --gpu-memory-utilization 0.74 --max-tokens 32`
+
 ## Fallback readiness (Phase 10)
 
 - A **SYCL llama.cpp build already exists** at `~/llama-bonsai-sycl/build/`

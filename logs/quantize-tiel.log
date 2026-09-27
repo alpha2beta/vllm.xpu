@@ -1,0 +1,178 @@
+QUANT: model.safetensors-00003-of-00017.safetensors
+resume: 2 source shards done, next output shard #5
+[3/17] model.safetensors-00003-of-00017.safetensors: 37 tensors
+  [val] model.language_model.layers.12.mlp.experts.down_proj expert 63 down: mean-rel-err=0.11785
+  [val] model.language_model.layers.12.mlp.experts.down_proj expert 127 down: mean-rel-err=0.11523
+  [val] model.language_model.layers.12.mlp.experts.down_proj expert 191 down: mean-rel-err=0.11738
+  shard done (3s elapsed)
+  wrote model-00005-of-XXXXX.safetensors: 3626 tensors, 0.98 GiB
+DONE: 9863 tensors, 5 shards, 4.62 GiB in 4s
+quantized projs: 1802, validated: 28, max mean-rel-err=0.11969, mean=0.11747
+DELETED source model.safetensors-00003-of-00017.safetensors
+QUANT: model.safetensors-00004-of-00017.safetensors
+resume: 3 source shards done, next output shard #6
+[4/17] model.safetensors-00004-of-00017.safetensors: 50 tensors
+  [val] model.language_model.layers.14.mlp.experts.gate_up_proj expert 31 up_proj: mean-rel-err=0.11711
+  [val] model.language_model.layers.14.mlp.experts.gate_up_proj expert 63 up_proj: mean-rel-err=0.11692
+  [val] model.language_model.layers.14.mlp.experts.gate_up_proj expert 95 up_proj: mean-rel-err=0.11793
+  wrote model-00006-of-XXXXX.safetensors: 3569 tensors, 1.00 GiB
+  shard done (2s elapsed)
+  wrote model-00007-of-XXXXX.safetensors: 582 tensors, 0.17 GiB
+DONE: 14014 tensors, 7 shards, 5.79 GiB in 2s
+quantized projs: 2058, validated: 32, max mean-rel-err=0.11919, mean=0.11752
+DELETED source model.safetensors-00004-of-00017.safetensors
+QUANT: model.safetensors-00005-of-00017.safetensors
+resume: 4 source shards done, next output shard #8
+[5/17] model.safetensors-00005-of-00017.safetensors: 28 tensors
+  [val] model.language_model.layers.17.mlp.experts.down_proj expert 63 down: mean-rel-err=0.11731
+  [val] model.language_model.layers.17.mlp.experts.down_proj expert 127 down: mean-rel-err=0.11614
+  [val] model.language_model.layers.17.mlp.experts.down_proj expert 191 down: mean-rel-err=0.11710
+  shard done (2s elapsed)
+  wrote model-00008-of-XXXXX.safetensors: 3612 tensors, 0.96 GiB
+DONE: 17626 tensors, 8 shards, 6.75 GiB in 3s
+quantized projs: 1797, validated: 28, max mean-rel-err=0.11956, mean=0.11787
+DELETED source model.safetensors-00005-of-00017.safetensors
+QUANT: model.safetensors-00006-of-00017.safetensors
+resume: 5 source shards done, next output shard #9
+[6/17] model.safetensors-00006-of-00017.safetensors: 59 tensors
+  [val] model.language_model.layers.19.mlp.experts.gate_up_proj expert 31 up_proj: mean-rel-err=0.11848
+  [val] model.language_model.layers.19.mlp.experts.gate_up_proj expert 63 up_proj: mean-rel-err=0.11785
+  [val] model.language_model.layers.19.mlp.experts.gate_up_proj expert 95 up_proj: mean-rel-err=0.11946
+  wrote model-00009-of-XXXXX.safetensors: 3517 tensors, 1.00 GiB
+  shard done (3s elapsed)
+  wrote model-00010-of-XXXXX.safetensors: 648 tensors, 0.19 GiB
+DONE: 21791 tensors, 10 shards, 7.94 GiB in 3s
+quantized projs: 2063, validated: 32, max mean-rel-err=0.11946, mean=0.11737
+DELETED source model.safetensors-00006-of-00017.safetensors
+QUANT: model.safetensors-00007-of-00017.safetensors
+resume: 6 source shards done, next output shard #11
+[7/17] model.safetensors-00007-of-00017.safetensors: 28 tensors
+  [val] model.language_model.layers.21.mlp.experts.down_proj expert 63 down: mean-rel-err=0.11603
+  [val] model.language_model.layers.21.mlp.experts.down_proj expert 127 down: mean-rel-err=0.11588
+  [val] model.language_model.layers.21.mlp.experts.down_proj expert 191 down: mean-rel-err=0.11812
+  shard done (2s elapsed)
+  wrote model-00011-of-XXXXX.safetensors: 3612 tensors, 0.96 GiB
+DONE: 25403 tensors, 11 shards, 8.90 GiB in 3s
+quantized projs: 1797, validated: 28, max mean-rel-err=0.12011, mean=0.11768
+DELETED source model.safetensors-00007-of-00017.safetensors
+QUANT: model.safetensors-00008-of-00017.safetensors
+resume: 7 source shards done, next output shard #12
+[8/17] model.safetensors-00008-of-00017.safetensors: 59 tensors
+  [val] model.language_model.layers.23.mlp.experts.gate_up_proj expert 31 up_proj: mean-rel-err=0.11735
+  [val] model.language_model.layers.23.mlp.experts.gate_up_proj expert 63 up_proj: mean-rel-err=0.11850
+  [val] model.language_model.layers.23.mlp.experts.gate_up_proj expert 95 up_proj: mean-rel-err=0.11960
+  wrote model-00012-of-XXXXX.safetensors: 3517 tensors, 1.00 GiB
+  shard done (3s elapsed)
+  wrote model-00013-of-XXXXX.safetensors: 648 tensors, 0.19 GiB
+DONE: 29568 tensors, 13 shards, 10.09 GiB in 3s
+quantized projs: 2063, validated: 32, max mean-rel-err=0.12002, mean=0.11818
+DELETED source model.safetensors-00008-of-00017.safetensors
+QUANT: model.safetensors-00009-of-00017.safetensors
+resume: 8 source shards done, next output shard #14
+[9/17] model.safetensors-00009-of-00017.safetensors: 34 tensors
+  [val] model.language_model.layers.26.mlp.experts.down_proj expert 63 down: mean-rel-err=0.11703
+  [val] model.language_model.layers.26.mlp.experts.down_proj expert 127 down: mean-rel-err=0.11653
+  [val] model.language_model.layers.26.mlp.experts.down_proj expert 191 down: mean-rel-err=0.11721
+  wrote model-00014-of-XXXXX.safetensors: 3569 tensors, 1.00 GiB
+  shard done (2s elapsed)
+  wrote model-00015-of-XXXXX.safetensors: 49 tensors, 0.01 GiB
+DONE: 33186 tensors, 15 shards, 11.10 GiB in 3s
+quantized projs: 1797, validated: 28, max mean-rel-err=0.11863, mean=0.11766
+DELETED source model.safetensors-00009-of-00017.safetensors
+QUANT: model.safetensors-00010-of-00017.safetensors
+resume: 9 source shards done, next output shard #16
+[10/17] model.safetensors-00010-of-00017.safetensors: 50 tensors
+  [val] model.language_model.layers.28.mlp.experts.gate_up_proj expert 31 up_proj: mean-rel-err=0.11860
+  [val] model.language_model.layers.28.mlp.experts.gate_up_proj expert 63 up_proj: mean-rel-err=0.11748
+  [val] model.language_model.layers.28.mlp.experts.gate_up_proj expert 95 up_proj: mean-rel-err=0.11799
+  wrote model-00016-of-XXXXX.safetensors: 3758 tensors, 1.00 GiB
+  shard done (3s elapsed)
+  wrote model-00017-of-XXXXX.safetensors: 393 tensors, 0.17 GiB
+DONE: 37337 tensors, 17 shards, 12.27 GiB in 3s
+quantized projs: 2058, validated: 32, max mean-rel-err=0.12065, mean=0.11789
+DELETED source model.safetensors-00010-of-00017.safetensors
+QUANT: model.safetensors-00011-of-00017.safetensors
+resume: 10 source shards done, next output shard #18
+[11/17] model.safetensors-00011-of-00017.safetensors: 34 tensors
+  [val] model.language_model.layers.30.mlp.experts.down_proj expert 63 down: mean-rel-err=0.11755
+  [val] model.language_model.layers.30.mlp.experts.down_proj expert 127 down: mean-rel-err=0.11869
+  [val] model.language_model.layers.30.mlp.experts.down_proj expert 191 down: mean-rel-err=0.11787
+  wrote model-00018-of-XXXXX.safetensors: 3569 tensors, 1.00 GiB
+  shard done (3s elapsed)
+  wrote model-00019-of-XXXXX.safetensors: 49 tensors, 0.01 GiB
+DONE: 40955 tensors, 19 shards, 13.28 GiB in 3s
+quantized projs: 1797, validated: 28, max mean-rel-err=0.11952, mean=0.11815
+DELETED source model.safetensors-00011-of-00017.safetensors
+QUANT: model.safetensors-00012-of-00017.safetensors
+resume: 11 source shards done, next output shard #20
+[12/17] model.safetensors-00012-of-00017.safetensors: 44 tensors
+  [val] model.language_model.layers.32.mlp.experts.gate_up_proj expert 31 up_proj: mean-rel-err=0.11839
+  [val] model.language_model.layers.32.mlp.experts.gate_up_proj expert 63 up_proj: mean-rel-err=0.11839
+  [val] model.language_model.layers.32.mlp.experts.gate_up_proj expert 95 up_proj: mean-rel-err=0.11779
+  wrote model-00020-of-XXXXX.safetensors: 3707 tensors, 1.00 GiB
+  shard done (3s elapsed)
+  wrote model-00021-of-XXXXX.safetensors: 438 tensors, 0.12 GiB
+DONE: 45100 tensors, 21 shards, 14.40 GiB in 3s
+quantized projs: 2058, validated: 32, max mean-rel-err=0.12757, mean=0.11931
+DELETED source model.safetensors-00012-of-00017.safetensors
+QUANT: model.safetensors-00013-of-00017.safetensors
+resume: 12 source shards done, next output shard #22
+[13/17] model.safetensors-00013-of-00017.safetensors: 43 tensors
+  [val] model.language_model.layers.35.mlp.experts.down_proj expert 63 down: mean-rel-err=0.11765
+  [val] model.language_model.layers.35.mlp.experts.down_proj expert 127 down: mean-rel-err=0.11658
+  [val] model.language_model.layers.35.mlp.experts.down_proj expert 191 down: mean-rel-err=0.11849
+  wrote model-00022-of-XXXXX.safetensors: 3517 tensors, 1.00 GiB
+  shard done (3s elapsed)
+  wrote model-00023-of-XXXXX.safetensors: 115 tensors, 0.03 GiB
+DONE: 48732 tensors, 23 shards, 15.43 GiB in 3s
+quantized projs: 1802, validated: 28, max mean-rel-err=0.12207, mean=0.11824
+DELETED source model.safetensors-00013-of-00017.safetensors
+QUANT: model.safetensors-00014-of-00017.safetensors
+resume: 13 source shards done, next output shard #24
+[14/17] model.safetensors-00014-of-00017.safetensors: 50 tensors
+  [val] model.language_model.layers.37.mlp.experts.gate_up_proj expert 31 up_proj: mean-rel-err=0.11871
+  [val] model.language_model.layers.37.mlp.experts.gate_up_proj expert 63 up_proj: mean-rel-err=0.11795
+  [val] model.language_model.layers.37.mlp.experts.gate_up_proj expert 95 up_proj: mean-rel-err=0.11818
+  wrote model-00024-of-XXXXX.safetensors: 3758 tensors, 1.00 GiB
+  shard done (3s elapsed)
+  wrote model-00025-of-XXXXX.safetensors: 393 tensors, 0.17 GiB
+DONE: 52883 tensors, 25 shards, 16.60 GiB in 3s
+quantized projs: 2058, validated: 32, max mean-rel-err=0.11969, mean=0.11789
+DELETED source model.safetensors-00014-of-00017.safetensors
+QUANT: model.safetensors-00015-of-00017.safetensors
+resume: 14 source shards done, next output shard #26
+[15/17] model.safetensors-00015-of-00017.safetensors: 37 tensors
+  [val] model.language_model.layers.4.mlp.experts.down_proj expert 63 down: mean-rel-err=0.11747
+  [val] model.language_model.layers.4.mlp.experts.down_proj expert 127 down: mean-rel-err=0.11649
+  [val] model.language_model.layers.4.mlp.experts.down_proj expert 191 down: mean-rel-err=0.11645
+  shard done (2s elapsed)
+  wrote model-00026-of-XXXXX.safetensors: 3626 tensors, 0.98 GiB
+DONE: 56509 tensors, 26 shards, 17.58 GiB in 3s
+quantized projs: 1802, validated: 28, max mean-rel-err=0.11780, mean=0.11710
+DELETED source model.safetensors-00015-of-00017.safetensors
+QUANT: model.safetensors-00016-of-00017.safetensors
+resume: 15 source shards done, next output shard #27
+[16/17] model.safetensors-00016-of-00017.safetensors: 50 tensors
+  [val] model.language_model.layers.6.mlp.experts.gate_up_proj expert 31 up_proj: mean-rel-err=0.11714
+  [val] model.language_model.layers.6.mlp.experts.gate_up_proj expert 63 up_proj: mean-rel-err=0.11720
+  [val] model.language_model.layers.6.mlp.experts.gate_up_proj expert 95 up_proj: mean-rel-err=0.11676
+  wrote model-00027-of-XXXXX.safetensors: 3569 tensors, 1.00 GiB
+  shard done (3s elapsed)
+  wrote model-00028-of-XXXXX.safetensors: 582 tensors, 0.17 GiB
+DONE: 60660 tensors, 28 shards, 18.75 GiB in 3s
+quantized projs: 2058, validated: 32, max mean-rel-err=0.11798, mean=0.11717
+DELETED source model.safetensors-00016-of-00017.safetensors
+QUANT: model.safetensors-00017-of-00017.safetensors
+resume: 16 source shards done, next output shard #29
+[17/17] model.safetensors-00017-of-00017.safetensors: 361 tensors
+  [val] model.language_model.layers.9.mlp.experts.down_proj expert 63 down: mean-rel-err=0.11586
+  [val] model.language_model.layers.9.mlp.experts.down_proj expert 127 down: mean-rel-err=0.11595
+  [val] model.language_model.layers.9.mlp.experts.down_proj expert 191 down: mean-rel-err=0.11788
+  wrote model-00029-of-XXXXX.safetensors: 1791 tensors, 1.00 GiB
+  wrote model-00030-of-XXXXX.safetensors: 89 tensors, 1.75 GiB
+  shard done (2s elapsed)
+  wrote model-00031-of-XXXXX.safetensors: 15 tensors, 0.06 GiB
+DONE: 62555 tensors, 31 shards, 21.56 GiB in 2s
+quantized projs: 768, validated: 12, max mean-rel-err=0.11845, mean=0.11721
+DELETED source model.safetensors-00017-of-00017.safetensors
+LOOP-DONE
