@@ -321,3 +321,28 @@ memory. Both compile/graph variants were measured and rejected on memory/startup
 
 Smaller open items (from `tasks.md`): dedicated prefix-caching workload, independent chunked-prefill
 sweep, a `torch.profiler` trace, `intel-gpu-tools` (needs sudo), and a `max_num_seqs 4` point.
+
+## Tiel MTP + FP8-KV experiments (2026-09-27)
+
+**FP8 KV: works, no decode gain.** `--kv-cache-dtype fp8` server
+(`logs/server-tiel-fp8.log`): 53,043-token KV capacity (7.4× @ 7168) vs
+~9K BF16. Decode unchanged at all lengths (1024: 19.13 vs 19.15; 2048:
+18.45 vs 19.51; 6656: 19.09 vs 18.81 — all within noise):
+`logs/bench-tiel-fp8-{A,B,D}.log`, `results.csv`. Conclusion: Tiel decode
+on XPU is MoE-weight-traffic-bound, not KV-bound — halving KV traffic
+buys nothing. It does buy 5.8× KV capacity (useful for concurrency, not
+single-stream speed).
+
+**MTP: blocked on a vLLM fused-checkpoint loader gap, not our weights.**
+`--speculative-config {"method":"mtp","num_speculative_tokens":1}` fails
+at load (`logs/server-tiel-mtp.log`): the `qwen3_5_mtp` draft model builds
+standard unfused `w13_weight`/`w2_weight` expert params, but Tiel's MTP
+experts are fused `gate_up_proj`/`down_proj` 3D tensors (like its trunk),
+and the fused path (`is_fused` → chunk dim=1) expects `[E,2*I,K]` while
+Tiel stores `[E,1024,2048]` + separate down — `AttributeError: ... has no
+parameter 'w2_weight'`. Qwen3.6 worked because its MTP experts are already
+split gate/up/down in the checkpoint. Fix options: (a) unfuse Tiel's MTP
+experts gate/up in a conversion pass (mirrors what we did for the trunk —
+small script, same split); (b) wait on upstream. The draft block is only
+1.69 GB BF16; (a) is cheap. Attempt log entry: shell ate the first
+`--speculative-config` JSON (unquoted) — always single-quote it.
