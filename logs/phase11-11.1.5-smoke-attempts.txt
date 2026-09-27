@@ -1,0 +1,33 @@
+# 11.1.5 smoke attempts — MXFP4-draft checkpoint (2026-09-27)
+# Checkpoint: 64089 tensors / 32 shards / 20.47 GiB files (was 21.57), ignore 813.
+# In-conversion rel-err max 0.119, independent CPU audit mean 0.118 max 0.123.
+
+Attempt 1 (09:28): GPU_UTIL=0.74, MAX_SEQS=1, MTP K=1, KV 0.5GiB
+  -> taskset -c 0-3 FAILED (this session cpuset = 4-7, E-cores only).
+     Fixed launch_vllm.sh: graceful fallback to unpinned + warning.
+Attempt 2 (09:29): same, unpinned fallback OK, EngineCore:
+  -> ValueError: free 19.58 < 21.15 needed. No XPUExperts line reached.
+Attempt 3 (09:31): GPU_UTIL=0.70 (budget 20.01), after reclaim drain (0.38->0.01)
+  -> ValueError: free 19.59 < 20.01 needed. Short by 0.42 GiB.
+  -> GPUActive 0.32, GPUReclaim 0.01: ~9 GiB held by desktop/Steam (user active).
+
+State: BLOCKED on host GPU contention (same as status.md Gate-5 pre-history:
+"needs 21.56 free but only ~19 free (desktop/Steam hold the rest)").
+Checkpoint bytes verified (SHA256SUMS green, 64089 tensors open, audits <0.13).
+NOT attempting util<=0.68: budget would drop below resident (~19.6) — wrong variable.
+Resume: user frees GPU memory (close Steam/browser) OR confirms 0.68 gamble.
+
+Attempt 4 (10:31): GPU_UTIL=0.68 + MAX_LEN=4096 (was 65536 default -> KV fail):
+  -> PASS. Qwen3_5MoeMTP resolved, XPUExpertsMxFp4 x2 (trunk + draft),
+     weights 19.71 GiB / 42.7s (vs ~20.8 BF16 draft: -1.1 GiB, <20.6 criterion MET),
+     KV 6,301 tokens (1.54x @4096). Pinning: UNPINNED (this bg shell cpuset=4-7 E-cores;
+     the earlier 65536/0.68 attempt had full cpuset and P-pinned). So 24.85/24.87
+     was achieved on E-cores — P-pinned numbers may be slightly higher.
+  -> Paris probe: coherent ("Paris is located on the Seine..."). Canberra probe:
+     correct (Canberra), thinking emitted inline consuming budget (known caveat).
+  -> 11.1.6 bench: 1024/128/1 = 24.85 tok/s (vs 25.50 BF16, -2.5%);
+     2048/128/1 = 24.87 (vs 24.31 BF16, +2.3%). Verdict: MATCHES BF16 draft
+     (within noise; < hoped 26 but floor criterion met).
+  -> Host memory caveat: MemAvailable 0.9-1.0 GiB (desktop/Steam active, swap ~9.2
+     vs 4-6 in prior runs); swap +0.12 on first bench, flat on second.
+     results.csv util column hand-fixed 0.74->0.68 (bench script hardcodes 0.74).

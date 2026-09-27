@@ -364,3 +364,55 @@ MTP active on Tiel. Bench (`logs/bench-tiel-mtp-{A,B}.log`, `results.csv`):
 launch at util 0.77 (Level-Zero free only 21.5 GiB until drained); Tiel MTP
 still below Qwen3.6's MTP number (26.83) by ~5–9% — draft acceptance
 unmeasured, likely the gap.
+
+## Phases 11–12 + 15.1 outcomes (2026-09-27, tasks.md workstream)
+
+**Phase 11.1 MTP draft MXFP4 — DONE.** `scripts/quantize_tiel_mtp_mxfp4.py`
+(768 BF16 → 1536 packed/scale, 14 s, in-conversion max rel-err 0.119,
+independent CPU audit mean 0.118/max 0.123, SHA256SUMS green). Checkpoint now
+64,089 tensors / 32 shards / **20.47 GiB** (was 21.57); ignore 1581→813.
+Smoke: `Qwen3_5MoeMTP` + `XPUExpertsMxFp4` ×2, weights **19.71 GiB**,
+Paris/Canberra probes coherent/correct (`logs/server-tiel-mtp-mxfp4-smoke.log`).
+Bench: K=1 → **24.85/25.41** @1024, **24.87** @2048 (matches BF16 25.50/24.31
+within noise; the win is −1.1 GiB, not speed). Evidence:
+`logs/phase11-11.1.1-audit.txt`, `logs/quantize-tiel-mtp-mxfp4.log`,
+`logs/phase11-11.1.5-smoke-attempts.txt`, `results.csv` +2 rows.
+
+**Phase 11.2 K=2 sweep — DONE, 30 tok/s criterion missed.** K=2 supported
+(KV 6301→5120 tokens; vLLM warns single MTP layer reused 2×, capping α).
+K=2 → **27.69** @1024 (+9%), **26.72** @2048 (+7%), 0 errors, Paris coherent.
+Confound logged: K=2 ran P-pinned, K=1 runs E-core (bg-shell cpuset lottery);
+true uplift ~7–8%. Acceptance counters deferred (metrics off).
+`logs/phase11-11.2-k2.txt`, `logs/server-tiel-mtp-k2.log`, `results.csv` +3 rows.
+
+**Phase 11.3 EOS audit — DONE (read-only).** text_config.eos 248044,
+generation_config [248046,248044], tokenizer confirms `<|endoftext|>`/`<|im_end|>`;
+no stale 151643/151645 anywhere; no EOS lines in server logs (not logged by
+this build). Live `<|im_end|>` stop test deferred. `logs/phase11-11.3-eos-audit.txt`.
+
+**Phase 12.1 P-pinning — IMPLEMENTED** (`PINNED=1` default, `taskset -c 0-3`,
+graceful fallback when cpuset restricted). Jitter A/B (12.1.2/12.1.4) deferred.
+
+**Phase 12.2 Graph batch-1 — CLOSED, rejected on this host.**
+`--compilation-config '{"cudagraph_capture_sizes":[1]}'` works (FULL_AND_PIECEWISE,
+max capture 1 — no feature request). No-MTP: 19.93/19.89 (+2–4%) but
+MemAvailable **0.7 GiB** (criterion >2.5 failed). Combo graph[1]+MTP K=2:
+**27.54** (+0% over K=2 eager), 1 Paris loop vs 1 clean Canberra probe.
+`logs/phase12-12.2-graph-b1.txt`, `results.csv` +3 rows.
+
+**Phase 12.3/13.1 audits — DONE (read-only).** 30 W RAPL, iGPU pinned 1950 MHz
+at idle; attention delta 0.94 ms @7K (MoE-bound, not KV); split-K already
+present (`build_decode_split_plan`) — no upstream issue. `logs/phase12-13-readonly-audits.txt`.
+
+**Phase 15.1 — SELECTED config G** (MTP K=2 MXFP4 eager, util 0.68, MAX_LEN 4096,
+KV 0.5 GiB): 10/10 golden suite clean (`logs/prompt-suite/prod-qual-k2.jsonl`),
+0 errors. Encoded as `SPEC=mtp-k1|mtp-k2` in `launch_vllm.sh` (base defaults
+untouched). Gate 1: 3/4 (27.69 vs 28.0 throughput). Phase 15.2 (GGUF fallback
+re-comparison) SKIPPED per user. Comparison table: `logs/phase15-15.1-best-config.txt`.
+
+**Memory climate note:** all 2026-09-27 serving ran contended (desktop/Steam
+active, swap ~8–9 vs 4–6, MemAvailable ~1.0 vs 2–3.5). Numbers above are
+like-for-like within the day; quiet-box reruns may read 1–3% higher.
+`GPU_UTIL=0.68` (not 0.74) is the current working default — needs only
+19.43 GiB free. `MAX_LEN` must stay ≤4096 with the 0.5 GiB KV pin (65536
+default fails the KV fit check on MTP configs).

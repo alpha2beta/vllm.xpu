@@ -1,0 +1,53 @@
+# Phases 12–13 — read-only audits (2026-09-27, no server, no checkpoint writes)
+
+## 12.1.1 P-core IDs (258V, this box)
+- lscpu --extended: cpu 0-3 MAXMHZ 4700/4800/4700/4800 (Lion Cove P-cores),
+  cpu 4-7 MAXMHZ 3700 x4 (Skymont E-cores).
+- scaling_max_freq confirms: 4700000,4800000,4700000,4800000,3700000 x4.
+- Verdict: cores 0-3 = P-cores as assumed. 12.1.3 IMPLEMENTED in
+  scripts/launch_vllm.sh (PINNED=1 default, taskset -c 0-3, skip with PINNED=0).
+  12.1.2/12.1.4/12.1.5 need a running server (deferred).
+
+## 12.2.1 XPU graph capture config
+- vLLM env: VLLM_XPU_ENABLE_XPU_GRAPH (envs.py:318, default 0).
+- Capture sizes are NOT XPU-specific: CompilationConfig.cudagraph_capture_sizes
+  (config/compilation.py:655,1120 post_init_cudagraph_sizes). No
+  VLLM_XPU_GRAPH_BATCH_SIZES var exists.
+- Phase 9 test B used the default capture set [1,2,4] (FULL_AND_PIECEWISE) and
+  lost ~1.2 GiB host headroom (2.9 -> 1.48-1.77 GiB).
+- Open: whether --compilation-config '{"cudagraph_capture_sizes":[1]}' restricts
+  XPU graph capture to batch=1 on this build. Deferred to live test 12.2.2
+  (needs server + MemAvailable watch). No code change made.
+
+## 12.3.1 Power / frequency (this box)
+- RAPL constraint_0_power_limit_uw = 30000000 (30 W package).
+- iGPU tile0/gt0/freq0: cur 1950, max 1950, min 400 (MHz) — currently AT max.
+- thermals: 41.0, 20.0, 37.1, 39.1, 39.0 C (idle, no server).
+- xe driver path is /sys/devices/pci.../tile0/gt{0,1}/freq0/* (not
+  /sys/class/drm/card0/gt_*). Locking min_freq=1950 is writable in principle;
+  12.3.2/12.3.3 deferred to live bench (compare decode + jitter at locked vs
+  dynamic + thermal watch). No sysfs writes made.
+
+## 13.1.1 Attention fraction (from existing results.csv, no profiler needed)
+- Short P=1024: 19.15 tok/s -> 52.22 ms/step.
+- Long P=6660: 18.81 tok/s -> 53.16 ms/step.
+- Delta ~0.94 ms over +5.6K tokens -> attention is NOT the current vLLM
+  bottleneck at 7K (unlike AInfer where 10 full-attn layers = ~80% of step).
+  vLLM FP8-KV longs confirm: KV halving buys nothing (19.13/18.45/19.09 vs
+  19.15/19.51/18.81). Decode is MoE-weight-traffic-bound.
+- 13.1.2 (kernel strings) + 13.2 (profiler) + 13.3 (batch-token sweep) +
+  13.4 (8K+/16K qualification) deferred; 13.1.2 needs .so inspection which is
+  read-only and queued next.
+
+## 13.1.2-13.1.4 Decode attention dispatch (vllm-xpu-kernels)
+- flash_attn_interface.py: build_decode_split_plan() partitions KV tiles across
+  multiple workgroups per seq (splits_per_seq, work_list of
+  seq/kv_tile_start/kv_tile_count/split_idx). Heuristic targets ~2x
+  oversubscription of Xe cores per KV head, min 4 tiles/WG, cap num_kv_splits=32.
+- Default num_xe_cores=20 in the shim (generic Xe2/Xe3, not 8-core tuned) but the
+  split mechanism itself exists — 16 query heads do NOT leave 48/64 EUs idle at
+  long context; work scales with KV tiles.
+- Verdict (13.1.4): EU saturation ALREADY ADDRESSED. No upstream issue to file
+  for split-K. Remaining question is only whether num_xe_cores=8 tuning would
+  change the short-context single-split heuristic — negligible at 7K given the
+  0.94 ms attention delta measured in 13.1.1. Close 13.1 as documented.

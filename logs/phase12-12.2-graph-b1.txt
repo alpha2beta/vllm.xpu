@@ -1,0 +1,37 @@
+# Phase 12.2 — XPU graph batch=1 (2026-09-27, no MTP, EAGER=0, P-pinned)
+# Flags: VLLM_XPU_ENABLE_XPU_GRAPH=1 --compilation-config '{"cudagraph_capture_sizes":[1]}'
+
+## 12.2.1 (from earlier audit): no VLLM_XPU_GRAPH_BATCH_SIZES var; capture
+# sizes via CompilationConfig. CONFIRMED WORKING: cudagraph_capture_sizes=[1]
+# accepted, cudagraph_mode=FULL_AND_PIECEWISE, max_cudagraph_capture_size=1.
+# No feature request needed. 12.2.5 N/A.
+
+## 12.2.2 startup/memory (server tiel-graph-b1, util 0.68, maxlen 4096)
+- Weights 19.24 GiB / 24.5s (vs 42s eager — compile path loads faster?),
+  startup ~75s total (compile cost, like Phase 9 test A 95s).
+- MemAvailable while serving: 0.67-0.77 GiB. GPUActive 21.2, GPUReclaim ~0,
+  swap flat 7.96-8.03. PASS criterion (>2.5 GiB) FAILED badly.
+- Overhead is compile+graph host-side, not capture count: [1] saves nothing
+  vs [1,2,4] (1.48 then, 0.7 now — worse; desktop load differs, but nowhere
+  near the <250 MiB hope).
+
+## 12.2.3 decode (results.csv +2 rows, util hand-fixed 0.74->0.68)
+- 1024/128/1: 19.93 vs eager 19.15 (+4.1%)
+- 2048/128/1: 19.89 vs eager 19.51 (+1.9%)
+- Verdict: functional, small gain, REJECTED for this host on memory grounds
+  (same verdict class as Phase 9 test B). Documented option for bigger-RAM box.
+
+## 12.2.4 combo (graph+MTP): attempted next from clean state (see below).
+
+## 12.2.4 combo graph[1] + MTP K=2 (server tiel-graph-mtp-k2, EAGER=0, unpinned)
+- Started clean: weights 19.71 GiB, KV 5,120, "Capturing model for speculator",
+  FULL_AND_PIECEWISE cap [1]. MemAvailable 0.89 GiB (fails >2.5, as expected).
+- 1024/128/1: 27.54 tok/s vs K=2 eager 27.69 (-0.5%). Graph adds NOTHING on
+  top of MTP (dispatch savings hidden under draft-verify cost, or spec path
+  bypasses graphs). Gate-1 28.0 STILL not met; best remains 27.69.
+- Quality: Paris probe looped ("The capital of France is Paris..." x3);
+  Canberra re-probe fluent+correct. 1/2 clean — likely greedy noise (known
+  nondeterminism caveat), but combo needs full golden suite before any
+  production claim. Swap 9.83->9.78 (flat), 0 errors.
+- Verdict: combo COMPATIBLE but pointless (+0% speed, +memory, +startup).
+  12.2 CLOSED: graph batch-1 functional, rejected on this host.

@@ -1,0 +1,24 @@
+# Phase 11.1.1 — MTP draft block audit (2026-09-27)
+
+Source: models/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4/{config.json,model.safetensors.index.json}
+
+- quantization_config.ignore total: 1581 entries
+- mtp.* ignore: 785 entries = 768 expert + 17 non-expert
+  - experts: mtp.layers.0.mlp.experts.{0..255}.{gate_proj,up_proj,down_proj} (256*3=768)
+  - non-expert (17): mtp.fc, mtp.norm, mtp.pre_fc_norm_{embedding,hidden},
+    mtp.layers.0.{input_layernorm,post_attention_layernorm},
+    mtp.layers.0.self_attn.{q,k,v,o}_proj + q/k_norm,
+    mtp.layers.0.mlp.{gate,shared_expert{,_gate},shared_expert.{gate,up,down}_proj}
+- index tensors: 63321 total, 785 mtp.* all BF16 `.weight`
+  - mtp expert BF16: 768 tensors
+    - gate_proj [512,2048] BF16, up_proj [512,2048] BF16, down_proj [2048,512] BF16
+    - shards 32-33: 1.07 + 0.50 GiB ≈ 1.57 GiB (+ non-expert tail in shard 30)
+- Reference Qwen3.6-35B-A3B-MXFP4: identical layout (785 mtp BF16, ignore 1355 total
+  with 785 mtp) — trunk shapes match, so the same MXFP4 pipeline applies.
+- EOS (for 11.3, recorded here): text_config.eos_token_id=248044 (<|endoftext|>),
+  generation_config.eos=[248046,248044], tokenizer confirms 248044=<|endoftext|>,
+  248046=<|im_end|>. No stale Qwen2.5 tokens (151643/151645) in checkpoint.
+
+Conclusion: 11.1.2 scope = quantize exactly the 768 MTP expert BF16 tensors to
+weight_packed (U8) + weight_scale (U8 E8M0), drop those 768 from ignore, keep 17
+non-expert as BF16.

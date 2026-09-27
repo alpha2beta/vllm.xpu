@@ -1,0 +1,23 @@
+MTP packed pairs present: 0, BF16 left: 768
+backup: /home/yanchun/Projects/vllm.xpu/models/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4/model.safetensors.index.json.pre-mtp-mxfp4.bak
+backup: /home/yanchun/Projects/vllm.xpu/models/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4/config.json.pre-mtp-mxfp4.bak
+loaded 768 BF16 source tensors
+  [val] mtp.layers.0.mlp.experts.21.gate_proj.weight: mean-rel-err=0.11675
+  [val] mtp.layers.0.mlp.experts.42.up_proj.weight: mean-rel-err=0.11475
+  [val] mtp.layers.0.mlp.experts.63.down_proj.weight: mean-rel-err=0.11440
+  ... 64/256 experts (1s)
+  [val] mtp.layers.0.mlp.experts.85.gate_proj.weight: mean-rel-err=0.11687
+  ... 128/256 experts (1s)
+  [val] mtp.layers.0.mlp.experts.170.up_proj.weight: mean-rel-err=0.11731
+  ... 192/256 experts (1s)
+  [val] mtp.layers.0.mlp.experts.255.down_proj.weight: mean-rel-err=0.11937
+  ... 256/256 experts (1s)
+  wrote model-00034-of-XXXXX.safetensors: 1536 tensors, 0.40 GiB
+in-conversion spot checks: 12, max rel-err=0.11937, mean=0.11689
+  removed empty model-00032-of-00033.safetensors
+  removed empty model-00033-of-00033.safetensors
+index: 64089 tensors, 32 shards, 20.47 GiB
+ignore: 1581 -> 813 (dropped 768 MTP experts)
+SHA256SUMS rebuilt
+QUANT-MTP-OK in 14s (post-hoc audit: scripts/audit_tiel_mxfp4.py --mtp)
+EXIT:0

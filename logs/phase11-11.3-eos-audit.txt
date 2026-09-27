@@ -1,0 +1,25 @@
+# Phase 11.3 — EOS token audit (2026-09-27, read-only, no server needed)
+
+## 11.3.1 checkpoint config.json
+- text_config.eos_token_id = 248044
+- text_config.bos_token_id = 248044
+- generation_config.json: eos_token_id = [248046, 248044], pad = 248044
+- tokenizer_config.json: eos_token = <|im_end|>; added_tokens_decoder:
+  248044=<|endoftext|>, 248045=<|im_start|>, 248046=<|im_end|>
+- Verdict: checkpoint is self-consistent (248K vocab). 248044 = <|endoftext|>,
+  248046 = <|im_end|>. generation_config already lists BOTH as EOS.
+
+## 11.3.2 server runtime EOS (stale Qwen2.5 tokens 151643/151645)
+- grep logs/server-tiel-*.log for eos|stop_token|151643|151645|24804: no hits.
+  vLLM 0.30.0 does not log eos_token_id/stop_token_ids at startup on this build.
+- No stale-token reference found in any Tiel server log or in the checkpoint
+  JSONs (grep 151643/151645 over models/Tiel-*/config.json,
+  generation_config.json, tokenizer_config.json: no hits).
+- Verdict: no evidence of stale EOS; runtime check deferred to 11.3.3 live test
+  (needs server): send chat request, confirm finish_reason=stop on <|im_end|>.
+
+## 11.3.3 <|im_end|> (248046) as chat stop token
+- DEFERRED (needs running server). Procedure recorded in tasks.md 14.x context:
+  chat completion with max_tokens=10, confirm finish_reason stop.
+- Note: Tiel emits <think> inline; reasoning tokens consume max_tokens budget
+  (status.md caveat) — size agentic max_tokens accordingly, independent of EOS.

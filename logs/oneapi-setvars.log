@@ -1,12 +1,18 @@
- 
-:: initializing oneAPI environment ...
-   launch_vllm.sh: BASH_VERSION = 5.3.15(1)-release
-   args: Using "$@" for setvars.sh arguments: --kv-cache-dtype fp8 --kv-cache-memory-bytes 1073741824 --enable-auto-tool-choice --tool-call-parser qwen3_xml
-:: compiler -- latest
-:: debugger -- latest
-:: mkl -- latest
-:: tbb -- latest
-:: tcm -- latest
-:: umf -- latest
-:: oneAPI environment initialized ::
- 
+  
+usage: source setvars.sh [--force] [--config=file] [--help] [...]
+  --force        Force setvars.sh to re-run, doing so may overload environment.
+  --config=file  Customize env vars using a setvars.sh configuration file.
+  --help         Display this help message and exit.
+  ...            Additional args are passed to individual env/vars.sh scripts
+                 and should follow this script's arguments.
+  
+  Some POSIX shells do not accept command-line options. In that case, you can pass
+  command-line options via the SETVARS_ARGS environment variable. For example:
+  
+  $ SETVARS_ARGS="--config=config.txt" ; export SETVARS_ARGS
+  $ . path/to/setvars.sh
+  
+  The SETVARS_ARGS environment variable is cleared on exiting setvars.sh.
+  
+The oneAPI toolkits no longer support 32-bit libraries, starting with the 2025.0 toolkit release. See the oneAPI release notes for more details.
+  

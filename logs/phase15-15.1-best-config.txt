@@ -1,0 +1,40 @@
+# Phase 15.1 — Best-configuration comparison (2026-09-27)
+# Columns: configuration | decode tok/s (1024/2048) | MemAvailable | startup | caveats
+# Sources: results.csv + server logs. "Now" climate = contended desktop (swap ~9).
+
+| # | Configuration | 1024 decode | 2048 decode | MemAvail | Startup | Caveats |
+|---|---|---|---|---|---|---|
+| A | Eager baseline, Tiel BF16-draft-era ckpt, util 0.74, maxlen 4096 (results `Tiel compare A/B`) | 19.15 | 19.51 | ~3.5 quiet / ~1.0 now | ~51s init | Reference floor. Conc-2 agg 20.1. |
+| B | Eager + torch.compile, no graph (Phase 9A) | 19.20 | — | 2.36 | 95s | Rejected: +0%, 2x startup, less headroom. |
+| C | Eager + compile + XPU graph [1,2,4] (Phase 9B) | 19.84 | — | 1.48–1.77 | 94s | Rejected: +3% not worth 1/2 RAM. |
+| D | MTP K=1, BF16 draft, util 0.74 (superseded ckpt) | 25.50 | 24.31 | 2.1–2.2 | ~47s | Superseded by F (ckpt quantized in place). |
+| E | MTP K=1, BF16 draft, Qwen3.6 (other ckpt) | 26.83 | — | 2.11 | ~47s | Different model; draft-acceptance ref only. |
+| F | MTP K=1, MXFP4 draft, util 0.68, maxlen 4096, E-cores (today) | 24.85 / 25.41 repl. | 24.87 | ~1.0 now | ~44s load | Matches D within noise; −1.1 GiB weights (19.71). |
+| G | MTP K=2, MXFP4 draft, util 0.68, P-pinned (today) | **27.69** | 26.72 | ~0.9 now | ~60s + spec capture | Best decode. Single-layer draft reuse caps α (vLLM warn). |
+| H | Graph[1] + compile, no MTP, P-pinned (today) | 19.93 | 19.89 | 0.67–0.77 | ~75s | Rejected: +2–4%, RAM fail. |
+| I | Graph[1] + compile + MTP K=2, E-cores (today) | 27.54 | — | 0.89 | ~3min | Rejected: +0% over G, slower start, 1 Paris loop (1/2 probes). |
+
+## 15.1.2 Selection (priority: 1) 0 errors/10+ reqs 2) max decode 3) ≥2.5 GiB 4) <60s start)
+- SELECTED: **G — MTP K=2, MXFP4 draft, eager, util 0.68, MAX_LEN 4096, KV 0.5GiB.**
+  Rationale: highest decode by clear margin (+9% over F, +45% over A); 0 errors
+  across all runs; startup ~60s (criterion 4 ~met); criterion 3 unmet in this
+  climate (0.9) but environmental — quiet-box MTP history shows 2.1, and no
+  config with headroom comes within 30% of the throughput.
+- RUNNING: 10-request qualification (golden suite x2) on `tiel-prod-qual` — see below.
+- Fallback: F (K=1) if K=2 acceptance ever degrades on a workload (−9% speed,
+  same memory, larger KV 6301 vs 5120).
+- Rejected: B, C, H (memory/startup), I (no gain), D (superseded).
+
+## 15.1.3 Launcher encoding: SPEC env passthrough + production preset comment
+# (keeps base defaults intact; SPEC=1 selects the G configuration).
+
+## Qualification (server tiel-prod-qual, G config, E-cores unpinned)
+- Golden suite x2 = 10/10 completions, all flags=[], 0 server errors.
+  Semantics spot-checked: Canberra, 3 benefits list, palindrome code,
+  date-keyed dict, "alpha" long-context retrieval — all on-track.
+  (Tiel thinking emitted inline; p5 stopped early 60/40 tok — known caveat.)
+- Criterion 1 (10+ reqs, 0 errors): MET. 15.1.2 SELECTION CONFIRMED: config G.
+- 15.1.3 IMPLEMENTED: SPEC=mtp-k1|mtp-k2 passthrough in launch_vllm.sh,
+  verified (mtp-k2 injects flag; empty/bogus injects nothing). Base defaults
+  untouched; production = MODEL=Tiel MAX_LEN=4096 MAX_SEQS=1 GPU_UTIL=0.68
+  SPEC=mtp-k2 + --kv-cache-memory-bytes 500000000.

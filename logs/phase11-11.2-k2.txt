@@ -1,0 +1,33 @@
+# Phase 11.2 — Speculative depth sweep K=1 vs K=2 (2026-09-27, MXFP4 draft)
+# Config: MAX_LEN=4096 MAX_SEQS=1 GPU_UTIL=0.68 KV 0.5GiB, one variable (num_speculative_tokens).
+
+## 11.2.1 K=2 support: SUPPORTED (not blocked).
+- Server tiel-mtp-k2: num_spec_tokens=2 accepted, weights 19.71 GiB, KV 5,120
+  tokens (1.25x @4096; K=1 gave 6,301/1.54x — draft slots consume KV).
+- vLLM warning (speculative.py:1361): "num_speculative_tokens > 1 will run
+  multiple times of forward on same MTP layer, which may result in lower
+  acceptance rate" — this checkpoint has mtp_num_hidden_layers=1, so K=2
+  reuses the single draft layer twice.
+
+## 11.2.2 K=1 vs K=2 (MXFP4 draft; BF16 control superseded — BF16 draft no
+# longer exists post-11.1; K=1 MXFP4 serves as the control)
+- 1024/128/1: K=1 24.85 -> K=2 27.69 (+11.4%; +44.6% vs eager 19.15)
+- 2048/128/1: K=1 24.87 -> K=2 26.72 (+7.4%; +39.6% vs eager 19.51)
+- Paris probe on K=2: coherent. 0 errors, swap flat-ish (+0.26/+0.10 under
+  1 GiB host pressure — environmental).
+- 11.2.2 success criterion (>=30 tok/s): NOT MET (27.69). Single-layer draft
+  reuse caps acceptance; matches the vLLM warning. K=2 still the best config.
+
+## 11.2.3 Acceptance rate across domains: DEFERRED (metrics off,
+# per_request_spec_decode_metrics='none'; estimating alpha needs the
+# acceptance counters. Throughput ratios imply healthy alpha:
+# K=1 1.30x and K=2 1.45x over eager despite extra draft forwards.)
+
+## Replicate + confound note (10:45, server tiel-mtp-k1-pinned = K=1 UNPINNED E-cores)
+- K=1 1024 replicate: 25.41 tok/s (vs 24.85 earlier, +2.2% run variation).
+- CONFOUND: K=2 run happened to land in a full-cpuset bg shell (P-PINNED);
+  both K=1 runs landed E-core shells (unpinned). So 27.69 vs ~25.1 mixes
+  speculation + pinning effects. True K=2 uplift likely ~7-8%, not 11%.
+  Clean isolation needs same-shell back-to-back runs (12.1 experiment).
+- Gate 1 (28.0 tok/s) still not met by any config. Path forward: 12.x dispatch
+  (graph batch=1 + pinning, +5-10% hoped) stacked with K=2.
