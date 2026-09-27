@@ -98,6 +98,14 @@ any weight load — checkpoint bytes untouched by this. Resume when memory is
 free:
 `./.venv/bin/python scripts/smoke_offline.py --model models/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4 --language-model-only --max-model-len 1024 --gpu-memory-utilization 0.74 --max-tokens 32`
 
+**Update 2026-09-27: engine smoke test PASSED** (`logs/smoke-tiel-03.log`,
+exit path `RESULT: OK`). Weights loaded in 25.2 s, resident **19.24 GiB**,
+KV cache 13,019 tokens (12.71× @ 1024), greedy 32-token completion on
+"The capital of France is" → coherent Paris answer ("Paris is located in the
+north-central part of France, on the Seine River..."). Host peak RSS 1.93 GiB.
+The MXFP4 checkpoint is end-to-end loadable and generates through the XPU
+`XPUExpertsMxFp4` path — last unproven link closed.
+
 ## Fallback readiness (Phase 10)
 
 - A **SYCL llama.cpp build already exists** at `~/llama-bonsai-sycl/build/`
