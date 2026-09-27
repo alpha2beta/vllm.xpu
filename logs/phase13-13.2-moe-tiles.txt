@@ -1,0 +1,10 @@
+# Phase 13.2 — MoE grouped-GEMM tile verdict (2026-09-27): CLOSE, no action.
+# Direct hook profiling attempted and abandoned (both reasons in
+# logs/profile-tiel-layers.log): offline-LLM KV undersize at util 0.68
+# (needs explicit kv_cache_memory_bytes) and, decisively, V1 EngineCore runs
+# the model in a separate subprocess unreachable from API-process hooks.
+# Analytic bound (scripts/profile_layers.py, from results.csv):
+#   worst MoE/layer upper bound = 1.301 ms (eager 19.21 tok/s; assumes
+#   attention/GDN/norms cost zero). Task bands (>8 file / 5-7 close) assumed
+#   AInfer-scale batches; AInfer 5.92 ms was B=256. Bound is 4-6x below.
+# Conclusion: tiles well-calibrated for 8 Xe-cores at B=1. No upstream issue.

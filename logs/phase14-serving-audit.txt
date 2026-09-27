@@ -27,3 +27,10 @@
 - 14.3.3: thinking consumes max_tokens (256/256 used, answer cut mid-word
   "The com..."). Recommendation: size agentic max_tokens >= 512 for
   reasoning tasks, or ~2x the expected visible length.
+
+## 14.4-eager retest (server tiel-8k-fp8): CONFIRMED FLAT, closed.
+- Eager TTFT 1.08 -> 1.05 -> 1.06s. Same as MTP (1.15->1.13->1.13).
+- Verdict: no measurable prefix-cache TTFT benefit on EITHER config.
+  Likely architectural: hybrid GDN/SSM state (mamba_cache_mode='align')
+  defeats block-prefix reuse, and/or ~1s TTFT is overhead-dominated.
+  Requests are fast regardless (~1.05s). 14.4 CLOSED as investigated.

@@ -1,0 +1,29 @@
+# Phase 12.3 — SoC power & thermal (2026-09-27)
+
+## 12.3.1 (from earlier audit)
+- RAPL package limit 30 W; gt0 cur/max 1950 MHz, min 400 MHz; idle thermals ~40C.
+- xe sysfs path: /sys/devices/pci0000:00/0000:00:02.0/tile0/gt{0,1}/freq0/*.
+
+## 12.3.2 Lock attempt: NOT PERMITTED (documented, deferred to user)
+- min_freq is root-owned rw-r--r--; write attempt -> Permission denied
+  (no passwordless sudo in this session).
+- Defer-to-user command (run once per boot, persists until reboot):
+    echo 1950 | sudo tee /sys/devices/pci0000:00/0000:00:02.0/tile0/gt0/freq0/min_freq
+    echo 1950 | sudo tee /sys/devices/pci0000:00/0000:00:02.0/tile0/gt1/freq0/min_freq
+  Expected effect: floor iGPU at 1.95 GHz, removing dynamic up/down latency
+  and EPP drift during decode. Verify with:
+    cat .../tile0/gt0/freq0/{cur_freq,min_freq}
+- Note: cur_freq already reads 1950 at idle, so static headroom exists; the
+  open question is droop UNDER SUSTAINED LOAD (12.3.3).
+
+## 12.3.3 Under-load sampling: piggybacked on 13.4 server runs (see
+# logs/phase13-13.4-longctx.txt). Poll cur_freq + thermal zones during the
+# 8K bench; throttling = cur < 1900 sustained or thermal > 85C.
+
+## 12.3.3 Under-load result (sampled during 13.4 8K bench, logs/freq-8k-bench.txt)
+- gt0 NEVER left 1950 MHz across the full 8K bench (40 samples/200s);
+  thermals 44-63C. No droop, no throttling.
+- Verdict: freq lock (12.3.2) would buy NOTHING on this box today — the GPU
+  already sustains max clocks under sustained inference at 30 W RAPL.
+  Gate 2 power item CLOSED as investigated. Defer-to-user lock command kept
+  above for hot-room/repeat runs.

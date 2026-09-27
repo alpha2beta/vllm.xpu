@@ -1,0 +1,19 @@
+# Phase 13.4 — Long-context qualification (2026-09-27, eager Tiel, FP8 KV)
+# 13.4.1 8K (maxlen 8192, FP8, pin 0.75GB -> KV 27,852 = 3.4x):
+#   8000/128/1 -> decode 18.72 (criterion >=18 MET), prefill 1658,
+#   TTFT 4.83 (1.85/7.80 spread). MemAvail 0.41-0.51, swap +0.14.
+# 13.4.2 16K (maxlen 16384, FP8, pin 0.75GB -> KV 39,789 = 2.43x):
+#   15000/128/1 -> decode 18.76 (criterion >=17 MET), prefill 1773,
+#   TTFT 8.46 (0.64/16.28 — run-2 0.64s suggests exact-prompt prefix hit).
+#   MemAvail 0.57-0.84, swap +0.39 (largest growth today; 15k-prefill edge).
+#   Quality: 16K "alpha" retrieval CORRECT with max_tokens=64 (5.2s);
+#   with max_tokens=10 the thinking preamble ate the budget (14.3.3 caveat
+#   live demo, not a retrieval failure).
+#   Decode flat 1K->16K: 19.15 / 18.81 / 18.72 / 18.76 — attention is NOT
+#   the bottleneck at any tested length (13.1 confirmed at scale).
+# 13.4.3 conc2@4096 (on 8K server): per-req 17.66 (== Phase 8 17.08-17.53,
+#   no degradation); aggregate 13.00 is output-length-bound (short outs),
+#   NOT comparable to Phase 8's 22.51 (full 64-tok outs at 1K ctx).
+#   Verdict: PASS in substance; the 22.5 number can't transfer across ctx.
+# Gate 3: EU-split documented (13.1), tiles bounded (13.2), 8K/16K sustained
+#   >=18 without OOM (13.4). 8192 default NOT adopted (MTP KV pin sized 4096).
