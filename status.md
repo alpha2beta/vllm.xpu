@@ -346,3 +346,21 @@ experts gate/up in a conversion pass (mirrors what we did for the trunk —
 small script, same split); (b) wait on upstream. The draft block is only
 1.69 GB BF16; (a) is cheap. Attempt log entry: shell ate the first
 `--speculative-config` JSON (unquoted) — always single-quote it.
+
+**Update 2026-09-27: MTP unblocked via (a), measured.**
+`scripts/unfuse_tiel_mtp.py` (CPU-only reshape, committed) split the fused
+MTP experts into per-expert gate/up/down BF16 (768 tensors, new shards
+32–33; checkpoint now 63,321 tensors / 33 shards / 21.57 GiB, SHA256SUMS
+green, index + 1,581-entry ignore list updated). Along the way it also
+healed a stale `-of-00031` naming/index skew from the earlier incremental
+quantize runs (self-checking tail: renames every shard to a consistent
+`-of-00033` set and asserts every indexed tensor opens). Server
+`logs/server-tiel-mtp-s1c.log` (MAX_SEQS=1, util 0.74, 0.5 GiB KV):
+`Qwen3_5MoeMTP` draft resolves, `XPUExpertsMxFp4` selected, weights load —
+MTP active on Tiel. Bench (`logs/bench-tiel-mtp-{A,B}.log`, `results.csv`):
+1024/128/1 → **25.50 tok/s** decode (+33% vs 19.15 non-spec);
+2048/128/1 → **24.31 tok/s** (+25% vs 19.51). Quality spot-check (bat+ball,
+128 tokens) derives correctly. Remaining notes: needs a reclaim pass before
+launch at util 0.77 (Level-Zero free only 21.5 GiB until drained); Tiel MTP
+still below Qwen3.6's MTP number (26.83) by ~5–9% — draft acceptance
+unmeasured, likely the gap.
