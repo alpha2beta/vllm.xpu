@@ -106,6 +106,24 @@ north-central part of France, on the Seine River..."). Host peak RSS 1.93 GiB.
 The MXFP4 checkpoint is end-to-end loadable and generates through the XPU
 `XPUExpertsMxFp4` path — last unproven link closed.
 
+**Update 2026-09-27: vLLM XPU head-to-head vs Qwen3.6 MXFP4** (server
+`logs/server-tiel-01.log` :8001, `logs/bench-tiel-{01,02,03}.log`,
+`results.csv`; same calibrated points, eager, util 0.74):
+
+| point (in/out/conc) | Qwen3.6 decode | Tiel decode | Δ |
+|---|---|---|---|
+| 1024 / 128 / 1 | 19.27 | **19.15** | −0.6% |
+| 2048 / 128 / 1 | 19.28 | **19.51** | +1.2% |
+| 1024 / 64 / 2 | 17.53 (agg 22.94) | **17.35** (agg 20.12) | −1.0% |
+
+Identical arch + identical kernels ⇒ identical speed, as expected; Tiel's
+wider GDN `out_proj` costs nothing measurable. GPUActive flat 21.35 GiB,
+GPUReclaim 0, MemAvailable ~3.5 GiB, swap frozen 4.05 GiB — no pressure.
+Caveat: Tiel emits its thinking trace inline (no `reasoning` split on this
+`vllm serve` build), so reasoning tokens consume the `max_tokens` budget —
+size agentic `max_tokens` accordingly. Quality spot-checks coherent (Paris
+answer, `72`); full 5-prompt suite not yet run on Tiel.
+
 ## Fallback readiness (Phase 10)
 
 - A **SYCL llama.cpp build already exists** at `~/llama-bonsai-sycl/build/`
