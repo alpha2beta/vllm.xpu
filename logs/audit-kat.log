@@ -1,0 +1,17 @@
+downloading model-00000-of-00013.safetensors ...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2075 packed pairs to audit from model-00000-of-00013.safetensors
+  ... 500/2075 pairs, worst so far 0.12822
+  ... 1000/2075 pairs, worst so far 0.15720
+  ... 1500/2075 pairs, worst so far 0.15720
+  ... 2000/2075 pairs, worst so far 0.15720
+AUDIT-OK: 2075 pairs, mean rel-err=0.11585, max=0.15720 (model.language_model.layers.0.mlp.experts.252.gate_proj)
+Traceback (most recent call last):
+  File "/home/yanchun/Projects/vllm.xpu/scripts/audit_kat_mxfp4.py", line 116, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/scripts/audit_kat_mxfp4.py", line 108, in main
+    assert worst < 0.15, f"audit max rel-err {worst:.4f} >= 0.15"
+           ^^^^^^^^^^^^
+AssertionError: audit max rel-err 0.1572 >= 0.15
+EXIT:1

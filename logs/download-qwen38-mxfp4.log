@@ -1,0 +1,10 @@
+[90mHint: A new version of huggingface_hub (2.0.0) is available! You are using version 1.32.0.[0m
+[90mHint: The `hf-cli` skill is not installed. Run `hf skills add -g --claude` to teach your AI agents how to use the `hf` CLI.[0m
+/home/yanchun/.local/share/uv/tools/huggingface-hub/lib/python3.12/site-packages/huggingface_hub/cli/download.py:158: UserWarning: Ignoring `--include` since filenames have been explicitly set.
+  warnings.warn("Ignoring `--include` since filenames have been explicitly set.")
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Still waiting to acquire lock on /home/yanchun/Projects/vllm.xpu/models/Qwen3.8-27B-Turbo-Fable-MXFP4/.cache/huggingface/.gitignore.lock (elapsed: 0.1 seconds)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 10 files:  10%|█         | 1/10 [00:00<00:07,  1.20it/s]Fetching 10 files:  30%|███       | 3/10 [00:00<00:01,  3.76it/s]Fetching 10 files:  60%|██████    | 6/10 [00:01<00:00,  7.81it/s]Fetching 10 files:  80%|████████  | 8/10 [00:01<00:00,  7.68it/s]Fetching 10 files:  80%|████████  | 8/10 [00:20<00:00,  7.68it/s]Fetching 10 files:  90%|█████████ | 9/10 [00:49<00:10, 10.14s/it]Fetching 10 files: 100%|██████████| 10/10 [02:42<00:00, 33.71s/it]Fetching 10 files: 100%|██████████| 10/10 [02:42<00:00, 16.23s/it]
+[32m✓ Downloaded[0m
+  path: /home/yanchun/Projects/vllm.xpu/models/Qwen3.8-27B-Turbo-Fable-MXFP4
+EXIT:0

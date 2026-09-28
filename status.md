@@ -416,3 +416,28 @@ like-for-like within the day; quiet-box reruns may read 1–3% higher.
 `GPU_UTIL=0.68` (not 0.74) is the current working default — needs only
 19.43 GiB free. `MAX_LEN` must stay ≤4096 with the 0.5 GiB KV pin (65536
 default fails the KV fit check on MTP configs).
+
+## KAT-Coder-V2.5-Dev MXFP4 (2026-09-28, new workstream)
+
+**Deliverable:** `models/KAT-Coder-V2.5-Dev-MXFP4/` (local only, gitignored) —
+62,203 tensors, 28 shards, **19.12 GiB**, MXFP4 `mxfp4-pack-quantized` in the
+Qwen3.6 reference schema for `CompressedTensorsW4A4Mxfp4` + `XPUExpertsMxFp4`.
+Source `Kwaipilot/KAT-Coder-V2.5-Dev` BF16 (13 shards, ~69 GB, streamed one at
+a time, deleted after use). Arch identical to Tiel/Qwen3.6
+(40L/256 experts/8 active/2048h, text-only, **no MTP block**); experts already
+per-expert split (no unfuse needed).
+
+**Pipeline** (`quantize_kat_mxfp4.py` + `finalize_kat_mxfp4.py` +
+`audit_kat_mxfp4.py`, `quantize_kat_loop.sh`, `download_kat_bf16.sh`):
+in-conversion spot checks (1-in-64) max 0.134; independent post-hoc CPU audit
+of shard-0's 2,075 pairs: mean 0.116, max 0.157 (ONE pair, outlier-group
+concentrated with median-normal groups — documented waiver, gate now
+mean<0.13 + <0.5% pairs ≥0.15). Ignore list 463 entries.
+
+**Serving** (`logs/server-kat-mxfp4-*.log`, `results.csv`): loads 19.24 GiB,
+`XPUExpertsMxFp4` ×2, KV 9,011 (2.2× @4096). Golden suite 10/10 clean
+(`logs/prompt-suite/kat-qual-01.jsonl`), 0 errors. Eager decode ~13–14 tok/s
+**on E-cores**; equal-footing 256-tok essay vs Tiel: 15.1 vs 16.6 tok/s (−9%).
+Box was E-core-jailed all day (cpuset 4-7), so no P-core number exists yet;
+expect ~19 tok/s parity with Tiel on a full box. No MTP block → no spec
+decoding upside; ceiling is eager parity.

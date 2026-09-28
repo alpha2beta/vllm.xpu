@@ -1,0 +1,39 @@
+GET: model-00000-of-00013.safetensors
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/yanchun/Projects/vllm.xpu/models/_staging_kat/model-00000-of-00013.safetensors
+GET: model-00001-of-00013.safetensors
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/yanchun/Projects/vllm.xpu/models/_staging_kat/model-00001-of-00013.safetensors
+GET: model-00002-of-00013.safetensors
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/yanchun/Projects/vllm.xpu/models/_staging_kat/model-00002-of-00013.safetensors
+GET: model-00003-of-00013.safetensors
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/yanchun/Projects/vllm.xpu/models/_staging_kat/model-00003-of-00013.safetensors
+GET: model-00004-of-00013.safetensors
+/home/yanchun/Projects/vllm.xpu/models/_staging_kat/model-00004-of-00013.safetensors
+GET: model-00005-of-00013.safetensors
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/yanchun/Projects/vllm.xpu/models/_staging_kat/model-00005-of-00013.safetensors
+GET: model-00006-of-00013.safetensors
+/home/yanchun/Projects/vllm.xpu/models/_staging_kat/model-00006-of-00013.safetensors
+GET: model-00007-of-00013.safetensors
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/yanchun/Projects/vllm.xpu/models/_staging_kat/model-00007-of-00013.safetensors
+GET: model-00008-of-00013.safetensors
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/yanchun/Projects/vllm.xpu/models/_staging_kat/model-00008-of-00013.safetensors
+GET: model-00009-of-00013.safetensors
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/yanchun/Projects/vllm.xpu/models/_staging_kat/model-00009-of-00013.safetensors
+GET: model-00010-of-00013.safetensors
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/yanchun/Projects/vllm.xpu/models/_staging_kat/model-00010-of-00013.safetensors
+GET: model-00011-of-00013.safetensors
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/yanchun/Projects/vllm.xpu/models/_staging_kat/model-00011-of-00013.safetensors
+GET: model-00012-of-00013.safetensors
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/yanchun/Projects/vllm.xpu/models/_staging_kat/model-00012-of-00013.safetensors
+ALL-DONE
+EXIT:0
