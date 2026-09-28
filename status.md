@@ -441,3 +441,22 @@ mean<0.13 + <0.5% pairs ≥0.15). Ignore list 463 entries.
 Box was E-core-jailed all day (cpuset 4-7), so no P-core number exists yet;
 expect ~19 tok/s parity with Tiel on a full box. No MTP block → no spec
 decoding upside; ceiling is eager parity.
+
+## KAT MTP draft (2026-09-28)
+
+**Deliverable:** MXFP4 draft block merged into `models/KAT-Coder-V2.5-Dev-MXFP4/`
+(63,756 tensors / 29 shards / 19.60 GiB). Source
+`SpectreSystems/KAT-Coder-V2.5-Dev-MTP` `model-00014-of-mtp.safetensors`
+(1.6 GB, 19 BF16 tensors, fused experts like Tiel's).
+`scripts/quantize_kat_mtp_mxfp4.py` does unfuse+quantize in one pass
+(rel-err max 0.119, `logs/quantize-kat-mtp-mxfp4.log`). Required config fix:
+KAT base sets `text_config.mtp_num_hidden_layers=0` (no MTP); the vLLM draft
+builder reads it via `getattr(..., 1)`, so 0 builds zero layers — script sets
+it to 1 (backup `config.json.pre-kat-mtp.bak`). Ignore 463→480 (+17 MTP
+non-expert); SHA256SUMS rebuilt.
+
+**Serving** (`logs/server-kat-mtp-{smoke,k2}.log`, `results.csv`): draft
+`Qwen3_5MoeMTP` resolves, weights 19.71 GiB, KV 6,301 (K=1). Paris/Canberra
+probes correct. Bench (1024/128/1): K=1 **23.22**, K=2 **24.82** tok/s
+(both P-pinned; cf. Tiel 24.85–25.41 / 27.69). KAT has no E-core MTP number;
+eager E-core baseline 12.69–13.95.

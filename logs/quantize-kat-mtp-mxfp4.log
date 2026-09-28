@@ -1,0 +1,17 @@
+backup: /home/yanchun/Projects/vllm.xpu/models/KAT-Coder-V2.5-Dev-MXFP4/model.safetensors.index.json.pre-kat-mtp.bak
+backup: /home/yanchun/Projects/vllm.xpu/models/KAT-Coder-V2.5-Dev-MXFP4/config.json.pre-kat-mtp.bak
+fused experts: (256, 1024, 2048), (256, 2048, 512); non-expert MTP tensors: 17
+  [val] mtp.layers.0.mlp.experts.21.gate_proj.weight: mean-rel-err=0.11675
+  [val] mtp.layers.0.mlp.experts.42.up_proj.weight: mean-rel-err=0.11475
+  [val] mtp.layers.0.mlp.experts.63.down_proj.weight: mean-rel-err=0.11440
+  ... 64/256 experts (0s)
+  ... 128/256 experts (1s)
+  ... 192/256 experts (1s)
+  ... 256/256 experts (1s)
+  wrote model-00029-of-XXXXX.safetensors: 1553 tensors, 0.47 GiB
+spot checks: 12, max rel-err=0.11937, mean=0.11689
+index: 63756 tensors, 29 shards, 19.60 GiB
+config: mtp_num_hidden_layers=1, ignore 463 -> 480 (+17 MTP non-expert)
+SHA256SUMS rebuilt
+QUANT-KAT-MTP-OK in 10s
+EXIT:0
