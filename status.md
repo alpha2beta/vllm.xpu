@@ -539,3 +539,14 @@ Quality cost of ~45% fewer bytes is small (+0.42 PPL). Retained under Option B a
 ## EXL3 staged probe: 2.2bpw + FP8 KV + 32K (2026-10-07)
 
 **Pool-bound max ≈ 230K tokens at 0.65 util (230,589 in 9.31 GiB, 43.4 KB/tok — 3.2× the fp16 pool).** fp8 boots clean; short + 23.5K retrieval probes accurate. Tradeoff: fp8 prefill −65% (TTFT 4.7 vs 1.65 s), decode −15% (7.53 vs 8.82) — capacity, not speed. 64K+ still untested; fp8 needs full-suite re-qualification before trusted use. Evidence: `logs/exl3-2bpw-fp8-20261007-140828/`, 1 `results.csv` row.
+
+## 16-Prompt Quality Benchmark: Qwen3.8-27B EXL3 2.20bpw vs. Ternary Bonsai 2 27B PQ2_0 (2026-10-07)
+
+**Result: Qwen 2.20bpw scored 15/16 (93.8%) vs. Bonsai PQ2 14/16 (87.5%). Both achieved 100% on Math (4/4), Code (4/4, unit-tested), and Fact/Trap detection (4/4). Qwen outperformed Bonsai on complex instruction constraints (3/4 vs 2/4) due to Bonsai overthinking into 2048-token generation limits.**
+
+- **Harness & Protocol:** `scripts/bench_quality_16p.py`. Sequential evaluation with greedy sampling (`temperature=0.0`, `max_tokens=2048`). Isolated `<think>` reasoning traces from final outputs.
+- **Math & Quantitative Logic (4/4 both):** `math_bridge` (17 min), `math_lcm` (48 fruit), `math_speed` (3 hours), `math_probability` (3/28). Bonsai was more concise on math; Qwen generated exhaustive step-by-step proofs.
+- **Coding & Algorithms (4/4 both):** All 4 functions (`code_palindrome`, `code_merge_intervals`, `code_two_sum`, `code_flatten_dict`) passed 100% of executable Python test assertions.
+- **Instruction Following (Qwen 3/4 vs Bonsai 2/4):** Both passed strict JSON schema formatting (`format_json_only`) and strict word count bounds (`format_word_count`, 17 words). On reverse alphabetical European capitals (`format_reverse_capitals`), Qwen passed (`Zagreb, Warsaw, Vienna, Rome, Paris`) in 84s, whereas Bonsai got stuck in internal self-correction loops and hit the 2048-token ceiling with an empty answer (351.7s). Both failed the extreme negative constraint `format_no_letter_e` (Qwen leaked reasoning text without `<think>` tags; Bonsai timed out in reasoning).
+- **Factuality & Premise Traps (4/4 both):** Both passed Canberra, successfully caught the 1650 US President false premise, identified equal weight of steel vs feathers, and deduced the shortest person.
+- **Artifacts:** `results_qwen_2bpw_16p.json`, `results_bonsai_pq2_16p.json`.

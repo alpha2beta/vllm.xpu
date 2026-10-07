@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# E4.1: launch the OpenAI-compatible vLLM server for the EXL3 4.00bpw model.
+# Launch the OpenAI-compatible vLLM server for Qwen3.8-27B EXL3 2.20bpw.
 #
+# Defaults (override via env): MTP k=1 speculation, fp8 KV cache, 128k context.
 # Isolated from the production Tiel launcher (scripts/launch_vllm.sh):
 #   - loopback port 8001 (EXL3 reserved; Tiel uses 8000)
 #   - text-only, eager, conservative memory defaults
@@ -8,30 +9,30 @@
 #     patches, SMALL_M_MAX=8, no INT8 prefill, 1024-col recon slices, no DNNL
 #
 # Usage:
-#   scripts/launch_vllm_exl3.sh [label] [extra vllm serve args...]
+#   ./launch_vllm_qwen38_exl3.sh [label] [extra vllm serve args...]
 # Env overrides:
 #   MODEL, SERVED, MAX_LEN, MAX_SEQS, BATCHED_TOKENS, GPU_UTIL, PORT, HOST,
-#   EAGER=1/0, KV_DTYPE (default auto), EXL3_BACKEND (default auto),
+#   EAGER=1/0, KV_DTYPE (default fp8), EXL3_BACKEND (default auto),
+#   SPEC=mtp-k1/mtp-k2 (default mtp-k1; empty disables speculation),
 #   PINNED=1/0, WARMUP=1/0
 set -uo pipefail
 
-LABEL=${1:-exl3-4bpw-01}
+LABEL=${1:-exl3-2bpw-mtp-fp8-128k}
 shift || true
 
-MODEL=${MODEL:-models/turboderp-Qwen3.8-27B-exl3-4.00bpw}
-SERVED=${SERVED:-qwen3.8-27b-4bpw}
+MODEL=${MODEL:-models/turboderp-Qwen3.8-27B-exl3-2.20bpw}
+SERVED=${SERVED:-qwen3.8-27b-2bpw}
 HOST=${HOST:-127.0.0.1}
 PORT=${PORT:-8001}
-MAX_LEN=${MAX_LEN:-4096}
+MAX_LEN=${MAX_LEN:-131072}
 MAX_SEQS=${MAX_SEQS:-1}
 BATCHED_TOKENS=${BATCHED_TOKENS:-1024}
-GPU_UTIL=${GPU_UTIL:-0.70}
+GPU_UTIL=${GPU_UTIL:-0.65}
 EAGER=${EAGER:-1}
-KV_DTYPE=${KV_DTYPE:-auto}
+KV_DTYPE=${KV_DTYPE:-fp8}
 PINNED=${PINNED:-1}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
-cd "${ROOT_DIR}" || exit 1
+cd "${SCRIPT_DIR}" || exit 1
 mkdir -p logs
 LOG="logs/server-${LABEL}.log"
 
@@ -71,6 +72,12 @@ fi
 EAGER_FLAG=(--enforce-eager)
 [ "$EAGER" = "0" ] && EAGER_FLAG=()
 
+# MTP speculation (default k=1; SPEC=mtp-k2 for depth 2, SPEC= for off).
+SPEC=${SPEC:-mtp-k1}
+SPEC_FLAG=()
+[ "$SPEC" = "mtp-k1" ] && SPEC_FLAG=(--speculative-config '{"method":"mtp","num_speculative_tokens":1}')
+[ "$SPEC" = "mtp-k2" ] && SPEC_FLAG=(--speculative-config '{"method":"mtp","num_speculative_tokens":2}')
+
 ARGS=(
   --model "$MODEL"
   --served-model-name "$SERVED"
@@ -83,7 +90,10 @@ ARGS=(
   --kv-cache-dtype "$KV_DTYPE"
   --language-model-only
   --seed 0
+  --enable-auto-tool-choice
+  --tool-call-parser qwen3_xml
   "${EAGER_FLAG[@]}"
+  "${SPEC_FLAG[@]}"
   "$@"
 )
 

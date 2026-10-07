@@ -592,6 +592,12 @@ K=2 adds nothing. Production verdict unchanged (DROP).
   weight bytes; trellis coding works as advertised.
   Run: `logs/exl3-2bpw-20261007-124800/` (patches: `no-dpas.patch`,
   `k1-fallback.patch`, `mixed-k.patch` — all in git diff of `$EXL3_SRC`).
+- [x] **E8.4 — Quality benchmark vs. Ternary Bonsai 2 27B PQ2_0.**
+  Sequential side-by-side run over 16-prompt curated task suite (`scripts/bench_quality_16p.py`,
+  greedy temp 0.0, max 2048 tokens). Qwen 2.2bpw scored **15/16 (93.8%)** vs Bonsai **14/16 (87.5%)**.
+  Math 4/4 tied, Code 4/4 tied (100% unit assertions passed), Fact/Trap 4/4 tied. Qwen showed better
+  reasoning convergence on constrained tasks where Bonsai's `xhigh` reasoning looped to the 2048 token ceiling.
+  Artifacts: `results_qwen_2bpw_16p.json`, `results_bonsai_pq2_16p.json`.
 
 ---
 

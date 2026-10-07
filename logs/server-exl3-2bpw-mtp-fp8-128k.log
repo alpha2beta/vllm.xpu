@@ -1,0 +1,66 @@
+vllm serve --model models/turboderp-Qwen3.8-27B-exl3-2.20bpw --served-model-name qwen3.8-27b-2bpw --host 127.0.0.1 --port 8001 --max-model-len 131072 --max-num-seqs 1 --max-num-batched-tokens 1024 --gpu-memory-utilization 0.65 --kv-cache-dtype fp8 --language-model-only --seed 0 --enforce-eager --speculative-config {"method":"mtp","num_speculative_tokens":1}
+warning: P-core pinning unavailable in this cpuset (pid 77780's current affinity list: 4-7); running unpinned (PINNED=0 to silence)
+/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py:24: DeprecationWarning: `vllm.entrypoints.openai.api_server` is deprecated and will likely beunsupported in a future version. Use the corresponding function from `vllm.entrypoints.launchers` instead.
+  warnings.warn(
+/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py:51: DeprecationWarning: The `python -m vllm.entrypoints.openai.api_server` command is deprecated and may be removed in a future release. Please use `vllm server` instead.
+  warnings.warn(
+(APIServer pid=77780) INFO 10-07 18:32:02 [api_utils.py:347] 
+(APIServer pid=77780) INFO 10-07 18:32:02 [api_utils.py:347]        █     █     █▄   ▄█
+(APIServer pid=77780) INFO 10-07 18:32:02 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.30.0
+(APIServer pid=77780) INFO 10-07 18:32:02 [api_utils.py:347]   █▄█▀ █     █     █     █  model   models/turboderp-Qwen3.8-27B-exl3-2.20bpw
+(APIServer pid=77780) INFO 10-07 18:32:02 [api_utils.py:347]    ▀▀  ▀▀▀▀▀ ▀▀▀▀▀ ▀     ▀
+(APIServer pid=77780) INFO 10-07 18:32:02 [api_utils.py:347] 
+(APIServer pid=77780) INFO 10-07 18:32:02 [api_utils.py:286] non-default args: {'host': '127.0.0.1', 'port': 8001, 'model': 'models/turboderp-Qwen3.8-27B-exl3-2.20bpw', 'max_model_len': 131072, 'enforce_eager': True, 'served_model_name': ['qwen3.8-27b-2bpw'], 'gpu_memory_utilization': 0.65, 'kv_cache_dtype': 'fp8', 'language_model_only': True, 'max_num_batched_tokens': 1024, 'max_num_seqs': 1, 'speculative_config': {'method': 'mtp', 'num_speculative_tokens': 1}}
+(APIServer pid=77780) Traceback (most recent call last):
+(APIServer pid=77780)   File "<frozen runpy>", line 198, in _run_module_as_main
+(APIServer pid=77780)   File "<frozen runpy>", line 88, in _run_code
+(APIServer pid=77780)   File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py", line 59, in <module>
+(APIServer pid=77780)     main()
+(APIServer pid=77780)   File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/entrypoints/launchers/api_server/entry.py", line 226, in main
+(APIServer pid=77780)     uvloop.run(run_server(args))
+(APIServer pid=77780)   File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/uvloop/__init__.py", line 96, in run
+(APIServer pid=77780)     return __asyncio.run(
+(APIServer pid=77780)            ^^^^^^^^^^^^^^
+(APIServer pid=77780)   File "/home/yanchun/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py", line 195, in run
+(APIServer pid=77780)     return runner.run(main)
+(APIServer pid=77780)            ^^^^^^^^^^^^^^^^
+(APIServer pid=77780)   File "/home/yanchun/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py", line 118, in run
+(APIServer pid=77780)     return self._loop.run_until_complete(task)
+(APIServer pid=77780)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=77780)   File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+(APIServer pid=77780)   File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/uvloop/__init__.py", line 48, in wrapper
+(APIServer pid=77780)     return await main
+(APIServer pid=77780)            ^^^^^^^^^^
+(APIServer pid=77780)   File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/entrypoints/launchers/api_server/entry.py", line 175, in run_server
+(APIServer pid=77780)     listen_address, sock = setup_server(args, reuse_port=False)
+(APIServer pid=77780)                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=77780)   File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=77780)     return func(*args, **kwargs)
+(APIServer pid=77780)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=77780)   File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/entrypoints/launchers/launcher.py", line 276, in setup_server
+(APIServer pid=77780)     sock = create_server_socket(sock_addr, reuse_port=reuse_port)
+(APIServer pid=77780)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=77780)   File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/entrypoints/launchers/launcher.py", line 225, in create_server_socket
+(APIServer pid=77780)     sock.bind(addr)
+(APIServer pid=77780) OSError: [Errno 98] Address already in use
+(APIServer pid=76232) INFO:     192.168.5.224:55810 - "POST /v1/chat/completions HTTP/1.1" 400 Bad Request
+(APIServer pid=76232) INFO 10-07 18:36:22 [launcher.py:129] [shutdown] API server: shutdown triggered
+(APIServer pid=76232) INFO 10-07 18:36:22 [launcher.py:145] [shutdown] API server: stopping engine client mode=drain timeout=5s
+(APIServer pid=76232) INFO 10-07 18:36:22 [core_client.py:744] [shutdown] MPClient: start timeout=5s
+(APIServer pid=76232) INFO 10-07 18:36:22 [core_client.py:746] [shutdown] MPClient: stopping engine manager
+(APIServer pid=76232) INFO 10-07 18:36:22 [utils.py:632] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=76521) INFO 10-07 18:36:22 [core.py:1342] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=76521) INFO 10-07 18:36:22 [core.py:1493] [shutdown] EngineCore: start mode=drain timeout=5s
+(EngineCore pid=76521) INFO 10-07 18:36:22 [core.py:1524] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=76521) INFO 10-07 18:36:22 [core.py:1355] [shutdown] EngineCore: exiting busy loop
+(EngineCore pid=76521) INFO 10-07 18:36:22 [xpu_worker.py:228] XPUWorker shutdown: cleaning up (rank=0, local_rank=0)
+(EngineCore pid=76521) INFO 10-07 18:36:23 [xpu_worker.py:238] XPUWorker shutdown: done (rank=0, local_rank=0)
+(APIServer pid=76232) INFO 10-07 18:36:27 [core_client.py:748] [shutdown] MPClient: engine manager stopped
+(APIServer pid=76232) INFO 10-07 18:36:27 [core_client.py:749] [shutdown] MPClient: cleaning up background resources
+(APIServer pid=76232) INFO 10-07 18:36:27 [core_client.py:751] [shutdown] MPClient: complete
+(APIServer pid=76232) INFO 10-07 18:36:27 [launcher.py:154] [shutdown] API server: engine client stopped
+(APIServer pid=76232) INFO 10-07 18:36:27 [launcher.py:157] [shutdown] API server: signalling HTTP server shutdown
+(APIServer pid=76232) INFO 10-07 18:36:27 [launcher.py:179] [shutdown] API server: shutting down FastAPI HTTP server
+(APIServer pid=76232) INFO:     Shutting down
+(APIServer pid=76232) INFO:     Waiting for application shutdown.
+(APIServer pid=76232) INFO:     Application shutdown complete.

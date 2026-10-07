@@ -216,9 +216,9 @@ def evaluate_item(item: dict, answer: str) -> tuple[bool, str]:
     elif eval_type == "python_assert":
         code = extract_python_code(answer)
         full_code = code + "\n\n" + item["test_code"]
-        local_scope: Dict[str, Any] = {}
+        scope: Dict[str, Any] = {}
         try:
-            exec(full_code, {}, local_scope)
+            exec(full_code, scope, scope)
             return True, "All unit tests passed"
         except AssertionError as e:
             return False, f"Assertion failed: {e}"
