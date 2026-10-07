@@ -29,10 +29,11 @@ GPU_UTIL=${GPU_UTIL:-0.70}
 EAGER=${EAGER:-1}
 KV_DTYPE=${KV_DTYPE:-auto}
 PINNED=${PINNED:-1}
-LOG="logs/server-${LABEL}.log"
-
-cd "$(dirname "$0")/.." || exit 1
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
+cd "${ROOT_DIR}" || exit 1
 mkdir -p logs
+LOG="logs/server-${LABEL}.log"
 
 # Triton-XPU JIT needs <level_zero/ze_api.h> (same sysroot pattern as Tiel launcher).
 if [ ! -f tools/sysroot/usr/include/level_zero/ze_api.h ]; then

@@ -35,7 +35,12 @@ EAGER=${EAGER:-1}
 PINNED=${PINNED:-1}
 LOG="logs/server-${LABEL}.log"
 
-cd "$(dirname "$0")/.." || exit 1
+# Shield non-EXL3 models from exl3xpu in-memory monkey-patches
+export EXL3_VLLM_PATCHES=0
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
+cd "${ROOT_DIR}" || exit 1
 mkdir -p logs
 
 # Triton-XPU JIT needs <level_zero/ze_api.h> (Arch's `level-zero-headers`).
