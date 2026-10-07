@@ -1,0 +1,19 @@
+/home/yanchun/Projects/exl3xpu/csrc/exl3_ops.sycl:172:static int g_vec_max_m = 2;   // vector kernel for M<=2, DPAS (flat cost up to M=8) above
+/home/yanchun/Projects/exl3xpu/csrc/exl3_ops.sycl:216:    bool vec = M <= g_vec_max_m;
+/home/yanchun/Projects/exl3xpu/csrc/exl3_ops.sycl:268:    bool use_vec = M <= g_vec_max_m;
+/home/yanchun/Projects/exl3xpu/csrc/exl3_ops.sycl:307:#ifdef EXL3_ALL_CODEBOOKS
+/home/yanchun/Projects/exl3xpu/csrc/exl3_ops.sycl:543:#ifdef EXL3_ALL_CODEBOOKS
+/home/yanchun/Projects/exl3xpu/csrc/exl3_ops.sycl:762:#ifdef EXL3_ALL_CODEBOOKS
+/home/yanchun/Projects/exl3xpu/csrc/exl3_ops.sycl:772:void exl3_set_vec_max_m(int64_t n) { g_vec_max_m = (int)n; }
+/home/yanchun/Projects/exl3xpu/exl3xpu/ops.py:13:SMALL_M_MAX = int(os.environ.get("EXL3_SMALL_M_MAX", "128"))
+/home/yanchun/Projects/exl3xpu/exl3xpu/ops.py:14:# Prefill (M > SMALL_M_MAX) GEMMs in int8 XMX (2x fp16 rate): per-token activation scale (Hadamard-rotated
+/home/yanchun/Projects/exl3xpu/exl3xpu/ops.py:17:INT8_PREFILL = os.environ.get("EXL3_INT8_PREFILL", "0") == "1"
+/home/yanchun/Projects/exl3xpu/exl3xpu/ops.py:18:RECON_SLICE_N = int(os.environ.get("EXL3_RECON_SLICE_N", "16384"))
+/home/yanchun/Projects/exl3xpu/exl3xpu/ops.py:20:_backend = os.environ.get("EXL3_BACKEND", "auto")
+/home/yanchun/Projects/exl3xpu/exl3xpu/ops.py:46:                # never degrade silently to the ~5x slower Triton path; opt in with EXL3_BACKEND=triton
+/home/yanchun/Projects/exl3xpu/exl3xpu/ops.py:78:    if M <= SMALL_M_MAX:
+/home/yanchun/Projects/exl3xpu/exl3xpu/ops.py:133:    if INT8_PREFILL and x.numel() // x.shape[-1] > SMALL_M_MAX and not (esimd and hasattr(esimd, "exl3_set_int8")):
+/home/yanchun/Projects/exl3xpu/exl3xpu/ops.py:136:        return esimd.linear(x, trellis, suh, svh, shard_of_nb, group_bounds, K, cb, SMALL_M_MAX, RECON_SLICE_N)
+/home/yanchun/Projects/exl3xpu/exl3xpu/vllm_plugin.py:255:                                           ops.SMALL_M_MAX, ops.RECON_SLICE_N)
+/home/yanchun/Projects/exl3xpu/exl3xpu/vllm_plugin.py:320:                                         lm.exl3_K, lm.exl3_cb, ops.SMALL_M_MAX, ops.RECON_SLICE_N)
+/home/yanchun/Projects/exl3xpu/exl3xpu/vllm_plugin.py:333:    if os.environ.get("EXL3_VLLM_PATCHES", "1") != "0":

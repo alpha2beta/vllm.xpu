@@ -1,0 +1,5 @@
+decoder: 11.3897 + embed 2.3682 + lm_head 0.8885 => text payload 14.646 GiB
+excluded from text baseline: vision 0.8582 + mtp 0.198 GiB (verify loader excludes)
+residency adders (to measure at E4.2, not assumed): allocator overhead, KV/GDN state (MAX_LEN=4096),
+  reconstruction scratch (RECON_SLICE_N=1024 -> worst-case slice across layer shapes TBD in E1.4),
+  activations, 2.5 GiB host reserve. Unified memory: device+host share one pool.

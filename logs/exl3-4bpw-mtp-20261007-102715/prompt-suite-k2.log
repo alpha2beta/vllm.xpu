@@ -1,0 +1,18 @@
+p1_short_factual #1: 44 tok, 4.526s, flags=[]
+p1_short_factual #2: 44 tok, 4.512s, flags=[]
+p1_short_factual #3: 44 tok, 4.501s, flags=[]
+p2_instruction_following #1: 71 tok, 8.357s, flags=[]
+p2_instruction_following #2: 71 tok, 6.846s, flags=[]
+p2_instruction_following #3: 71 tok, 6.86s, flags=[]
+p3_small_coding #1: 233 tok, 19.431s, flags=[]
+p3_small_coding #2: 233 tok, 25.129s, flags=[]
+p3_small_coding #3: 252 tok, 27.645s, flags=[]
+p4_multi_turn #1: 160 tok, 18.365s, flags=[]
+p4_multi_turn #2: 160 tok, 19.033s, flags=[]
+p4_multi_turn #3: 132 tok, 15.22s, flags=[]
+p5_long_context #1: 47 tok, 12.993s, flags=[]
+p5_long_context #2: 47 tok, 12.241s, flags=[]
+p5_long_context #3: 47 tok, 11.387s, flags=[]
+
+15 completions written to /home/yanchun/Projects/vllm.xpu/logs/exl3-4bpw-mtp-20261007-102715/prompt-suite-k2.jsonl
+no empty/repetition/malformed outputs detected

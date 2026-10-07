@@ -1,0 +1,11 @@
+prompt ~2052 tokens (target 2048), max_tokens=128, concurrency=1, runs=3
+  req: ttft=5.04s total=12.26s out_tok=46 decode=6.37 tok/s
+  req: ttft=2.01s total=9.25s out_tok=46 decode=6.35 tok/s
+  req: ttft=2.02s total=9.25s out_tok=46 decode=6.37 tok/s
+
+TTFT median=2.02s (min 2.01 / max 5.04)  | prefill ~1016.4 tok/s
+decode: median=6.37 tok/s per request; aggregate=4.49 tok/s over 30.8s wall
+end-to-end: median=9.25s
+GPUActive 21.91 -> 21.91 GiB | GPUReclaim 0.00 -> 0.00 GiB
+MemAvailable 2.37 -> 2.37 GiB | swap used 2.53 -> 2.53 GiB
+

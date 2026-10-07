@@ -1,0 +1,13 @@
+Obtaining file:///home/yanchun/Projects/exl3xpu
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: exl3xpu
+  Building editable for exl3xpu (pyproject.toml): started
+  Building editable for exl3xpu (pyproject.toml): finished with status 'done'
+  Created wheel for exl3xpu: filename=exl3xpu-0.1.0-0.editable-py3-none-any.whl size=3857 sha256=51a1e8c703af9e6ca29b84402edb1bfcc7e6e88f6c763094cc01e915ff4d73a5
+  Stored in directory: /tmp/pip-ephem-wheel-cache-ueyzbsg_/wheels/80/99/f8/95ef912fb49dbca2d7826a5a4faf03249fcd60ff8cbb0ed6ed
+Successfully built exl3xpu
+Installing collected packages: exl3xpu
+Successfully installed exl3xpu-0.1.0

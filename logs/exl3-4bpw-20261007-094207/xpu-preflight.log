@@ -1,0 +1,10 @@
+[level_zero:gpu][level_zero:0] Intel(R) oneAPI Unified Runtime over Level-Zero V2, Intel(R) Arc(TM) Graphics 20.4.4 [1.17.39758]
+[opencl:cpu][opencl:0] Intel(R) OpenCL, Intel(R) Core(TM) Ultra 7 258V OpenCL 3.0 (Build 0) [2026.21.3.0.31_160000]
+[opencl:gpu][opencl:1] Intel(R) OpenCL Graphics (integrated), Intel(R) Arc(TM) Graphics OpenCL 3.0 NEO  [26.35.39758]
+Platform #0: Intel(R) OpenCL
+ `-- Device #0: Intel(R) Core(TM) Ultra 7 258V
+Platform #1: Intel(R) OpenCL Graphics (integrated)
+ `-- Device #0: Intel(R) Arc(TM) Graphics
+Platform #2: rusticl
+GPUActive:        375232 kB
+GPUReclaim:     11652644 kB

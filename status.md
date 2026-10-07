@@ -460,3 +460,59 @@ non-expert); SHA256SUMS rebuilt.
 probes correct. Bench (1024/128/1): K=1 **23.22**, K=2 **24.82** tok/s
 (both P-pinned; cf. Tiel 24.85–25.41 / 27.69). KAT has no E-core MTP number;
 eager E-core baseline 12.69–13.95.
+
+## EXL3 4.00bpw on Arc 140V (2026-10-07, experimental)
+
+**Result: plugin works on Xe2-LPG with a no-DPAS patch; dense-27B decode 6.4–6.5 tok/s — not competitive with Tiel MoE (19–28) or Bonsai (~38–42). Recommend DROP for production; keep as experimental reference.**
+
+- Source: `0xSero/exl3xpu` pinned `15ded2f3` + 12-line `no-dpas.patch`
+  (`g_vec_max_m` 2→8 with MR=1/2/4/8 tail coverage; `fused_small` declines M>2;
+  `exl3_gemm_small` TORCH_CHECKs M≤8). Guide's `=256` substitution rejected as
+  row-incorrect. Full plan/evidence: `tasks.md` E0–E6, `logs/exl3-4bpw-20261007-094207/`.
+- Build: `scripts/build_exl3_ext.sh`, `_C.so` 2.3 MB sha256 `ac710cf1…0e00265`,
+  no `EXL3_FLAGS` (K=4/6 mul1 default), DNNL off (no oneDNN tree on machine).
+  Install added only the editable `exl3xpu` line (freeze diff clean).
+- Correctness: 48/48 synthetic operator cases + M=512 prefill shapes (mlp-down,
+  248320-wide K=6 lm-head) match the fp32 CPU reference; 409 EXL3 modules load
+  (8 MTP, vision excluded text-only); 15/15 prompt suite semantically correct.
+  Thinking leaks into content (`</think>` marker) — model behavior, costs budget.
+- Perf (eager, B=1, KV-auto, MAX_LEN=4096, prefix-cache on):
+  1026-tok in → TTFT ~1.7 s, decode **6.48**; 2052-tok in → decode **6.37**
+  (early stop: 31/46 toks of req 128; rows in `results.csv` with caveats).
+- Ops lessons: startup needs `WARMUP=1` reclaim (18.25 GiB free < 20.01 desired
+  otherwise); `fuser -k 8001` orphans `VLLM::EngineCore` holding ~18 GB —
+  kill it directly, then reclaim before restart. Steady-state flat
+  (MemAvailable ~2.4–4.2 GiB, swap counters static). Qualified MAX_LEN=4096 only.
+- Rollback: stop API server + EngineCore (verify port free + GPUActive ~0.05),
+  then `reclaim_gpu_cache.py`. NOTE: the installed `exl3xpu` entry point runs
+  `register()` in every vLLM process, applying `vllm_patches` unless
+  `EXL3_VLLM_PATCHES=0` is exported — untested interaction with Tiel serving.
+  Until qualified, export `EXL3_VLLM_PATCHES=0` in Tiel sessions or
+  `pip uninstall exl3xpu`.
+
+## EXL3 MTP speculation (2026-10-07, same checkpoint)
+
+**Result: MTP K=1/K=2 both function on the no-DPAS path; decode improves but end-to-end loses on short outputs. No change to DROP verdict.**
+
+| Config | 1024 decode / e2e | 2048 decode / e2e |
+|---|---|---|
+| Eager (baseline) | 6.48 / 6.47 s | 6.37 / 9.25 s |
+| MTP K=1 | **9.86** / 7.94 s | **9.02** / 12.21 s |
+| MTP K=2 | 8.62 / 9.35 s | 9.25 / 12.36 s |
+
+Decode gains (+42–52% K=1) come with TTFT regressions (draft + chunked prefill:
+1024 TTFT 1.7→4.8 s). Breakeven ≈ 60 output tokens; bench outputs stopped early
+(31/46 of req 128, thinking+EOS). K=2 shows acceptance lottery on reasoning
+text (12.27/8.24/8.62 across runs) and no gain over K=1. Acceptance rate not
+directly measurable in this build. Evidence: `logs/exl3-4bpw-mtp-20261007-102715/`,
+4 `results.csv` rows. Ops: reclaim script can wedge holding 16 GiB host when the
+reclaim pool is already small — skip WARMUP then; always kill EngineCore PIDs,
+not just the port.
+
+## EXL3 perplexity (2026-10-07)
+
+**4.00bpw WikiText-2 test PPL: 6.36** (72 non-overlapping 4096-tok chunks,
+294,840 tokens, vLLM offline `prompt_logprobs`, raw continuation). Smoke was
+6.55 on 2 chunks. Healthy ~27B range — no quant blowup. Harness:
+`scripts/eval_exl3_ppl.py`; result `logs/exl3-4bpw-ppl-20261007-105637/ppl-full.json`.
+2.2bpw comparison pending download (`SC_2.20bpw_H3_V3` @ `25019f16…`).

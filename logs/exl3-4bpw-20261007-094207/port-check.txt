@@ -1,0 +1,2 @@
+no listener on 8000/8001
+yanchun    34163  0.0  0.0   6260  2452 ?        SN   09:43   0:00 tee -a /home/yanchun/Projects/vllm.xpu/logs/exl3-4bpw-20261007-094207/port-check.txt

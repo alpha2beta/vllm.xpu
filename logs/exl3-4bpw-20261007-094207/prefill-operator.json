@@ -1,0 +1,5 @@
+{
+  "mlp-down": {"M": 512, "k": 17408, "n": 5120, "K": 4, "max_abs": 0.17987060546875, "seconds": 0.26, "pass": true},
+  "lmhead": {"M": 512, "k": 5120, "n": 248320, "K": 6, "max_abs": 0.1044464111328125, "seconds": 1.45, "pass": true},
+  "note": "atol=0.08/rtol=0.08 vs fp32 CPU ref; larger abs err reflects larger output magnitudes (rel within tolerance). No full-FP16 weight expansion: bounded 1024-col slices."
+}

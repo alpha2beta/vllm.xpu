@@ -1,0 +1,20 @@
+OK   vllm.plugins
+OK   vllm.model_executor.layers.linear
+OK   vllm.model_executor.layers.quantization
+OK   vllm.model_executor.layers.quantization.base_config
+OK   vllm.model_executor.layers.vocab_parallel_embedding
+WARNING 10-07 09:42:43 [indexer_topk.py:29] Failed to import the DeepSelect extension (vllm._deepselect_C): No module named 'vllm._deepselect_C'
+OK   vllm.v1.worker.gpu_model_runner
+OK   vllm.model_executor.models.qwen3_5_mtp
+load_general_plugins: <function load_general_plugins at 0x7f2eca633380>
+register_quantization_config: <function register_quantization_config at 0x7f2e54444ae0>
+LinearBase/Method/Unquant: <class 'vllm.model_executor.layers.linear.LinearBase'> <class 'vllm.model_executor.layers.linear.LinearMethodBase'> <class 'vllm.model_executor.layers.linear.UnquantizedLinearMethod'>
+ParallelLMHead: <class 'vllm.model_executor.layers.vocab_parallel_embedding.ParallelLMHead'>
+torch file: /home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/torch/__init__.py
+torch include exists: True
+lib/libc10_xpu.so True
+lib/libtorch_xpu.so True
+lib/libc10.so True
+lib/libtorch_cpu.so True
+CXX11_ABI: True
+['lora_filesystem_resolver', 'lora_hf_hub_resolver']

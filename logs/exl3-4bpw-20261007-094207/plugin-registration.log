@@ -1,0 +1,10 @@
+EXL3_VLLM_PATCHES: 0
+EXL3_SMALL_M_MAX: 8
+entry points: ['exl3xpu', 'lora_filesystem_resolver', 'lora_hf_hub_resolver']
+load_general_plugins -> None
+WARNING 10-07 09:47:38 [indexer_topk.py:29] Failed to import the DeepSelect extension (vllm._deepselect_C): No module named 'vllm._deepselect_C'
+quant 'exl3' resolves to: <class 'exl3xpu.vllm_plugin.Exl3Config'>
+ESIMD lib: loaded
+supported(4,2): True supported(6,2): True
+qwen3_5_mtp importable; _exl3_patched: False
+GDN build patched: False (must be False)

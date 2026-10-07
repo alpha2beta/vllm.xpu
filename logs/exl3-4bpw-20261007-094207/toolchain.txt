@@ -1,0 +1,14 @@
+/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/torch
+ls: cannot access '/opt/intel/oneapi/dnnl': No such file or directory
+compiler
+debugger
+dev-utilities
+licensing
+mkl
+modulefiles-setup.sh
+redist
+setvars.sh
+support.txt
+tbb
+tcm
+umf

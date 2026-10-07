@@ -1,0 +1,26 @@
+payload bytes: 16860508228 (15.703 GiB)
+groups GiB: {'embeddings': 2.3682, 'decoder_layers': 11.3897, 'lm_head': 0.8885, 'vision': 0.8582, 'mtp': 0.198}
+trellis K counts: {4: 408, 6: 1}
+errors: none; missing=0 extra=0
+wrote /home/yanchun/Projects/vllm.xpu/logs/exl3-4bpw-20261007-094207/checkpoint-audit.json
+storage modules: 707
+with bits_per_weight: 401
+without bits: ['model.language_model.embed_tokens', 'model.language_model.layers.0.input_layernorm', 'model.language_model.layers.0.linear_attn.in_proj_b', 'model.language_model.layers.0.linear_attn.in_proj_a', 'model.language_model.layers.0.linear_attn.norm', 'model.language_model.layers.0.post_attention_layernorm', 'model.language_model.layers.1.input_layernorm', 'model.language_model.layers.1.linear_attn.in_proj_b', 'model.language_model.layers.1.linear_attn.in_proj_a', 'model.language_model.layers.1.linear_attn.norm']
+tokenizer: {
+ "bos_token_id_cfg": 248044,
+ "eos_token_id_cfg": 248044,
+ "eos_gen": [
+  248046,
+  248044
+ ],
+ "chat_template_file": true,
+ "tokenizer_eos_id": "<|im_end|>",
+ "apply_chat_template_ok": true,
+ "decoded_eos": [
+  "<|im_end|>",
+  "<|endoftext|>"
+ ]
+}
+checks: {'lm_head_quantized': True, 'in_proj_ba_unquantized': True, 'fused_qkv_present': True, 'qkvz_split_present': True}
+suffix: {'weight': 528, 'A_log': 48, 'dt_bias': 48, 'mul1': 409, 'suh': 409, 'svh': 409, 'trellis': 409, 'bias': 166}
+warnings: ['crc32.txt recorded only; checksum format not validated']

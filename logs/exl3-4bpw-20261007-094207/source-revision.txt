@@ -1,0 +1,42 @@
+15ded2f3add148c4db3c900cba7de878238f53bc
+15ded2f3add148c4db3c900cba7de878238f53bc 2026-09-26 06:53:34 -0400 PROGRESS: B70 #0 flapping too; TB 2.1 job kept resumable (8/8 scored passed)
+fp8kv_prefill.py
+__init__.py
+ops.py
+ref.py
+triton_kernels.py
+vllm_patches.py
+vllm_plugin.py
+[project.entry-points."vllm.general_plugins"]
+exl3xpu = "exl3xpu.vllm_plugin:register"
+
+[project.entry-points."sglang.srt.plugins"]
+2:requires = ["setuptools>=68"]
+9:requires-python = ">=3.10"
+/home/yanchun/Projects/exl3xpu/scripts:
+build_ext.sh
+draft_vocab.py
+graft_tensors.py
+lb.py
+serve.py
+stop_port.sh
+stop.sh
+
+/home/yanchun/Projects/exl3xpu/tests:
+gateA3
+greedy_repro.py
+icpx_probe.sh
+oracle_cuda.py
+prefill_nll.py
+test_bitexact_xpu.py
+test_esimd.py
+test_fa_esimd.py
+test_fp8kv_prefill.py
+test_int8_prefill.py
+test_mtp_divergence.py
+test_mtp_identity.py
+test_needle.py
+test_prefill_path.py
+test_video.py
+test_vision.py
+test_xpu_kernels.py

@@ -140,6 +140,15 @@ def main() -> int:
     ap.add_argument("--runs", type=int, default=2)
     ap.add_argument("--notes", default="")
     ap.add_argument("--no-csv", action="store_true")
+    # E5.1 (EXL3): explicit metadata overrides so appended rows describe the
+    # actual run instead of the previous hard-coded Tiel values.
+    ap.add_argument("--git-revision", default=None)
+    ap.add_argument("--model-revision", default=None)
+    ap.add_argument("--backend", default=None)
+    ap.add_argument("--memory-util", type=float, default=None)
+    ap.add_argument("--batched-tokens", type=int, default=None)
+    ap.add_argument("--eager", type=int, default=None,
+                    help="1=eager, 0=graph build (default: 1)")
     args = ap.parse_args()
 
     from openai import OpenAI
@@ -154,10 +163,17 @@ def main() -> int:
 
     g0, m0 = gpu_mem(), meminfo()
     results: list[dict] = []
+    errors: list[str] = []
     lock = threading.Lock()
 
     def worker():
-        r = one_request(client, args.model, prompt, args.output_tokens)
+        try:
+            r = one_request(client, args.model, prompt, args.output_tokens)
+        except Exception as e:  # noqa - propagate, don't silently drop
+            with lock:
+                errors.append(repr(e))
+                print(f"  req FAILED: {e!r}", flush=True)
+            return
         with lock:
             results.append(r)
             print(f"  req: ttft={r['ttft']:.2f}s total={r['total']:.2f}s "
@@ -174,6 +190,12 @@ def main() -> int:
     wall = time.perf_counter() - t_start
 
     g1, m1 = gpu_mem(), meminfo()
+    expected = args.runs * args.concurrency
+    if errors or len(results) != expected:
+        print(f"FAILED requests: {len(errors)} errors, "
+              f"{len(results)}/{expected} succeeded")
+        for e in errors[:5]:
+            print(f"  err: {e}")
     if not results:
         print("no successful requests — nothing to report")
         return 1
@@ -198,11 +220,20 @@ def main() -> int:
     print(summary)
 
     if not args.no_csv:
+        import subprocess
+        _git = args.git_revision
+        if _git is None:
+            try:
+                _git = subprocess.check_output(
+                    ["git", "rev-parse", "--short", "HEAD"],
+                    cwd=ROOT, text=True).strip()
+            except Exception:
+                _git = "none (not a git repo)"
         row = {
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-            "git_revision": "none (not a git repo)",
-            "model_revision": "7eceff3a9f7e6f916c824d197266d86676bce695",
-            "backend": "vllm-0.30.0+xpu (Intel XPU / Arc 140V, Xe2)",
+            "git_revision": _git,
+            "model_revision": args.model_revision or "7eceff3a9f7e6f916c824d197266d86676bce695",
+            "backend": args.backend or "vllm-0.30.0+xpu (Intel XPU / Arc 140V, Xe2)",
             "torch_version": "2.13.0+xpu",
             "vllm_version": "0.30.0+xpu",
             "kernel_version": "vllm-xpu-kernels 0.1.14.1",
@@ -212,23 +243,23 @@ def main() -> int:
             "input_tokens": in_tok,
             "output_tokens": out_toks,
             "max_num_seqs": args.concurrency,
-            "max_num_batched_tokens": 4096,
-            "memory_utilization": 0.74,
-            "eager": True,
+            "max_num_batched_tokens": args.batched_tokens if args.batched_tokens is not None else 4096,
+            "memory_utilization": args.memory_util if args.memory_util is not None else 0.74,
+            "eager": True if args.eager is None else bool(args.eager),
             "ttft_s": round(statistics.median(ttfts), 3),
             "prefill_tps": round(prefill_tps, 2),
             "decode_tps": round(statistics.median(decodes), 2),
             "total_latency_s": round(statistics.median(totals), 3),
             "peak_memory_gb": round(g1.get("GPUActive", 0) / 2**30, 2),
             "swap_used_gb": round((m1["SwapTotal"] - m1["SwapFree"]) / 1048576, 2),
-            "result": "ok",
+            "result": "ok" if not errors and len(results) == expected else "partial",
             "notes": args.notes or (f"server bench: concurrency={args.concurrency} "
                                     f"runs={args.runs}; streamed, temperature=0"),
         }
         with CSV.open("a", newline="") as fh:
             csv.DictWriter(fh, fieldnames=COLS).writerow(row)
         print(f"appended row to {CSV}")
-    return 0
+    return 1 if errors else 0
 
 
 if __name__ == "__main__":

@@ -1,0 +1,2 @@
+30a31
+> -e git+https://github.com/0xSero/exl3xpu.git@15ded2f3add148c4db3c900cba7de878238f53bc#egg=exl3xpu

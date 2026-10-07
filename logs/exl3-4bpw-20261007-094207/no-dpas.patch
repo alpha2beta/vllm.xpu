@@ -1,0 +1,38 @@
+diff --git a/csrc/exl3_ops.sycl b/csrc/exl3_ops.sycl
+index a4299ec..395a522 100644
+--- a/csrc/exl3_ops.sycl
++++ b/csrc/exl3_ops.sycl
+@@ -169,7 +169,9 @@ static bool dispatch_dpas(int MB, const at::Tensor& xh, const at::Tensor& tr, co
+ #define EXL3_DPAS24_NT 2
+ #endif
+ static int dpas_nt(int MB) { return MB == 4 ? EXL3_DPAS4_NT : MB == 8 ? EXL3_DPAS8_NT : MB == 24 ? EXL3_DPAS24_NT : (MB == 40 || MB == 48) ? 2 : (MB <= 16 ? 4 : (MB == 32 ? EXL3_DPAS32_NT : EXL3_DPAS64_NT)); }
+-static int g_vec_max_m = 2;   // vector kernel for M<=2, DPAS (flat cost up to M=8) above
++// Arc 140V baseline (no XMX/DPAS): vector kernel for M<=8 (dispatch_mr covers
++// MR=1/2/4/8 with tail guards). M above this must use reconstruct+GEMM.
++static int g_vec_max_m = 8;
+ 
+ // Split-K sizing: threads to aim for when choosing the number of K splits. Measured on B70 (all linears,
+ // graph-captured): 1024 beats 4096 by 10-20% for M=1..32 (fewer fp32 partials for had_out to reduce, and the
+@@ -212,6 +214,10 @@ static void launch_fused(KernelT k, int n, sycl::queue& q) {
+ template <int K, int CB>
+ static bool fused_small(const at::Tensor& x, const at::Tensor& tr, const at::Tensor& suh, const at::Tensor& svh,
+                         const at::Tensor& shard, at::Tensor& out, int M, int Kdim, int N, sycl::queue& q) {
++    // Arc 140V baseline: the fused kernel only instantiates MR=1/2 (rows beyond
++    // m=1 are never computed). Decline larger M so the caller falls through to
++    // the unfused vector path, which covers MR up to 8.
++    if (M > 2) return false;
+     int tk = Kdim / 16, tiles_n = N / 16;
+     bool vec = M <= g_vec_max_m;
+     int NT = vec ? (M <= 1 ? nt_of(K, 1) : nt_of(K, 2)) : dpas_nt(8);
+@@ -258,6 +264,11 @@ void exl3_gemm_small(at::Tensor x, at::Tensor trellis, at::Tensor suh, at::Tenso
+     TORCH_CHECK(trellis.scalar_type() == at::kShort && trellis.is_contiguous());
+     auto& q = queue_of(x);
+     int M = x.size(0), Kdim = x.size(1), N = svh.size(0), S = suh.size(0);
++    // Arc 140V baseline (no XMX/DPAS): fail loudly instead of dispatching DPAS.
++    // Production callers route M > g_vec_max_m via reconstruct+GEMM
++    // (EXL3_SMALL_M_MAX); direct op calls with M > 8 are a caller bug.
++    TORCH_CHECK(M <= g_vec_max_m, "exl3_gemm_small: M=", M,
++                " exceeds no-DPAS vector limit ", g_vec_max_m);
+     if (g_fused && M <= 8 && x.scalar_type() == at::kHalf && out.scalar_type() == at::kHalf && out.stride(1) == 1 &&
+         N / 128 <= (1 << 16)) {
+         bool done = false;

@@ -1,480 +1,648 @@
-# Implementation Tasks: vLLM XPU Optimization for 258V / Tiel-Coder-35B-A3B
+# Implementation Tasks: Qwen3.8-27B EXL3 4.00bpw on Arc 140V
 
-## Objective
+## Goal and Scope
 
-Systematically close the decode throughput gap between vLLM XPU (19.15 tok/s baseline)
-and the hardware roofline (~35 tok/s) on the Intel Core Ultra 7 258V, while preserving
-correctness, stability, and serving usability. Every task changes **one variable**,
-measures before and after, and records evidence in `logs/` and `results.csv`.
-
-## Guiding Principles
-
-- Correctness before performance — every change verified against the 5-prompt golden suite.
-- One variable at a time — never stack untested changes.
-- Evidence-driven — no claimed improvement without `results.csv` rows + server logs.
-- Reversible — every experimental change must be env-gated or behind a flag.
-- Memory-aware — host `MemAvailable` must stay ≥ 2.5 GiB; swap must not grow during steady state.
-
-## Reference Numbers
-
-| Metric | Baseline Value | Source |
-|---|---|---|
-| Eager decode (P=1024, B=1) | **19.15 tok/s** | `results.csv` row `Tiel compare A` |
-| MTP decode (K=1, BF16 draft, P=1024) | **25.50 tok/s** | `results.csv` row `Tiel MTP (unfused draft)` |
-| MTP decode (K=1, Qwen3.6, P=1024) | **26.83 tok/s** | `results.csv` row `MTP test` |
-| Concurrency-2 aggregate | **22.51 tok/s** | `results.csv` row `Phase8 sweep` |
-| Long-context decode (P=6660, B=1) | **18.81 tok/s** | `results.csv` row `Tiel compare D` |
-| Resident weights (text-only, MXFP4) | **19.24 GiB** | `status.md` Gate 5 |
-| Resident weights (+ MTP BF16 draft) | **21.57 GiB** | `status.md` Tiel MTP section |
-| Host MemAvailable while serving | **2.1–3.5 GiB** | varies by config |
-| AInfer greedy decode (reference) | **35.06–35.91 tok/s** | `../AInfer/STATUS.md` |
-| AInfer dual-token MTP (reference) | **45.62–51.72 tok/s** | `../AInfer/improvement.md` I3.1 |
-| llama.cpp Vulkan decode (reference) | **28.69 tok/s** | `fallback-comparison.md` |
-| LPDDR5X-8533 measured stream BW | **103.03 GB/s** | `../AInfer/target_machine_identity.json` |
-
----
-
-## Phase 11: MTP Draft Model Optimization (→ Gate 1 / Milestone M1)
-
-### 11.1 Quantize MTP Draft Expert Weights to MXFP4
-
-- [ ] **11.1.1** Audit the current Tiel MTP draft block composition.
-      The `quantization_config.ignore` list in the Tiel checkpoint contains **785 `mtp.*` entries**,
-      meaning all MTP weights are currently BF16. The MTP block is 1.69 GiB (785 tensors:
-      19 expert layers × (gate_up_proj [256,1024,2048] + down_proj [256,2048,512]) + norms + router).
-      - File: `models/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4/config.json`
-      - Evidence: `scripts/inspect_shard_sizes.py` → shard 32–33 sizes
-
-- [ ] **11.1.2** Extend `scripts/quantize_tiel_mxfp4.py` to cover MTP expert weights.
-      The unfused MTP experts (created by `scripts/unfuse_tiel_mtp.py`) are now per-expert
-      gate/up/down BF16 tensors in shards 32–33. Apply the same MXFP4 quantization pipeline
-      (group-32 symmetric E2M1 + E8M0 scales) using `torch.ops.vllm.xpu_mxfp4_quantize`.
-      - Input: BF16 per-expert `mtp.0.mlp.experts.{i}.{gate,up,down}_proj.weight`
-      - Output: `weight_packed` (uint8) + `weight_scale` (uint8 E8M0) tensors
-      - Constraint: Must match the schema `CompressedTensorsW4A4Mxfp4.create_weights()` expects
-
-- [ ] **11.1.3** Update `config.json` quantization ignore list.
-      Remove the 768 MTP expert entries from the ignore list (keep MTP norms, router, and
-      non-expert layers in the ignore list as BF16).
-
-- [ ] **11.1.4** Re-index safetensors and verify with `scripts/audit_tiel_mxfp4.py`.
-      Run SHA256SUMS verification, tensor count check, and spot-check dequantization
-      (max rel-err < 0.15).
-
-- [ ] **11.1.5** Smoke test the quantized-MTP checkpoint.
-      ```bash
-      MODEL=models/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4 \
-      MAX_SEQS=1 GPU_UTIL=0.74 \
-        scripts/launch_vllm.sh tiel-mtp-mxfp4-smoke \
-        --speculative-config '{"method":"mtp","num_speculative_tokens":1}' \
-        --kv-cache-memory-bytes 500000000
-      ```
-      - Pass criteria: Server starts, `XPUExpertsMxFp4` selected for draft model,
-        weights < 20.6 GiB, coherent generation on "The capital of France is" probe.
-      - Log: `logs/server-tiel-mtp-mxfp4-smoke.log`
-
-- [ ] **11.1.6** Benchmark quantized-MTP vs BF16-MTP draft.
-      Run calibrated bench points: 1024/128/1 and 2048/128/1.
-      - Expected: decode ≥ 26 tok/s (at least matching BF16 draft), MemAvailable +1 GiB.
-      - Append rows to `results.csv` with notes `Tiel MTP MXFP4 draft`.
-
-### 11.2 Speculative Depth Sweep (K=1 vs K=2)
-
-- [ ] **11.2.1** Test `num_speculative_tokens=2` with BF16 draft (control).
-      ```bash
-      --speculative-config '{"method":"mtp","num_speculative_tokens":2}'
-      ```
-      - If vLLM 0.30.0 supports K=2 for MTP: bench 1024/128/1, record acceptance rate
-        from server metrics (if exposed) or estimate from throughput vs single-token baseline.
-      - If unsupported (error): record the error, note that K=2 requires a future vLLM version,
-        and close this task as BLOCKED.
-      - Log: `logs/bench-tiel-mtp-k2.log`
-
-- [ ] **11.2.2** If K=2 works: test with MXFP4 draft from 11.1.
-      Compare: K=1 MXFP4 draft vs K=2 MXFP4 draft vs K=1 BF16 draft.
-      - Success criterion: K=2 reaches **≥ 30 tok/s** on code completion prompts.
-
-- [ ] **11.2.3** Measure acceptance rate across prompt domains.
-      Run 5 representative prompts (factual, code, reasoning, instruction, long-context)
-      and record per-prompt acceptance rate α and realized throughput.
-      - AInfer reference: α ranges from 55% (arithmetic) to 94% (logic puzzle).
-      - Log: `logs/bench-tiel-mtp-acceptance.log`
-
-### 11.3 EOS Token Audit
-
-- [ ] **11.3.1** Verify `eos_token_id` in the Tiel checkpoint `config.json`.
-      Currently reads `eos_token_id: 248044` (text_config). Confirm this matches
-      `<|endoftext|>` in the tokenizer vocabulary (248K vocab model).
-
-- [ ] **11.3.2** Verify vLLM server uses the correct EOS tokens at runtime.
-      Check server log for `eos_token_id` or `stop_token_ids` at startup.
-      Confirm no stale Qwen2.5 tokens (151643, 151645) are referenced.
-      ```bash
-      grep -i "eos\|stop_token" logs/server-tiel-*.log | head -20
-      ```
-
-- [ ] **11.3.3** Verify `<|im_end|>` (248046) is used as a chat stop token.
-      Send a chat completion request and confirm `finish_reason: "stop"` is triggered
-      by `<|im_end|>`, not by a stale token.
-
-**Gate 1 Exit Criteria:**
-- [ ] Draft model quantized to MXFP4, resident weight memory reduced by ≥ 1.0 GiB.
-- [ ] MTP decode throughput ≥ 28.0 tok/s on 1024-token prompt.
-- [ ] 0 errors, golden suite passes, correct EOS handling.
-
----
-
-## Phase 12: CPU & Driver Dispatch Optimization (→ Gate 2 / Milestone M2)
-
-### 12.1 CPU P-Core Pinning
-
-- [ ] **12.1.1** Identify the Lion Cove P-core IDs on this specific 258V.
-      ```bash
-      lscpu --extended | head -20
-      # or: cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq
-      ```
-      Verify cores 0–3 are Lion Cove (4.8 GHz max) and 4–7 are Skymont (3.7 GHz max).
-
-- [ ] **12.1.2** Baseline inter-token jitter without pinning.
-      Run `scripts/bench_envelope.py` point 1024/128/1 three times.
-      Record p50, p95, p99, stddev of inter-token latency from the bench log.
-
-- [ ] **12.1.3** Add `taskset` to `scripts/launch_vllm.sh`.
-      ```bash
-      # In launch_vllm.sh, change the exec line:
-      exec taskset -c 0-3 python -m vllm.entrypoints.openai.api_server "${ARGS[@]}" >>"$LOG" 2>&1
-      ```
-      Gate with env var: `PINNED=${PINNED:-1}`, skip `taskset` when `PINNED=0`.
-
-- [ ] **12.1.4** Benchmark with P-core pinning.
-      Re-run the same 3× bench point. Record p50, p95, p99, stddev.
-      - Success: p95 jitter reduced by ≥ 20% and/or TTFT reduced by ≥ 50 ms.
-      - Log: `logs/bench-tiel-pinned.log`
-
-- [ ] **12.1.5** Verify correctness with pinning.
-      Run the 5-prompt golden suite under pinned config. All outputs must match
-      non-pinned outputs (modulo the existing bit-nondeterminism caveat).
-
-### 12.2 Single-Batch XPU Graph Capture
-
-- [ ] **12.2.1** Investigate XPU graph capture configuration.
-      Read vLLM source for XPU graph batch size selection:
-      ```bash
-      grep -rn "capture_sizes\|cudagraph_sizes\|xpu_graph" .venv/lib/python3.12/site-packages/vllm/ | head -30
-      ```
-      Determine if `VLLM_XPU_GRAPH_BATCH_SIZES` or similar env var controls capture sizes.
-
-- [ ] **12.2.2** Test XPU graph with batch=1 only.
-      Start server with:
-      ```bash
-      EAGER=0 VLLM_XPU_ENABLE_XPU_GRAPH=1 MAX_SEQS=1 \
-        scripts/launch_vllm.sh tiel-graph-b1 \
-        # Add any flag to restrict capture sizes to [1] if available
-      ```
-      Record: startup time, MemAvailable after init, GPUActive, GPUReclaim.
-      - Pass: MemAvailable > 2.5 GiB (vs 1.48 GiB observed with batch [1,2,4]).
-
-- [ ] **12.2.3** Benchmark XPU graph batch=1 decode.
-      Run calibrated points 1024/128/1 and 2048/128/1.
-      - Expected: 5–10% decode improvement over eager baseline (19.15 → 20–21 tok/s).
-      - Append rows to `results.csv`.
-
-- [ ] **12.2.4** Test XPU graph + MTP combined.
-      If both batch-1 graph and MTP are compatible, benchmark the combination.
-      This targets the multiplicative effect: graph dispatch savings + MTP bandwidth savings.
-      - Expected: ≥ 28 tok/s.
-
-- [ ] **12.2.5** If single-batch restriction is not configurable:
-      File this as a vLLM feature request. Record the investigation in `status.md` and
-      close this task as BLOCKED with the specific code path documented.
-
-### 12.3 SoC Power & Thermal Profile
-
-- [ ] **12.3.1** Read current power limits and GPU frequency.
-      ```bash
-      cat /sys/class/powercap/intel-rapl/intel-rapl:0/constraint_0_power_limit_uw 2>/dev/null
-      cat /sys/class/drm/card0/gt_cur_freq_mhz 2>/dev/null
-      cat /sys/class/drm/card0/gt_max_freq_mhz 2>/dev/null
-      cat /sys/class/drm/card0/gt_min_freq_mhz 2>/dev/null
-      ```
-      If files exist, record the values. If not (sysfs path differs on `xe` driver),
-      search for the correct path:
-      ```bash
-      find /sys -name "*freq*" -path "*gt*" 2>/dev/null
-      ```
-
-- [ ] **12.3.2** Lock GPU frequency to max during benchmarking.
-      If writable without sudo:
-      ```bash
-      echo 1950 > /sys/class/drm/card0/gt_min_freq_mhz
-      ```
-      If sudo required: document the command and expected effect, defer to user.
-
-- [ ] **12.3.3** Benchmark with locked frequency vs default.
-      Compare decode tok/s and inter-token jitter at locked 1.95 GHz vs default dynamic.
-      Record thermal readings if available (`/sys/class/thermal/thermal_zone*/temp`).
-
-**Gate 2 Exit Criteria:**
-- [ ] P-core pinning active in launcher, jitter stddev reduced ≥ 20%.
-- [ ] XPU graph investigation complete (either working with < 250 MiB overhead, or documented as blocked).
-- [ ] GPU frequency behavior documented.
-
----
-
-## Phase 13: Kernel & Attention Micro-Architecture (→ Gate 3 / Milestone M3)
-
-### 13.1 Decode Attention EU Saturation Audit
-
-- [ ] **13.1.1** Profile attention layer contribution to decode latency.
-      AInfer found that at P=6720, 10 full-attention layers consume ~65 ms of 81 ms
-      step time (~80% of decode). vLLM's FP8-KV long-context shows 18.81 tok/s (53 ms/step).
-      Estimate attention fraction from the long-context vs short-context delta:
-      - Short (P=1024): 19.15 tok/s → 52.2 ms/step
-      - Long (P=6660): 18.81 tok/s → 53.2 ms/step
-      - Delta: ~1.0 ms → attention is NOT the current bottleneck in vLLM at 7K
-        (unlike AInfer where it dominated). Record this finding.
-
-- [ ] **13.1.2** Inspect `vllm-xpu-kernels` decode attention dispatch.
-      ```bash
-      # Check if attention kernel parallelizes across KV tiles (not just heads)
-      strings .venv/lib/python3.12/site-packages/vllm_xpu_kernels/*.so | grep -i "split\|tile\|chunk\|workgroup" | head -20
-      # Check the Python-side dispatch:
-      grep -rn "num_kv_splits\|split_k\|gqa.*decode" .venv/lib/python3.12/site-packages/vllm_xpu_kernels/ | head -20
-      ```
-
-- [ ] **13.1.3** If attention is NOT split across KV tiles:
-      File observation that 16 query heads underutilize 64 VEs. Note this as a future
-      upstream contribution opportunity. Document expected impact at 16K+ contexts.
-
-- [ ] **13.1.4** If attention IS already split:
-      Record the split factor and document that EU saturation is already addressed.
-
-### 13.2 MoE Grouped GEMM Tile Investigation
-
-- [ ] **13.2.1** Profile per-layer latency breakdown.
-      Use `torch.profiler` or a simple timing wrapper around a single offline inference:
-      ```python
-      # scripts/profile_layers.py
-      import torch
-      with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU]) as prof:
-          # run one forward pass
-      prof.export_chrome_trace("logs/trace-tiel-decode.json")
-      ```
-      Identify: embed, per-layer MoE, per-layer attention, per-layer GDN, LM head.
-
-- [ ] **13.2.2** Compare per-layer MoE latency with AInfer's measured 5.92 ms/layer.
-      AInfer measured: MoE triad (GateUp + SwiGLU + Down) = 5.92 ms/layer at B=256.
-      vLLM's `cutlass_grouped_gemm_interface` profile should show similar or higher.
-
-- [ ] **13.2.3** Document findings and determine if tile tuning is actionable.
-      If per-layer MoE > 8 ms (significantly worse than AInfer), the tile parameters in
-      `vllm-xpu-kernels` are suboptimal for 8 Xe-cores. File upstream issue with evidence.
-      If ≈ 5–7 ms, tiles are already well-calibrated; close this task.
-
-### 13.3 Prefill Workspace & Batch Token Sweep
-
-- [ ] **13.3.1** Baseline: current `max_num_batched_tokens=4096`.
-      Record prefill tok/s at P=1024 and P=2048 from existing data.
-
-- [ ] **13.3.2** Test `max_num_batched_tokens=1024`.
-      Start server, bench P=1024/128/1. Record TTFT, prefill tok/s, MemAvailable.
-      Hypothesis: lower workspace, faster TTFT on short prompts, slower on long prompts.
-
-- [ ] **13.3.3** Test `max_num_batched_tokens=2048`.
-      Same bench points. Record.
-
-- [ ] **13.3.4** Test `max_num_batched_tokens=8192` (if memory permits).
-      Same bench points. Record. Watch MemAvailable carefully.
-
-- [ ] **13.3.5** Select optimal `max_num_batched_tokens` and update `launch_vllm.sh` default.
-      Decision criteria: best TTFT at P=1024 with MemAvailable > 2.5 GiB.
-
-### 13.4 Long-Context Decode Qualification (8K+)
-
-- [ ] **13.4.1** Benchmark 8192-token context with FP8 KV.
-      ```bash
-      MAX_LEN=8192 GPU_UTIL=0.78 \
-        scripts/launch_vllm.sh tiel-8k-fp8 --kv-cache-dtype fp8
-      ```
-      Bench point: 8000/128/1. Record decode tok/s, MemAvailable, swap.
-
-- [ ] **13.4.2** Benchmark 16384-token context with FP8 KV.
-      Same setup with `MAX_LEN=16384`. Bench point: 15000/128/1.
-      - Expected: decode stays > 17 tok/s (flat, based on existing 6.6K data).
-
-- [ ] **13.4.3** Benchmark concurrency=2 at 4096-token context.
-      Verify aggregate throughput ≥ 22.5 tok/s matches Phase 8 baseline.
-
-**Gate 3 Exit Criteria:**
-- [ ] Attention EU utilization documented (split or not-split).
-- [ ] Per-layer MoE latency profiled and compared to AInfer reference.
-- [ ] Optimal `max_num_batched_tokens` selected.
-- [ ] 8K+ context sustained at ≥ 18 tok/s decode without swap growth.
-
----
-
-## Phase 14: Serving & Agent Usability (→ Gate 4 / Milestone M4)
-
-### 14.1 Client Disconnect Behavior
-
-- [ ] **14.1.1** Test disconnect abort behavior.
-      Start server. Send a streaming chat request with `max_tokens=512`.
-      Disconnect the client (ctrl-C curl) after 5 tokens.
-      - Check: Does the server log show the request was cancelled promptly?
-      - Check: Is the next request serviced without delay?
-      ```bash
-      # Terminal 1: start server
-      # Terminal 2:
-      timeout 2 curl -N http://127.0.0.1:8000/v1/chat/completions \
-        -H "Content-Type: application/json" \
-        -d '{"model":"Tiel","messages":[{"role":"user","content":"Write a long essay about recursion"}],"max_tokens":512,"stream":true}'
-      # Terminal 3: immediately after disconnect
-      time curl http://127.0.0.1:8000/v1/chat/completions \
-        -H "Content-Type: application/json" \
-        -d '{"model":"Tiel","messages":[{"role":"user","content":"Hi"}],"max_tokens":5}'
-      ```
-      Record: time-to-response of the second request.
-
-- [ ] **14.1.2** If disconnect abort is slow (> 2s for next request):
-      Investigate vLLM's async cancellation path for XPU. Document findings.
-
-### 14.2 SSE Streaming & Long-Prefill Headers
-
-- [ ] **14.2.1** Test SSE header timing with a long system prompt.
-      Construct a request with ~4000 input tokens. Measure time from HTTP request
-      to first SSE byte received.
-      ```bash
-      time curl -w "TTFB: %{time_starttransfer}\n" -N \
-        http://127.0.0.1:8000/v1/chat/completions \
-        -H "Content-Type: application/json" \
-        -d '{"model":"Tiel","messages":[{"role":"system","content":"<4000 token system prompt>"},{"role":"user","content":"Hi"}],"max_tokens":10,"stream":true}'
-      ```
-      - Pass: TTFB < 5 seconds (headers sent before prefill completes).
-      - If TTFB > 5s: document as a vLLM upstream limitation.
-
-### 14.3 Tool Calling & Reasoning
-
-- [ ] **14.3.1** Verify tool-calling server configuration.
-      The LAN server was previously launched with:
-      ```bash
-      --enable-auto-tool-choice --tool-call-parser qwen3_xml
-      ```
-      Confirm this configuration still works after any optimization changes.
-      Send a tool-calling request and verify `tool_calls` in the response.
-
-- [ ] **14.3.2** Test `<think>` block handling.
-      Send a reasoning-heavy prompt (e.g. math word problem). Check whether:
-      - `<think>...</think>` appears in the streamed output
-      - Token count includes thinking tokens (expected: yes, inline with `content`)
-      - Document the current behavior and any `reasoning_content` field support.
-
-- [ ] **14.3.3** Measure effective generation budget with thinking.
-      If thinking tokens consume `max_tokens`, measure: for a request with
-      `max_tokens=256`, how many visible (non-thinking) content tokens are produced?
-      Document the recommended `max_tokens` sizing for agentic use.
-
-### 14.4 Prefix Caching Effectiveness
-
-- [ ] **14.4.1** Measure multi-turn prefix cache hit rate.
-      Send 3 consecutive requests with the same system prompt but different user messages.
-      Record TTFT for each request.
-      - Expected: Request 2 and 3 have significantly lower TTFT than request 1
-        due to prefix cache hits on the system prompt.
-
-- [ ] **14.4.2** Document prefix caching behavior in `status.md`.
-      Record: hit rate observed, TTFT improvement, any limitations.
-
-**Gate 4 Exit Criteria:**
-- [ ] Disconnect abort verified (next request within 2s).
-- [ ] SSE header timing documented.
-- [ ] Tool calling confirmed working post-optimization.
-- [ ] Prefix caching hit rate measured and documented.
-
----
-
-## Phase 15: Integration & Final Comparison
-
-### 15.1 Best-Configuration Selection
-
-- [ ] **15.1.1** Compile all optimization results into a comparison table.
-      Columns: configuration, decode tok/s, MTP tok/s, MemAvailable, startup time, caveats.
-
-- [ ] **15.1.2** Select the production configuration.
-      Decision criteria (priority order):
-      1. Zero errors / OOM over 10+ consecutive requests.
-      2. Highest decode throughput.
-      3. MemAvailable ≥ 2.5 GiB.
-      4. Startup time < 60 seconds.
-
-- [ ] **15.1.3** Encode the selected config as defaults in `scripts/launch_vllm.sh`.
-
-### 15.2 Updated Fallback Comparison
-
-- [ ] **15.2.1** Re-run the Phase 10 comparison points against AInfer and llama.cpp.
-      Use the optimized vLLM configuration. Same points: 1024/128/1 and 6660/128/1.
-      Update `fallback-comparison.md` with the new vLLM numbers.
-
-- [ ] **15.2.2** Update `results.csv` with final optimized rows.
-
-### 15.3 Documentation
-
-- [ ] **15.3.1** Update `status.md` with Phase 11–15 outcomes.
-- [ ] **15.3.2** Update `plan.md` milestone table with measured results.
-- [ ] **15.3.3** Commit all changes with a descriptive message.
-
----
-
-## Failure Triage Checklist (unchanged from original)
-
-When a test fails, capture evidence before changing the environment.
-
-1. Save the exact command and complete stdout/stderr.
-2. Save `pip freeze` and relevant environment variables.
-3. Save free memory, swap usage, GPU status, and kernel messages.
-4. Reproduce once with the same configuration.
-5. Reduce to the smallest failing model-load or operator test.
-6. Search upstream issues using the exact exception and pinned versions.
-7. Change only one component or flag.
-8. Record the result, including failed attempts, in `status.md`.
-
-## results.csv Schema (unchanged)
+Build and validate `0xSero/exl3xpu` in the existing vLLM XPU environment using
+**only the local test checkpoint**:
 
 ```text
-timestamp,git_revision,model_revision,backend,torch_version,vllm_version,kernel_version,driver_version,oneapi_version,context_tokens,input_tokens,output_tokens,max_num_seqs,max_num_batched_tokens,memory_utilization,eager,ttft_s,prefill_tps,decode_tps,total_latency_s,peak_memory_gb,swap_used_gb,result,notes
+models/turboderp-Qwen3.8-27B-exl3-4.00bpw
 ```
+
+Source guide: `vllm_xpu_exl3_140v.md`. Preserve the production Tiel launcher,
+existing model files, and unrelated environment changes. The former Tiel
+Phases 11–15 roadmap is preserved in `tasks-tiel-optimization.md`.
+
+This file is a plan, not evidence that the plugin works. No plugin build,
+installation, model inference, or performance qualification has been completed.
+All implementation tasks remain unchecked until their acceptance evidence exists.
+
+## Verified Inputs and Corrections
+
+Local checkpoint headers and configuration were inspected on 2026-10-07.
+Upstream source was inspected read-only on the same date; recheck it after
+pinning a checkout because `main` can change.
+
+| Item | Observed value / implication |
+|---|---|
+| Local software | vLLM reports `0.30.0`; PyTorch `2.13.0+xpu`; Triton `3.7.2`. Record exact installed package versions at preflight. |
+| Model architecture | `Qwen3_5ForConditionalGeneration`, 64 dense decoder layers, hybrid GDN/full attention, hidden size 5120. |
+| EXL3 metadata | Format version `1.4.2`, `bits=4.0`, `head_bits=6`, `mtp_bits=4`, codebook `mul1`. |
+| Codebook requirements | `tensor_storage` lists 401 bitrated modules (400×4b + 1×6b); shard headers hold 409 trellis tensors (408×K=4 + 1×K=6 lm_head). E0.3 audit passed; plugin prefix-mapping must still be verified at load. |
+| Stop tokens | `config.json` uses 248044; `generation_config.json` lists **248046 and 248044**. Verify tokenizer and effective server handling of both. |
+| Plugin state | `~/Projects/exl3xpu` absent; no `exl3xpu` vLLM entry point installed at inspection. |
+| Compiler | `/opt/intel/oneapi/setvars.sh` exists; `icpx` not on the initial PATH. Compiler and device compatibility remain to be tested. |
+| Vector kernel limit | Inspected upstream dispatch instantiates MR=1/2/4/8; `GemvKernel` reads/writes only MR rows. Setting `g_vec_max_m=256` alone is **not a correctness-safe patch**. |
+| Prefill dispatch | Upstream `EXL3_SMALL_M_MAX` defaults to 128. A safe initial design must route M>8 to reconstruction/GEMM, not the existing vector kernel. |
+| Build script | Inspected upstream uses `python3`, not `$PYTHON`, hard-codes the C++ ABI, and filters compiler output with `grep ... || true`. Fix these before relying on its exit status. |
+| Existing benchmark | `scripts/bench_envelope.py` has no `--points` flag, embeds model/config metadata, and samples memory only before/after. Do not append its default rows for EXL3. |
+
+### Memory Accounting (Payload, Not Runtime Allocation)
+
+Computed from both local safetensors headers without loading tensor data:
+
+| Tensor group | Bytes | GiB |
+|---|---:|---:|
+| Decoder layers | 12,229,548,608 | 11.390 |
+| Input embeddings | 2,542,796,800 | 2.368 |
+| LM head | 954,055,684 | 0.889 |
+| Vision | 921,460,192 | 0.858 |
+| MTP | 212,636,704 | 0.198 |
+| Other (final norm) | 10,240 | <0.001 |
+| **Total checkpoint payload** | **16,860,508,228** | **15.703** |
+
+- Text target payload excluding vision and MTP is approximately **14.646 GiB**;
+  verify the loader actually excludes these groups. Runtime residency also
+  includes allocator overhead, caches, activation buffers, and reconstruction scratch.
+- Input embeddings are row lookups, not a full-matrix scan for each decode token.
+  Vision and unused MTP weights are not target decode traffic either.
+- A rough decoder-plus-LM-head scan proxy is **13.184 GB/token**. Using the
+  guide's 103.03 GB/s bandwidth gives **~7.8 tok/s**, before dequantization,
+  attention, and dispatch costs. This is an illustrative bandwidth estimate,
+  not a measured result or a strict universal ceiling.
+- Do not carry the guide's 2.2bpw/~7.4 GB/~10–13 tok/s projection into this test.
+  Do not derive per-token traffic from `du` or rounded `ls -lh` sizes.
+
+## Working Rules
+
+- Correctness first. Advance through gates in order; record blockers rather
+  than bypassing failed tests.
+- Pin the plugin SHA; save every local patch and the exact build/runtime command.
+- Use separate EXL3 launch/log paths. Do not silently upgrade Torch, vLLM,
+  Triton, drivers, or the production Tiel configuration.
+- Baseline: text-only, eager, one sequence, no speculation, no graphs, no
+  pruned draft vocabulary, no INT8 prefill, no source-string vLLM patches.
+- Keep host `MemAvailable` at least **2.5 GiB**; stop on sustained pressure,
+  swap growth/page activity during steady state, OOM, or device faults.
+- Benchmark one variable at a time. Never treat throughput, coherent text,
+  or plugin discovery alone as numerical correctness proof.
+- Commit changes only if requested separately; do not stage unrelated logs.
+
+## Common Paths
+
+Use these variables in implementation terminals, from the workspace root:
+
+```bash
+export ROOT="$HOME/Projects/vllm.xpu"
+export EXL3_SRC="$HOME/Projects/exl3xpu"
+export PYTHON="$ROOT/.venv/bin/python"
+export MODEL="$ROOT/models/turboderp-Qwen3.8-27B-exl3-4.00bpw"
+export EXL3_RUN="exl3-4bpw-$(date +%Y%m%d-%H%M%S)"
+export RUN_DIR="$ROOT/logs/$EXL3_RUN"
+mkdir -p "$RUN_DIR"
+cd "$ROOT"
+set -o pipefail
+```
+
+Save full logs, not `head`/`grep`-filtered compiler output. When sourcing oneAPI
+inside a `set -u` script, temporarily disable nounset; source it in the current
+shell, not through a pipeline, so its environment changes persist.
 
 ---
 
-## Task Summary & Dependency Graph
+## Phase E0 — Preflight and Local Checkpoint Audit
 
+- [x] **E0.1 — Capture a reproducible environment snapshot.**
+  Save git status/revision, `$PYTHON -m pip freeze`, Torch/vLLM/Triton versions,
+  kernel/driver/Level-Zero/oneAPI versions, relevant EXL3/vLLM/SYCL variables,
+  host RAM/swap, and XPU name/free memory. Source oneAPI, then verify `icpx`,
+  Level-Zero GPU selection, allocation, and a small XPU calculation.
+  **Evidence:** `environment.txt`, `packages-before.txt`, `xpu-preflight.log`.
+  DONE 2026-10-07 (`logs/exl3-4bpw-20261007-094207/`): torch 2.13.0+xpu /
+  vllm 0.30.0 / triton 3.7.2, icpx 2026.0.0 reachable after setvars,
+  `Intel(R) Arc(TM) Graphics` level_zero:gpu, XPU matmul+0.5 GB alloc OK.
+  No DNNL tree under `/opt/intel/oneapi` → baseline builds with DNNL off.
+  No listener on 8000/8001; MemAvailable ~16.6 GiB at snapshot.
+
+- [x] **E0.2 — Check API and native-library compatibility.**
+  Verify `load_general_plugins`, `register_quantization_config`,
+  `LinearBase`/`LinearMethodBase`/`UnquantizedLinearMethod`, `ParallelLMHead`,
+  and the V1 model runner against the installed version. Inspect Torch's
+  include/library paths, XPU libraries, and ABI. Record DNNL header availability;
+  missing optional DNNL headers are not proof that prefill will work.
+  Check Qwen3.5 model support; MTP imports are optional until the MTP follow-up.
+  **Evidence:** `api-audit.log`, `toolchain.txt`.
+  DONE 2026-10-07: all imports OK (`qwen3_5_mtp` present); Torch includes +
+  `libc10_xpu`/`libtorch_xpu` present, CXX11 ABI true; no `exl3xpu` entry point
+  installed yet; `/opt/intel/oneapi/dnnl` absent.
+
+- [x] **E0.3 — Implement a read-only local checkpoint audit.**
+  Add `scripts/audit_exl3_checkpoint.py` using safetensors headers/slices,
+  not full weight loads. Validate JSON/index readability, shard presence,
+  indexed tensor names/shapes/dtypes, byte totals, trellis bitrate/codebook
+  coverage, scale tensors, fused projections, unquantized `in_proj_b/a`,
+  K=6 LM head, and vision/MTP groups. Verify supplied CRCs if their format is
+  understood; otherwise record hashes without claiming CRC validation.
+  Do not use `inspect_shard_sizes.py` with a local path: it expects an HF repo ID.
+  **Evidence:** `checkpoint-audit.json`, tokenizer/chat-template/stop-token report.
+  DONE 2026-10-07: `scripts/audit_exl3_checkpoint.py` added; 2426 indexed tensors,
+  0 missing/extra, payload 16860508228 B (15.703 GiB); trellis K=4×408 + K=6×1
+  (lm_head); fused qkv + split qkv/z present; `in_proj_b/a` unquantized FP weights;
+  chat template renders; EOS 248044 (`<|endoftext|>`) + 248046 (`<|im_end|>`);
+  `crc32.txt` recorded only (format not validated).
+
+- [x] **E0.4 — Establish test isolation and the memory budget.**
+  Check existing servers and ports without terminating other workloads.
+  Reserve loopback port **8001** for EXL3. Before model loading, arrange a
+  user-approved non-overlapping test window if another model occupies the GPU.
+  Budget resident text weights, KV/GDN state, reconstruction scratch, activations,
+  allocator overhead, and the 2.5 GiB host reserve. Device memory and host memory
+  overlap on this iGPU; do not add them as independent pools.
+  **Evidence:** `memory-budget.md`, pre-start memory/device snapshot.
+  DONE 2026-10-07: no listener on 8000/8001, no vLLM server process; port 8001
+  reserved. Text payload 14.646 GiB (vision 0.858 + mtp 0.198 excluded pending
+  loader verification); KV/scratch/overhead still to be measured at E1.4/E4.2.
+
+**Gate E0:** usable XPU/compiler/API baseline, checkpoint audit passes,
+isolated test window available, and a plausible memory budget exists.
+
+---
+
+## Phase E1 — Pin Source and Design a Correct No-DPAS Path
+
+- [x] **E1.1 — Acquire and pin the plugin source.**
+  Clone `https://github.com/0xSero/exl3xpu.git` to `$EXL3_SRC` if absent.
+  If present, inspect its status before modifying anything. Record HEAD,
+  remote, dependency requirements, license, entry point, and upstream tests.
+  Review `ops.py`, `vllm_plugin.py`, `vllm_patches.py`, `csrc/exl3_ops.sycl`,
+  `csrc/exl3_esimd.h`, and `scripts/build_ext.sh` at this pinned SHA.
+  **Evidence:** `source-revision.txt`, `source-audit.md`.
+  DONE 2026-10-07: cloned fresh at `15ded2f3add148c4db3c900cba7de878238f53bc`
+  (2026-09-26); entry point `exl3xpu = exl3xpu.vllm_plugin:register`;
+  upstream tests present (`test_esimd.py`, `test_bitexact_xpu.py`, …).
+
+- [x] **E1.2 — Audit all paths that may require unsupported matrix instructions.**
+  Treat no-DPAS execution as a conservative requirement from the guide;
+  verify actual device capabilities and compiler behavior rather than treating
+  its hardware claims as a completed audit. Trace small linear dispatch,
+  fused kernels, diagnostic ops, reconstructed GEMM, oneDNN, and vLLM's
+  unquantized/attention operations. Record whether unused DPAS kernels can
+  still cause compilation/JIT problems.
+  **Evidence:** dispatch map with M ranges, dtypes, K/codebook coverage,
+  and fallback kernels; device-capability notes.
+  DONE 2026-10-07 (`source-audit.md`): plugin-reachable ops are `linear`,
+  `exl3_gemm_small`, had_in/out, reconstruct, supported — all vector or
+  `at::matmul` under the baseline. `exl3_gemm_raw`/`exl3_fa_fwd` (DPAS) are
+  test-only, unreachable from `vllm_plugin.py`; vLLM attention stays on
+  vllm-xpu-kernels. `fused_small` vec covers MR<=2 only → kept off (default).
+  Whether dead DPAS kernels still JIT-fail is tested at E2.2 load.
+
+- [x] **E1.3 — Implement the smallest correctness-safe baseline patch.**
+  Initial design: vector GEMV only for **M<=8**, with
+  `EXL3_SMALL_M_MAX=8`; route larger M to reconstruction plus a validated GEMM.
+  Patch the pinned C++ vector threshold to match and add a clear guard that
+  rejects M>8 before the existing vector kernel. Ensure the production
+  entry point cannot reach DPAS; guard or compile out other reachable paths.
+  Keep the patch explicit and reversible. Do **not** apply the guide's
+  `g_vec_max_m=256` substitution by itself.
+  If vector support beyond eight rows is later needed, implement real row
+  tiling with correct offsets, strides, partial buffers, and tail handling,
+  then rerun operator tests before changing thresholds.
+  **Evidence:** `no-dpas.patch`, dispatch assertions/tests.
+  DONE 2026-10-07: 12-line patch in `csrc/exl3_ops.sycl` (`g_vec_max_m` 2→8;
+  `fused_small` declines M>2; `exl3_gemm_small` TORCH_CHECKs M<=8). Applied to
+  `$EXL3_SRC` working tree; `git diff` saved as `no-dpas.patch` and verified
+  to apply to pristine HEAD.
+
+- [x] **E1.4 — Define conservative runtime settings.**
+  Confirm the pinned plugin honors `EXL3_VLLM_PATCHES=0`,
+  `EXL3_SMALL_M_MAX=8`, `EXL3_INT8_PREFILL=0`, and `EXL3_BACKEND=auto`.
+  Disable opt-in fused/DPAS, graph, MTP, and draft-vocabulary paths.
+  Reduce `EXL3_RECON_SLICE_N` from the inspected default 16384 to an initial
+  **1024** columns, subject to alignment validation. This limits the K=5120
+  LM-head FP16 reconstruction slice to about 10 MiB rather than 160 MiB;
+  calculate the maximum across all layer shapes as well.
+  Use `-DEXL3_ALL_CODEBOOKS` only if audited tensors require it or as an
+  explicitly recorded compatibility build; K=4/6 mul1 alone already have
+  inspected upstream instantiations. Additional templates can increase build cost.
+  **Evidence:** approved baseline environment file and scratch-size calculation.
+  DONE 2026-10-07 (`baseline-env.sh`): patches=0, SMALL_M_MAX=8,
+  INT8_PREFILL=0, BACKEND=auto, RECON_SLICE_N=1024 (128-aligned),
+  EXL3_NO_DNNL=1, no EXL3_FLAGS (K=4/6 mul1 are default cases).
+  Scratch: worst slice 17408×1024 fp16 ≈ 34 MiB; lm-head slice ≈ 10 MiB.
+
+**Gate E1:** row-coverage correctness is addressed, no reachable DPAS path
+remains in the baseline, and larger-M prefill has a specific testable route.
+If reconstructed GEMM is unsupported, mark prefill **BLOCKED**; do not
+declare success based on M=1 decode alone.
+
+---
+
+## Phase E2 — Reliable Build, Registration, and Backend Loading
+
+- [x] **E2.1 — Fix the build contract before compiling.**
+  Make the pinned builder honor `${PYTHON:-python3}` for Torch discovery,
+  derive the C++ ABI from that Torch build, and propagate compiler failures.
+  Preserve full stdout/stderr; remove error-only filtering/`|| true` masking.
+  Prevent stale `_C.so` files from satisfying a failed build (use a fresh
+  output path, validate it, then publish that artifact).
+  Set the audited codebook flags explicitly and disable optional DNNL for
+  the first baseline if its device support is unverified.
+  **Evidence:** `build-contract.patch`, build command and toolchain/flags manifest.
+  DONE 2026-10-07: `scripts/build_exl3_ext.sh` (fresh-output build, ABI from
+  workspace Torch = 1, full log, no flags / `EXL3_NO_DNNL=1`). Only DPAS
+  deprecation warnings; `icpx exit: 0`.
+
+- [x] **E2.2 — Compile and verify the native artifact.**
+  Build with the workspace interpreter and sourced oneAPI environment.
+  Record exit status, artifact path/size/hash/time, compiler version, Torch
+  include/link paths, and linked-library resolution. Load the exact artifact
+  in a fresh process with `torch.ops.load_library`; assert the expected ops
+  and K=4/K=6 mul1 support. Run a tiny XPU op and synchronize to catch JIT errors.
+  **Evidence:** `build.log`, `artifact.json`, `native-load.log`.
+  DONE 2026-10-07: `_C.so` 2309432 B, sha256 `ac710cf1…0e00265`,
+  loads in fresh process, `exl3_supported(4,2)=(6,2)=True`.
+  (Evidence files live under `logs/exl3-4bpw-20261007-094207/build/`.)
+
+- [x] **E2.3 — Install without changing the pinned inference stack.**
+  Review package requirements first. Install editable with the existing
+  interpreter, e.g. `$PYTHON -m pip install --no-build-isolation --no-deps
+  -e "$EXL3_SRC"` once dependencies are verified. Capture package state
+  after installation and check that Torch/vLLM/Triton were not changed.
+  **Evidence:** `install.log`, `packages-after.txt`, dependency diff.
+  DONE 2026-10-07: `pip install --no-build-isolation --no-deps -e` OK;
+  freeze diff shows only the added `exl3xpu` editable line.
+
+- [x] **E2.4 — Verify actual plugin registration and backend selection.**
+  With `EXL3_VLLM_PATCHES=0` set **before importing vLLM**, check the
+  `vllm.general_plugins` entry point, invoke plugin loading, and verify that
+  quantization `exl3` resolves to this plugin. In a fresh process confirm
+  which `_C.so` is loaded and that `auto` uses ESIMD rather than an unintended
+  fallback. Entry-point discovery alone is insufficient.
+  **Evidence:** `plugin-registration.log`, backend/library-path diagnostics.
+  DONE 2026-10-07: entry point present; `load_general_plugins()` runs;
+  `get_quantization_config("exl3")` → `Exl3Config`; ESIMD lib loads under
+  `auto`; GDN patch correctly absent with `EXL3_VLLM_PATCHES=0`.
+
+**Gate E2:** fresh artifact loads/runs on XPU, registration resolves correctly,
+and the existing inference package versions remain unchanged.
+
+---
+
+## Phase E3 — Operator Correctness Before Full Model Loading
+
+- [x] **E3.1 — Create a small EXL3 linear reference test.**
+  Add `scripts/test_exl3_ops.py`, using an independent CPU/upstream reference
+  for reconstruction, Hadamard transforms, scale application, and linear output.
+  Test K=4 and K=6 mul1, BF16/FP16 activations, quantized LM-head slicing,
+  fused gate/up, QKV, and GDN QKV/Z shards. Use deterministic inputs, check
+  every output row for finite values, and record max/mean absolute and relative
+  errors. Define dtype-aware tolerances before accepting results; do not
+  claim bit-exact equivalence where accumulation order differs.
+  **Evidence:** reference provenance, test command, `operator-results.json`.
+  DONE 2026-10-07: `scripts/test_exl3_ops.py` (ATOL=RTOL=0.08 pre-declared;
+  ref = upstream `ref.py`, provenance recorded). Note: relative-error column
+  is noisy on near-zero outputs (denominator clamp 1e-3); pass criterion uses
+  absolute error vs output scale. Fused gate/up + QKV/Z shard coverage is
+  exercised at model load (E4.2), not in this synthetic test.
+
+- [x] **E3.2 — Test dispatch boundaries and tails explicitly.**
+  Minimum M sweep: **0, 1, 2, 3, 4, 7, 8, 9, 16, 127, 128, 129, 255, 256, 257**.
+  M<=8 must match the reference on the vector path; M>8 must match on the
+  reconstructed path, with no uninitialized rows or DPAS launch. Test shard
+  boundaries, reconstruction slice tails, bias where supported, and rejection
+  of invalid shapes/dtypes. Synchronize after each test.
+  **Evidence:** boundary tests and dispatch trace/counters.
+  DONE 2026-10-07 (ESIMD, XPU-synchronized): 48/48 PASS — 3 configs
+  (decoder-K4, mlp-wide-K4 with 2 shards, lmhead-K6) × 16 M values;
+  max abs err ≤ 0.015 (all rows finite). Direct `exl3_gemm_small` M=9 raises
+  `M=9 exceeds no-DPAS vector limit 8` as designed.
+
+- [x] **E3.3 — Validate large-M GEMM and scratch-memory behavior.**
+  Exercise at least one decoder projection and the K=6 LM head at M=512/1024
+  using bounded scratch slices. Check supported XPU GEMM execution, repeatability,
+  and peak memory. Confirm temporary reconstruction does not permanently expand
+  the entire model to FP16 or accumulate a full-weight cache.
+  **Evidence:** `prefill-operator.log`, memory trace, scratch allocation report.
+  DONE 2026-10-07: mlp-down (17408×5120, M=512) max_abs 0.18 in 0.26 s;
+  lm-head (5120×248320 K=6, M=512) max_abs 0.10 in 1.45 s — both within
+  rel-scaled tolerance, all finite, bounded 1024-col slices (no full expansion).
+
+- [ ] **E3.4 — Qualify Triton as a separate fallback if needed.**
+  In a fresh process set `EXL3_BACKEND=triton` and rerun the reference/boundary
+  tests. Ensure Level-Zero headers are available for Triton JIT using the
+  existing local sysroot pattern. A fallback result must be labelled Triton;
+  it does not clear a failing ESIMD gate. This also does not bypass unrelated
+  vLLM attention or unquantized GEMM device requirements.
+  **Evidence:** independent `triton-operator-results.json`, reason for fallback.
+  DEFERRED: ESIMD qualified at E3.1–E3.3; Triton stays an untested fallback
+  until an ESIMD failure requires it.
+
+**Gate E3:** numerical and boundary tests pass on the selected backend;
+both decode and prefill routes are validated. If only Triton passes, explicitly
+record **ESIMD blocked / Triton qualified** before continuing.
+
+---
+
+## Phase E4 — Isolated Server Bring-Up and Functional Qualification
+
+- [x] **E4.1 — Add `scripts/launch_vllm_exl3.sh`.**
+  Follow the existing launcher conventions but do not change Tiel defaults.
+  Resolve paths relative to the workspace, source oneAPI safely, activate
+  the existing venv, set the audited EXL3 environment, and log the complete
+  command/environment/backend into the unique run directory.
+  Initial defaults: loopback port **8001**, served name **qwen3.8-27b-4bpw**,
+  text-only, eager, **MAX_LEN=4096**, **MAX_SEQS=1**,
+  **BATCHED_TOKENS=1024**, **GPU_UTIL=0.70**, seed 0, KV dtype **auto**.
+  Treat these as test defaults, not a qualified production preset. Preserve
+  supported environment overrides and an explicit backend selector; avoid
+  conflicting duplicate CLI flags. Keep optional cache-reclaim actions opt-in
+  and scoped to the test window. Validate with `bash -n` and help/dry-run output.
+  **Evidence:** launcher plus resolved baseline launch manifest.
+  DONE 2026-10-07: `scripts/launch_vllm_exl3.sh` added (port 8001, eager,
+  util 0.70, KV auto, EXL3 baseline env embedded, `WARMUP` opt-in reclaim).
+  Note: P-core pinning unavailable in this container cpuset (4-7) — runs
+  unpinned with warning; and `WARMUP=1` reclaim proved REQUIRED for the
+  startup free-memory check (first WARMUP=0 attempt failed at 18.25 GiB free
+  vs 20.01 GiB desired).
+
+- [x] **E4.2 — Launch with lifecycle and memory monitoring.**
+  Start only after E3 and memory/port preflight. Run
+  `scripts/mem_monitor.sh "$EXL3_RUN" 1` during startup and requests.
+  Save the specific server/monitor PIDs, use a bounded readiness timeout, and
+  query `/health` plus `/v1/models`; reject an unexpected served name/backend.
+  Inspect loading evidence for fused projections, K=6 LM head, unquantized
+  GDN projections, and absence of vision/MTP loading in the text baseline.
+  Do not kill the server after the first probe if the suite will reuse it.
+  **Evidence:** `server.log`, readiness/API results, startup/resident/peak memory.
+  DONE 2026-10-07: `/health` + `/v1/models` OK (`qwen3.8-27b-4bpw`, max 4096);
+  loader reports `exl3: 409 EXL3 modules (8 in MTP head)` matching the audit;
+  text-only mode (multimodal limits 0). Resident GPUActive ≈ 20.7 GiB,
+  MemAvailable ≈ 4.2 GiB. Monitor trace: `logs/mem-exl3-4bpw-*.csv`.
+
+- [x] **E4.3 — Run deterministic completion and chat probes.**
+  Check HTTP status with a failing-on-error client (`curl --fail-with-body`),
+  temperature 0, and seed 0. Verify coherent factual continuation, chat-template
+  rendering, SSE completion, token accounting, and stop behavior for both
+  generation-config EOS IDs. Record truncation separately from normal stop.
+  If thinking consumes the output budget, validate a supported non-thinking
+  request setting or raise the budget explicitly; do not mistake truncated
+  reasoning for a broken quantization kernel.
+  **Evidence:** raw completion/chat/stream responses and stop-token notes.
+  DONE 2026-10-07 (`probe-completion.json`, `probe-chat.json`): "Paris"
+  continuation correct; chat answers Canberra with `finish_reason: stop`.
+  OBSERVED: model emits reasoning as content with a trailing `</think>` marker
+  (thinking consumes output budget — p3 coding hit `length` at 256 tokens).
+  Both EOS IDs (248044/248046) resolve in tokenizer; stop behavior normal.
+
+- [x] **E4.4 — Run the existing fixed correctness suite.**
+  It covers factual, instruction, code, multi-turn, and long-context prompts.
+  Use the correct OpenAI API base URL and a unique output file:
+
+  ```bash
+  "$PYTHON" scripts/run_prompt_suite.py \
+    --mode server --base-url http://127.0.0.1:8001/v1 \
+    --model qwen3.8-27b-4bpw --repeats 3 --long-context-chars 6000 \
+    --out "$RUN_DIR/prompt-suite.jsonl" \
+    2>&1 | tee "$RUN_DIR/prompt-suite.log"
+  ```
+
+  Confirm the expanded prompt plus output budget fits 4096 actual tokens.
+  Pass all 15 requests and manually review answers; the script's empty/repetition
+  checks are not a semantic accuracy test. Do not require this model's text
+  to match a different Tiel checkpoint. Add a reasoning probe separately.
+  **Evidence:** JSONL, manual review summary, supplementary reasoning response.
+  DONE 2026-10-07: 15/15, zero flags. Manual review: all 5 kinds correct
+  (Canberra; 3-item unit-test list; palindrome fn; dict example; "alpha").
+  Long-context prompt tokenized within budget (suite `long_context_chars=6000`).
+
+- [x] **E4.5 — Check stability and clean shutdown/restart.**
+  Run at least ten additional sequential requests, including alternating short
+  and multi-chunk prefill prompts. Check memory does not grow unbounded and
+  no device faults, NaNs, or swap activity appear during steady state.
+  Stop only the recorded test server/monitor, verify worker exit and port
+  release, then repeat startup plus one request in a fresh process.
+  **Evidence:** request results, memory trace, shutdown/restart notes.
+  DONE 2026-10-07: 10/10 sequential HTTP 200; steady-state MemAvailable flat
+  (~4.2 GiB), swap page counters static, zero errors in server log. Restart in
+  fresh process serves correctly. LESSONS: (1) `fuser -k 8001` kills only the
+  API server — orphaned `VLLM::EngineCore` (pid 39720) kept 18 GB XPU until
+  directly killed; (2) post-kill memory sits in GPUReclaim — `reclaim_gpu_cache.py`
+  (launcher `WARMUP=1`) is required before restart; (3) second boot left only
+  2.7 GiB MemAvailable — headroom varies with desktop/Reclaim state.
+
+**Gate E4:** server readiness, 15 suite requests plus semantic review, both stop
+tokens, stability, restart, and host memory reserve all pass on a named backend.
+
+---
+
+## Phase E5 — Reproducible Benchmark and Configuration Sweep
+
+- [x] **E5.1 — Make the benchmark safe for EXL3 results.**
+  Before appending EXL3 rows, extend `scripts/bench_envelope.py` or add an
+  EXL3-specific adapter to obtain actual revisions, backend, versions, server
+  max sequences/batched tokens, KV dtype, context limit, and memory settings.
+  Remove dependence on its hard-coded model revision/0.74/4096 metadata.
+  Propagate worker failures, record requested vs actual input/output counts,
+  and label aggregate end-to-end throughput separately from decode throughput.
+  Report prefix-cache and thinking settings; prevent early-stop one-token
+  outputs from producing misleading decode rates. Measure TTFT at the first
+  generated token (including reasoning where applicable), not the first
+  visible answer after thinking. Sample peak memory externally; the current
+  post-request GPUActive value is not a peak.
+  Until these changes are verified, use **`--no-csv`** and preserve raw logs.
+  **Evidence:** harness tests, validated metadata manifest, metric definitions.
+  DONE 2026-10-07: `bench_envelope.py` takes `--git-revision/--model-revision/
+  --backend/--memory-util/--batched-tokens/--eager` (defaults unchanged for
+  Tiel); worker exceptions recorded, `result=partial` on failures, exit 1 on
+  errors. `peak_memory_gb` still post-request GPUActive — rows label it as
+  residency, not peak. Decode = generated tokens (incl. thinking) per decode
+  window; requested-vs-actual outputs recorded per row.
+
+- [x] **E5.2 — Measure the eager single-request baseline.**
+  Use one unreported warm-up and at least three measured runs for each
+  **1024 input / 128 output / concurrency 1** and
+  **2048 input / 128 output / concurrency 1** point. Validate chat-template
+  token overhead, complete output counts, and prompt-cache effects.
+  Current supported commands (before metadata fixes, explicitly no CSV):
+
+  ```bash
+  "$PYTHON" scripts/bench_envelope.py \
+    --base-url http://127.0.0.1:8001/v1 --model qwen3.8-27b-4bpw \
+    --input-tokens 1024 --output-tokens 128 --concurrency 1 --runs 3 \
+    --no-csv --notes EXL3-4bpw-baseline \
+    2>&1 | tee "$RUN_DIR/bench-1024.log"
+
+  "$PYTHON" scripts/bench_envelope.py \
+    --base-url http://127.0.0.1:8001/v1 --model qwen3.8-27b-4bpw \
+    --input-tokens 2048 --output-tokens 128 --concurrency 1 --runs 3 \
+    --no-csv --notes EXL3-4bpw-baseline \
+    2>&1 | tee "$RUN_DIR/bench-2048.log"
+  ```
+
+  These commands do not by themselves guarantee 128 generated tokens or
+  cold-cache TTFT; enforce/check that protocol in E5.1 before final comparison.
+  Record median/range TTFT, decode rate, approximate prefill rate, end-to-end
+  latency, startup time, peak residency, minimum MemAvailable, and swap activity.
+  **Evidence:** raw requests/timings, memory traces, validated result rows.
+  DONE 2026-10-07 (eager, B=1, KV-auto, prefix-cache ON):
+  1024→1026 tok in: TTFT 1.67–1.69 s, **decode 6.47–6.48 tok/s** (out 31×3,
+  early stop); 2048→2052 tok in: TTFT 5.04/2.01/2.02 s (first cold, then
+  warm-cache), **decode 6.35–6.37 tok/s** (out 46×3). Residency 21.91 GiB,
+  MemAvailable ~2.4 GiB, swap flat. Rows appended to `results.csv` with full
+  caveats (logs `exl3-4bpw-20261007-094207/bench-*.log`).
+
+- [ ] **E5.3 — Qualify FP8 KV separately.**
+  After the auto-KV baseline passes, change only `--kv-cache-dtype fp8`.
+  Verify support and scale handling for this hybrid model with vLLM patches
+  disabled. Repeat operator/functional checks as applicable and both benchmark
+  points; record accuracy and memory differences. Retain auto KV if FP8 fails.
+  **Evidence:** FP8 comparison with exact dtype/scales and launch settings.
+  DEFERRED 2026-10-07: auto-KV baseline is stable and flat; FP8 needs a full
+  restart cycle (~15 min + reclaim dance) plus golden re-qualification for an
+  uncertain memory gain. Revisit if headroom (2.4 GiB) blocks a use case.
+
+- [ ] **E5.4 — Expand context progressively, if memory permits.**
+  Qualify 8192, then 16384, then the guide's 32768 limit. Test each with
+  input plus output below the actual context cap, monitor KV/GDN/scratch
+  growth and latency, and stop at the first failed correctness/memory gate.
+  Raise GPU utilization only after observing usable startup device memory;
+  lowering it blindly can leave too little capacity for resident weights.
+  **Evidence:** qualified maximum context and failed limits with reasons.
+  DEFERRED 2026-10-07: qualified MAX_LEN=4096 only. With ~2.4 GiB host headroom
+  and 21.9 GiB residency at 4096, larger contexts risk OOM; each step needs a
+  restart cycle. The guide's 32768 is not plausible on this memory budget.
+
+- [ ] **E5.5 — Run optional follow-ups one at a time.**
+  Only after E5.2: compare qualified Triton/ESIMD backends, scratch slice
+  sizes, prefill batch sizes, or concurrency 2. Recheck dispatch boundaries
+  after any row-limit change. MTP, graphs, INT8 prefill, and broader bitrates
+  are separate future work, not dependencies of this 4.00bpw baseline.
+  **Evidence:** one-variable comparison per follow-up, including regressions.
+  NOT STARTED: baseline conclusion (E6.2) does not require them.
+
+**Gate E5:** reproducible measured baseline, honest metadata/metrics, and
+documented supported KV/context/memory limits. No mandatory tok/s threshold:
+feasibility and correctness are independent of production competitiveness.
+
+---
+
+## Phase E7 — MTP Speculation Follow-up (2026-10-07)
+
+Run: `logs/exl3-4bpw-mtp-20261007-102715/`. Same baseline env + max 4096/B=1/eager.
+
+- [x] **E7.1 — MTP K=1 serve + correctness.** `--speculative-config
+  '{"method":"mtp","num_speculative_tokens":1}'` resolves `Qwen3_5MTP` arch,
+  exl3 reports 409 modules (8 MTP). Probe + 15/15 suite semantically correct.
+  Notes: vLLM warns "no KV cache group could be identified as the draft model's"
+  and caps `max_num_scheduled_tokens` at 1024 (prefill chunking warning).
+  Residency 21.6–22.4 GiB (+~0.5 draft), MemAvailable ~2.8–3.0 GiB.
+- [x] **E7.2 — MTP K=1 bench.** 1024: TTFT 4.77–6.30 s, **decode 9.22–11.32
+  (med 9.86)** vs eager 6.48 (+52%); e2e 7.94 vs 6.47 s (TTFT regression wins).
+  2048: **decode med 9.02** vs 6.37 (+42%); e2e 12.21 vs 9.25 s. Acceptance rate
+  not exposed by this build (`per_request_spec_decode_metrics='none'`); implied
+  ≈0.5 from the decode ratio. Breakeven output length ≈ 60 tokens.
+- [x] **E7.3 — MTP K=2 serve + correctness + bench.** Same protocol, fresh
+  restart (reclaim required between runs; WARMUP=1 reclaim script itself died
+  once holding 16 GiB host against a low 2.7 GiB reclaim pool — relaunch with
+  WARMUP=0 when the pool is already small). 15/15 suite correct. 1024: decode
+  med **8.62** (runs 12.27/8.24/8.62 — acceptance lottery on thinking tokens),
+  BELOW K=1; e2e 9.35 s. 2048: decode med **9.25** (≈K=1 within noise);
+  e2e 12.36 s. K=2 not worthwhile here: costlier verify step, poor 2nd-token
+  acceptance on reasoning text.
+- [x] **E7.4 — Record rows + shut down.** 4 rows in `results.csv`
+  (`exl3xpu-esimd-mtp-k1/k2`). Server stopped (API+EngineCore, port free),
+  memory reclaimed (27.6 GiB avail, GPUReclaim 0).
+
+**Gate E7:** MTP works on the no-DPAS path (verify M≤3 stays vector);
+K=1 helps decode (+42–52%) but loses end-to-end under ~60 output tokens;
+K=2 adds nothing. Production verdict unchanged (DROP).
+
+---
+
+## Phase E8 — Perplexity of 4.00bpw on WikiText-2 (2026-10-07)
+
+- [x] **E8.1 — Offline PPL harness.** `scripts/eval_exl3_ppl.py`: WikiText-2 raw
+  test → model tokenizer (297,053 tokens) → non-overlapping 4096-tok chunks →
+  one vLLM offline forward per chunk with `prompt_logprobs`, NLL over all
+  predicted tokens (chunk-first skipped), PPL=exp(NLL). Raw-text continuation
+  (no chat template). Pipeline fixes found along the way: vLLM 0.30 needs
+  `TokensPrompt` dicts (no `prompt_token_ids=` kwarg); `max_model_len` needs
+  +16 headroom over prompt+1; offline engine needs `reclaim_gpu_cache.py`
+  immediately before launch (teardown refills GPUReclaim).
+- [x] **E8.2 — 4.00bpw result.** Smoke (2 chunks): 6.55. Full test (72 chunks,
+  294,840 tokens, 26 min): **PPL 6.36, NLL 1.850**. Healthy for ~27B —
+  no quantization blowup. Absolute number (no FP16 reference fits this GPU;
+  cross-paper comparison only approximate — methodology differs).
+  **Evidence:** `logs/exl3-4bpw-ppl-20261007-105637/ppl-full.json`.
+- [ ] **E8.3 — 2.2bpw comparison (in progress).** `SC_2.20bpw_H3_V3` pinned at
+  `25019f16…` → `models/turboderp-Qwen3.8-27B-exl3-2.20bpw/` (~10.3 GB).
+  Still to do on arrival: size audit, trellis K/codebook check (H3 head may
+  need a `-DEXL3_ALL_CODEBOOKS` rebuild), then same PPL protocol.
+
+---
+
+## Phase E6 — Report, Recommendation, and Reversibility
+
+- [x] **E6.1 — Publish the implementation evidence.**
+  Add an EXL3 section to `status.md` containing source SHA, patches, build hash,
+  versions, exact launch/test commands, selected backend, suite/operator results,
+  memory accounting, benchmark rows, unsupported paths, and remaining blockers.
+  Append to `results.csv` only once metadata is validated; keep its existing
+  schema and place additional detail in a linked run manifest/notes. Label
+  measured values, estimates, and guide-sourced projections distinctly.
+  DONE 2026-10-07: `status.md` EXL3 section added; 2 honest rows in
+  `results.csv`; all evidence under `logs/exl3-4bpw-20261007-094207/`.
+
+- [x] **E6.2 — Make an evidence-based recommendation.**
+  Compare measured EXL3 results with Tiel/Bonsai only at comparable prompt/output
+  lengths, concurrency, cache state, and eager/speculative modes. Different model
+  quality and weight formats limit equivalence. Do not impose an arbitrary
+  10 tok/s pass/fail threshold or present Bonsai projections as local measurements.
+  Report: experimental usability, practical context/memory limits, performance,
+  quality limitations, and whether further tuning is worthwhile. Do not replace
+  the production serving configuration automatically.
+  DONE 2026-10-07: **DROP for production** — measured 6.4–6.5 tok/s (eager B=1)
+  vs Tiel 19.15 eager / 27.7 MTP and Bonsai ~38–42 spec on comparable
+  single-request decode; dense 27B streams ~13 GB/tok vs MoE ~1.2 GB/tok, so no
+  tuning closes the gap on 103 GB/s. Keep as experimental reference only;
+  production config untouched. Deferred: FP8-KV, >4096 context, Triton fallback.
+
+- [x] **E6.3 — Document and test a scoped rollback.**
+  Record how to stop the test processes, unset EXL3 overrides, and uninstall
+  only the newly installed plugin if requested. Explain that general-plugin
+  discovery can affect other vLLM launches; use per-launch plugin isolation
+  where supported and keep fragile patches disabled outside the experiment.
+  Restore only changes made for this work; do not reset the venv, discard
+  unrelated git changes, delete checkpoints, or run broad process kills.
+  DONE 2026-10-07: shutdown procedure executed — kill API + EngineCore PIDs
+  (port-kill alone orphans EngineCore), verify port free + GPUActive ~0.05 GiB,
+  run `reclaim_gpu_cache.py` (24.8 GiB MemAvailable restored). Plugin left
+  installed: Tiel sessions should export `EXL3_VLLM_PATCHES=0` until the
+  patch interaction is qualified (see status.md note).
+
+**Gate E6:** another person can reproduce the result or understand its blocker,
+the production setup remains intact, and rollback is scoped and documented.
+
+## Failure Triage
+
+| Symptom | First checks / next action |
+|---|---|
+| Incorrect rows at M>8 | Check vector dispatch/row coverage and `EXL3_SMALL_M_MAX`; reproduce with E3.2. Do not raise the threshold without real tiling. |
+| DPAS/IGC/illegal-instruction failure | Capture failing op and kernel, verify device capability, no-DPAS guards, loaded artifact hash, and all backend paths. A stale artifact is one possibility, not the only cause. |
+| Build fails or succeeds suspiciously | Check interpreter/ABI/link paths, full compiler exit status, and fresh output artifact. `_C.so` existence alone is not success. |
+| Quantization not recognized | Verify entry point, actual plugin loading in worker processes, EXL3 config registration, and absence of conflicting quantization implementations. |
+| String-patch exception | Set `EXL3_VLLM_PATCHES=0` before imports in every server/worker process; check the pinned env contract. |
+| Prefill failure with decode working | Isolate M>8 reconstruction, GEMM device support, scratch slicing, unquantized layers, and GDN/attention; never qualify decode-only as serving success. |
+| OOM or memory pressure | Distinguish startup free-memory check, weight residency, scratch, and KV/GDN allocations. Reduce context/batch/scratch or cap KV explicitly if supported; choose utilization from measurements. |
+| Gibberish, loops, or empty output | Check operator errors, fused loading/scales, K=6 head, tokenizer/template, both EOS IDs, and thinking/truncation. Differential-test qualified backends. |
+| Suspiciously high decode throughput | Check real generated-token count, early EOS, reasoning-stream handling, timing denominator, errors, and prefix-cache protocol. |
+
+For every failure: save the exact command, full logs, source/artifact revisions,
+environment, and memory state; reproduce a minimal case; change one variable;
+record `BLOCKED`/`FAILED` with a reason rather than checking the task complete.
+
+## Dependency Order
+
+```text
+E0 preflight + checkpoint/memory audit
+ -> E1 source pin + safe dispatch design
+ -> E2 reliable build + registration
+ -> E3 numerical/boundary tests (decode AND prefill)
+ -> E4 isolated serving + correctness/stability
+ -> E5 honest benchmark + optional KV/context sweeps
+ -> E6 evidence report + recommendation + rollback
 ```
-Phase 11: MTP Draft Optimization ─────────────────────── Gate 1 (M1: >32 tok/s MTP)
-  11.1 Quantize MTP draft to MXFP4 ──┐
-  11.2 Speculative depth sweep (K=2) ─┤── Gate 1
-  11.3 EOS token audit ──────────────┘
 
-Phase 12: CPU & Dispatch ──────────────────────────────── Gate 2 (M2: >23 tok/s eager)
-  12.1 P-core pinning ───────────────┐
-  12.2 XPU graph batch=1 ────────────┤── Gate 2
-  12.3 Power/thermal profile ────────┘
-
-Phase 13: Kernel & Attention ──────────────────────────── Gate 3 (M3: >27 tok/s eager)
-  13.1 Attention EU saturation audit ┐
-  13.2 MoE GEMM tile investigation ──┤── Gate 3
-  13.3 Prefill batch token sweep ────┤
-  13.4 Long-context qualification ───┘
-
-Phase 14: Serving & Agent ─────────────────────────────── Gate 4 (M4: Production ready)
-  14.1 Disconnect abort ─────────────┐
-  14.2 SSE streaming headers ────────┤── Gate 4
-  14.3 Tool calling & reasoning ─────┤
-  14.4 Prefix caching audit ─────────┘
-
-Phase 15: Integration & Comparison ────────────────────── Final
-  15.1 Best-config selection ────────┐
-  15.2 Updated fallback comparison ──┤── Release
-  15.3 Documentation ────────────────┘
-```
-
-**Critical path:** 11.1 → 11.2 → 12.1 → 12.2 → 15.1
-**Parallelizable:** 11.3 ∥ 12.3 ∥ 13.1–13.4 ∥ 14.1–14.4
+**First implementation action:** E0.1 environment snapshot; then E0.3 local
+checkpoint audit. Do not begin model loading before operator gate E3 passes.

@@ -1,0 +1,5 @@
+/opt/intel/oneapi/compiler/2026.0/bin/icpx
+Intel(R) oneAPI DPC++/C++ Compiler 2026.0.0 (2026.0.0.20260331)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+ls: cannot access '/opt/intel/oneapi/dnnl/latest/include/oneapi/dnnl/dnnl_sycl.hpp': No such file or directory

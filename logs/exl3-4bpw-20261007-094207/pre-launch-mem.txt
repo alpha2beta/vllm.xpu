@@ -1,0 +1,3 @@
+MemAvailable:   23917416 kB
+GPUActive:         52968 kB
+GPUReclaim:      5176604 kB

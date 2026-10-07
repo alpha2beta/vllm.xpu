@@ -1,0 +1,6 @@
+device selector: level_zero:gpu
+torch 2.13.0+xpu xpu available: True
+device count: 1
+device name: Intel(R) Arc(TM) Graphics
+matmul sum: -338.11419677734375
+alloc 0.5GB ok: (268435456,)

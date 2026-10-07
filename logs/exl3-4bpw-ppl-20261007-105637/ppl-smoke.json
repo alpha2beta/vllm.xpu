@@ -1,0 +1,10 @@
+{
+  "model": "models/turboderp-Qwen3.8-27B-exl3-4.00bpw",
+  "dataset": "wikitext-2-raw-v1 test",
+  "method": "non-overlapping 4096-tok chunks, prompt_logprobs, skip chunk-first tokens",
+  "tokens": 8190,
+  "nll": 1.8799686393785466,
+  "ppl": 6.553299343428588,
+  "chunks": 2,
+  "seconds": 158.1
+}

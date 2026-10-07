@@ -1,0 +1,6 @@
+MemTotal:       32376880 kB
+MemAvailable:   17448564 kB
+SwapTotal:      32376828 kB
+SwapFree:       31352856 kB
+GPUActive:        374788 kB
+GPUReclaim:     11702888 kB
