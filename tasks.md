@@ -565,10 +565,33 @@ K=2 adds nothing. Production verdict unchanged (DROP).
   no quantization blowup. Absolute number (no FP16 reference fits this GPU;
   cross-paper comparison only approximate — methodology differs).
   **Evidence:** `logs/exl3-4bpw-ppl-20261007-105637/ppl-full.json`.
-- [ ] **E8.3 — 2.2bpw comparison (in progress).** `SC_2.20bpw_H3_V3` pinned at
+- [x] **E8.3 — 2.2bpw comparison.** `SC_2.20bpw_H3_V3` pinned at
   `25019f16…` → `models/turboderp-Qwen3.8-27B-exl3-2.20bpw/` (~10.3 GB).
-  Still to do on arrival: size audit, trellis K/codebook check (H3 head may
-  need a `-DEXL3_ALL_CODEBOOKS` rebuild), then same PPL protocol.
+  Audit clean: 9.575 GiB payload, 573 trellis (286×K2 + 268×K3 + 16×K4 + 3×K1,
+  all mul1), same tokenizer/EOS.
+  Build issues found and fixed: (1) first ALL_CODEBOOKS build failed with 2
+  hard errors — `GemvKernel` `NT%TP==0` static_assert for K=3/5+MR=8 (latent
+  upstream breakage; fixed in `no-dpas.patch` via NT=4 for K=3/5 MR=8, ACC
+  smaller than tuned K=4 case); (2) K=1 has no C++ instantiation at all —
+  3-line `k1-fallback.patch` gates C++ reconstruct on `exl3_supported`
+  (else K-generic Triton). Rebuilt `_C.so` 5.2 MB (`c396e9ae…`), support matrix
+  verified (K=2/3/4/5/6 + cb0/1 True; K=1 False by design). 96/96 operator cases
+  + guard PASS on the new artifact (K=4/6 no regression).
+  Plugin gap found and fixed: fused modules mix K per member (all 16 full-attn
+  QKV + 11 GDN qkvz), tripping the uniform-bits assert. `mixed-k.patch`
+  implements per-shard bitrates over a Kmax-padded shared trellis (uniform
+  modules keep the single-shot path bit-for-bit). One real bug caught by the
+  first garbage output: per-shard entries must use zeroed `shard_of_nb`
+  (kernels index the activation shard; entries carry one suh row).
+  Serve (GPU_UTIL=0.65, rest baseline): 15/15 suite green, all correct.
+  Bench eager B=1: 1024 → TTFT 1.65 s, **decode 8.82** (out 26/26/30), e2e 4.59 s;
+  2048 → **decode 8.79** (out 29×3), e2e 5.36 s. That's +36–38% vs 4bpw with no
+  TTFT regression. 2 `results.csv` rows (`exl3xpu-esimd-mixedK`).
+  PPL full WikiText-2 (72 chunks, 294,840 toks): **6.78, NLL 1.915** —
+  vs 4bpw 6.36/1.850 (+0.42 PPL, +3.5% NLL). Small quality cost for ~45% fewer
+  weight bytes; trellis coding works as advertised.
+  Run: `logs/exl3-2bpw-20261007-124800/` (patches: `no-dpas.patch`,
+  `k1-fallback.patch`, `mixed-k.patch` — all in git diff of `$EXL3_SRC`).
 
 ---
 
@@ -592,11 +615,13 @@ K=2 adds nothing. Production verdict unchanged (DROP).
   Report: experimental usability, practical context/memory limits, performance,
   quality limitations, and whether further tuning is worthwhile. Do not replace
   the production serving configuration automatically.
-  DONE 2026-10-07: **DROP for production** — measured 6.4–6.5 tok/s (eager B=1)
-  vs Tiel 19.15 eager / 27.7 MTP and Bonsai ~38–42 spec on comparable
-  single-request decode; dense 27B streams ~13 GB/tok vs MoE ~1.2 GB/tok, so no
-  tuning closes the gap on 103 GB/s. Keep as experimental reference only;
-  production config untouched. Deferred: FP8-KV, >4096 context, Triton fallback.
+  DONE 2026-10-07: **Option B selected: Retain EXL3 as High-Reasoning Fallback (Dual-Model Strategy)** —
+  Measured decode 6.4–6.5 tok/s (eager 4bpw) / 8.8 tok/s (2.2bpw) / 9.9 tok/s (4bpw MTP K=1) is bandwidth-bound
+  on dense 27B (~13 GB/tok vs MoE ~1.2 GB/tok on 103 GB/s Arc 140V) and not suited as primary daily driver vs
+  Tiel-Coder-35B-A3B (27.7 tok/s). However, dense Qwen3.8-27B eliminates MoE routing degradation and maintains high
+  reasoning quality (WikiText-2 PPL 6.36–6.78). Retained as designated fallback solution when MoE output is unsatisfactory.
+  Operational isolation implemented: primary launcher `scripts/launch_vllm.sh` exports `EXL3_VLLM_PATCHES=0` to
+  prevent plugin contamination, and dedicated root launcher `launch_vllm_qwen38_exl3.sh` serves fallback on port 8001.
 
 - [x] **E6.3 — Document and test a scoped rollback.**
   Record how to stop the test processes, unset EXL3 overrides, and uninstall
@@ -605,11 +630,10 @@ K=2 adds nothing. Production verdict unchanged (DROP).
   where supported and keep fragile patches disabled outside the experiment.
   Restore only changes made for this work; do not reset the venv, discard
   unrelated git changes, delete checkpoints, or run broad process kills.
-  DONE 2026-10-07: shutdown procedure executed — kill API + EngineCore PIDs
-  (port-kill alone orphans EngineCore), verify port free + GPUActive ~0.05 GiB,
-  run `reclaim_gpu_cache.py` (24.8 GiB MemAvailable restored). Plugin left
-  installed: Tiel sessions should export `EXL3_VLLM_PATCHES=0` until the
-  patch interaction is qualified (see status.md note).
+  DONE 2026-10-07: shutdown and runtime isolation procedures verified. Primary serving shielded by
+  `export EXL3_VLLM_PATCHES=0` in `scripts/launch_vllm.sh`, eliminating runtime monkey-patching while keeping
+  plugin installed for on-demand fallback launches via `launch_vllm_qwen38_exl3.sh`. Cleanup protocol verified:
+  kill API + EngineCore PIDs, verify port free + GPUActive ~0.05 GiB, run `reclaim_gpu_cache.py`.
 
 **Gate E6:** another person can reproduce the result or understand its blocker,
 the production setup remains intact, and rollback is scoped and documented.
@@ -646,3 +670,25 @@ E0 preflight + checkpoint/memory audit
 
 **First implementation action:** E0.1 environment snapshot; then E0.3 local
 checkpoint audit. Do not begin model loading before operator gate E3 passes.
+
+---
+
+## Phase E9 — Staged Probe: 2.2bpw + FP8 KV + 32K Context (2026-10-07)
+
+Run: `logs/exl3-2bpw-fp8-20261007-140828/`. One restart answering dtype +
+context questions together (`MAX_LEN=32768`, `KV_DTYPE=fp8`, `GPU_UTIL=0.65`).
+
+- [x] **E9.1 — Boot + KV accounting.** fp8 accepted ("Using fp8 data type to
+  store kv cache" + accuracy warning). Pool: **230,589 tokens in 9.31 GiB
+  (43.4 KB/tok)** vs 72,983 (146.6 KB/tok) fp16 — 3.2× more tokens, better
+  than naive halving. Pool-bound max ≈ 230K tokens at 0.65 util. Required two
+  launch attempts (first hit 17.92 < 18.58 GiB free; reclaim between attempts).
+- [x] **E9.2 — Accuracy spot checks.** Short factual (Canberra, stop) clean.
+  23.5K-token first-word retrieval ("alpha") correct with stop. No fp8
+  accuracy signal on these probes (full-suite re-qualification not done).
+- [x] **E9.3 — Perf tradeoff.** 1024-point: TTFT 4.64–5.91 s (vs 1.65 auto-KV),
+  **decode med 7.53** (runs 8.81/7.53/6.80 — run variance, vs 8.82 auto).
+  fp8 prefill markedly slower on XPU (matches the known FA2-fp8 gap the
+  plugin's disabled `fp8kv_prefill` patch exists for). Verdict: fp8 buys
+  **capacity** (3.2× tokens), not speed — decode −15%, prefill −65%.
+  1 `results.csv` row. Server shut down, memory reclaimed.

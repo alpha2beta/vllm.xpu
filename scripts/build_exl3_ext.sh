@@ -41,9 +41,10 @@ echo "CXX11 ABI: $ABI"
 
 # Baseline flags (see logs/<run>/baseline-env.sh): no ALL_CODEBOOKS needed for
 # K=4/6 mul1; DNNL explicitly off (no oneDNN tree on this machine).
+# Override with EXL3_FLAGS="-DEXL3_ALL_CODEBOOKS" for low-bitrate checkpoints.
 export EXL3_NO_DNNL=1
-unset EXL3_FLAGS || true
-echo "EXL3_FLAGS: ${EXL3_FLAGS-<unset>}  EXL3_NO_DNNL=$EXL3_NO_DNNL"
+export EXL3_FLAGS="${EXL3_FLAGS:-}"
+echo "EXL3_FLAGS: ${EXL3_FLAGS:-<unset>}  EXL3_NO_DNNL=$EXL3_NO_DNNL"
 
 FRESH="$EXL3_SRC/exl3xpu/_C.so.fresh-$(date +%Y%m%d-%H%M%S)"
 rm -f "$FRESH"
@@ -51,7 +52,7 @@ echo "fresh output: $FRESH"
 
 # shellcheck disable=SC2086
 icpx -fsycl -fsycl-targets=spir64 -O3 -ffast-math -fPIC -std=c++17 -shared \
-  -fsycl-device-code-split=per_kernel "-D_GLIBCXX_USE_CXX11_ABI=$ABI" \
+  -fsycl-device-code-split=per_kernel "-D_GLIBCXX_USE_CXX11_ABI=$ABI" ${EXL3_FLAGS:-} \
   -I "$EXL3_SRC/csrc" -I"$T/include" -I"$T/include/torch/csrc/api/include" \
   -x c++ "$EXL3_SRC/csrc/exl3_ops.sycl" -x none -o "$FRESH" \
   -L"$T/lib" -Wl,-rpath,"$T/lib" -lc10 -ltorch -ltorch_cpu -lc10_xpu -ltorch_xpu

@@ -1,0 +1,156 @@
+{
+  "model": "models/turboderp-Qwen3.8-27B-exl3-2.20bpw",
+  "checks": {
+    "lm_head_quantized": true,
+    "in_proj_ba_unquantized": true,
+    "fused_qkv_present": true,
+    "qkvz_split_present": true
+  },
+  "warnings": [
+    "crc32.txt recorded only; checksum format not validated"
+  ],
+  "architectures": [
+    "Qwen3_5ForConditionalGeneration"
+  ],
+  "model_type": "qwen3_5",
+  "quant_top": {
+    "quant_method": "exl3",
+    "version": "1.4.2",
+    "bits": 2.2,
+    "head_bits": 3,
+    "codebook": "mul1",
+    "mtp_bits": 2,
+    "out_scales": "always",
+    "calibration": {
+      "rows": 250,
+      "cols": 2048
+    }
+  },
+  "tensor_storage_modules": 707,
+  "tensor_storage_bpw": {
+    "1": 3,
+    "2": 278,
+    "3": 104,
+    "4": 16
+  },
+  "indexed_tensors": 3080,
+  "index_total_size": 10280596468,
+  "shard_files": [
+    "model-00001-of-00002.safetensors",
+    "model-00002-of-00002.safetensors"
+  ],
+  "tensors_missing_from_shards": [],
+  "tensors_missing_count": 0,
+  "tensors_extra_in_shards": [],
+  "tensors_extra_count": 0,
+  "group_bytes": {
+    "lm_head": 477281284,
+    "embeddings": 2542796800,
+    "decoder_layers": 6755992128,
+    "vision": 398057872,
+    "mtp": 106468384
+  },
+  "group_counts": {
+    "lm_head": 4,
+    "embeddings": 1,
+    "decoder_layers": 2049,
+    "vision": 987,
+    "mtp": 39
+  },
+  "group_gib": {
+    "lm_head": 0.4445,
+    "embeddings": 2.3682,
+    "decoder_layers": 6.292,
+    "vision": 0.3707,
+    "mtp": 0.0992
+  },
+  "total_payload_bytes": 10280596468,
+  "suffix_counts": {
+    "mul1": 573,
+    "suh": 573,
+    "svh": 573,
+    "weight": 445,
+    "A_log": 48,
+    "dt_bias": 48,
+    "trellis": 573,
+    "bias": 247
+  },
+  "trellis_K_counts": {
+    "3": 268,
+    "4": 16,
+    "2": 286,
+    "1": 3
+  },
+  "trellis_shape_samples": {
+    "model.language_model.layers.0.linear_attn.in_proj_qkv.trellis": [
+      320,
+      640,
+      48
+    ],
+    "model.language_model.layers.0.linear_attn.in_proj_z.trellis": [
+      320,
+      384,
+      64
+    ],
+    "model.language_model.layers.0.linear_attn.out_proj.trellis": [
+      384,
+      320,
+      48
+    ],
+    "model.language_model.layers.0.mlp.down_proj.trellis": [
+      1088,
+      320,
+      32
+    ],
+    "model.language_model.layers.0.mlp.gate_proj.trellis": [
+      320,
+      1088,
+      16
+    ],
+    "model.language_model.layers.0.mlp.up_proj.trellis": [
+      320,
+      1088,
+      16
+    ],
+    "model.language_model.layers.1.linear_attn.in_proj_qkv.trellis": [
+      320,
+      640,
+      32
+    ],
+    "model.language_model.layers.1.linear_attn.in_proj_z.trellis": [
+      320,
+      384,
+      32
+    ]
+  },
+  "scale_dtypes": {
+    "F16": 1146
+  },
+  "tokenizer": {
+    "bos_token_id_cfg": 248044,
+    "eos_token_id_cfg": 248044,
+    "eos_gen": [
+      248046,
+      248044
+    ],
+    "chat_template_file": true,
+    "tokenizer_eos_id": "<|im_end|>",
+    "apply_chat_template_ok": true,
+    "decoded_eos": [
+      "<|im_end|>",
+      "<|endoftext|>"
+    ]
+  },
+  "crc32_txt": [
+    "cf59f3ab  chat_template.jinja",
+    "ac8d98f1  generation_config.json",
+    "1824fcb5  merges.txt",
+    "030e383a  preprocessor_config.json",
+    "6b61f895  tokenizer.json",
+    "7adf2118  tokenizer_config.json",
+    "44c041dc  video_preprocessor_config.json",
+    "da8db314  vocab.json"
+  ],
+  "errors": [],
+  "ok": true
+}

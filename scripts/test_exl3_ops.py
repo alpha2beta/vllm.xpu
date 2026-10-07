@@ -85,6 +85,11 @@ def main() -> int:
         ("decoder-K4", 512, 512, 4, 2),
         ("mlp-wide-K4", 512, 1024, 4, 2),
         ("lmhead-K6", 512, 256, 6, 2),
+        # 2.2bpw checkpoint coverage (needs EXL3_ALL_CODEBOOKS build for K=2/3;
+        # K=1 has no C++ instantiation: triton-only via the k1-fallback patch).
+        ("bpw22-K3", 512, 512, 3, 2),
+        ("bpw22-K2", 512, 512, 2, 2),
+        ("bpw22-K1-triton", 512, 256, 1, 2),
     ]
     for name, k, n, K, cb in configs:
         trellis, suh, svh, shard, bounds = make_tensors(k, n, K, cb, args.device)

@@ -55,6 +55,16 @@ Phase 9 outcome: **eager + `--max-num-seqs 2`** selected (+35 % aggregate throug
 4. **Python 3.12.14** (vLLM XPU docs mark 3.12 as mandatory for the XPU wheel).
 5. First load test will use **text-only instantiation + no speculative decoding** to
    keep resident weights ≈20.5 GB instead of 23.1 GB.
+6. **Primary Production Serving: `Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4` (Config G)**.
+   Deployed with MTP $K=2$, eager execution, achieving **27.69 tok/s** decode (port 8080).
+   Selected as the primary daily driver for coding and general tasks due to MoE memory bandwidth efficiency (~1.2 GB/tok vs dense ~13 GB/tok).
+7. **Option B Selected: `Qwen3.8-27B-exl3` retained as Designated High-Reasoning Fallback**.
+   Dense 27B architecture eliminates MoE routing artifacts and preserves high reasoning fidelity
+   (WikiText-2 PPL 6.36 at 4.00bpw, 6.78 at 2.20bpw), serving as quality fallback when 35B A3B
+   fails to generate satisfying code/reasoning results, despite lower decode throughput (6.5–9.9 tok/s).
+   Operational isolation implemented: symmetrical launcher `launch_vllm_qwen38_exl3.sh` (port 8001), while
+   primary launcher `scripts/launch_vllm.sh` enforces `export EXL3_VLLM_PATCHES=0` to eliminate
+   runtime monkey-patch contamination.
 
 ## Blockers
 
@@ -463,7 +473,7 @@ eager E-core baseline 12.69–13.95.
 
 ## EXL3 4.00bpw on Arc 140V (2026-10-07, experimental)
 
-**Result: plugin works on Xe2-LPG with a no-DPAS patch; dense-27B decode 6.4–6.5 tok/s — not competitive with Tiel MoE (19–28) or Bonsai (~38–42). Recommend DROP for production; keep as experimental reference.**
+**Result: plugin works on Xe2-LPG with a no-DPAS patch; dense-27B decode 6.4–6.5 tok/s — slower than Tiel MoE (19–28 tok/s). Retained under Option B as designated high-reasoning fallback.**
 
 - Source: `0xSero/exl3xpu` pinned `15ded2f3` + 12-line `no-dpas.patch`
   (`g_vec_max_m` 2→8 with MR=1/2/4/8 tail coverage; `fused_small` declines M>2;
@@ -483,16 +493,15 @@ eager E-core baseline 12.69–13.95.
   otherwise); `fuser -k 8001` orphans `VLLM::EngineCore` holding ~18 GB —
   kill it directly, then reclaim before restart. Steady-state flat
   (MemAvailable ~2.4–4.2 GiB, swap counters static). Qualified MAX_LEN=4096 only.
-- Rollback: stop API server + EngineCore (verify port free + GPUActive ~0.05),
-  then `reclaim_gpu_cache.py`. NOTE: the installed `exl3xpu` entry point runs
-  `register()` in every vLLM process, applying `vllm_patches` unless
-  `EXL3_VLLM_PATCHES=0` is exported — untested interaction with Tiel serving.
-  Until qualified, export `EXL3_VLLM_PATCHES=0` in Tiel sessions or
-  `pip uninstall exl3xpu`.
+- Rollback & Isolation: stop API server + EngineCore (verify port free + GPUActive ~0.05),
+  then `reclaim_gpu_cache.py`. Symmetrical fallback launcher `launch_vllm_qwen38_exl3.sh`
+  runs on port 8001. Production launcher `scripts/launch_vllm.sh` explicitly exports
+  `EXL3_VLLM_PATCHES=0`, isolating Tiel serving from runtime monkey patches while keeping
+  the plugin installed for on-demand fallback.
 
 ## EXL3 MTP speculation (2026-10-07, same checkpoint)
 
-**Result: MTP K=1/K=2 both function on the no-DPAS path; decode improves but end-to-end loses on short outputs. No change to DROP verdict.**
+**Result: MTP K=1/K=2 both function on the no-DPAS path; decode improves (up to 9.9 tok/s) but end-to-end loses on short outputs due to TTFT overhead.**
 
 | Config | 1024 decode / e2e | 2048 decode / e2e |
 |---|---|---|
@@ -516,3 +525,17 @@ not just the port.
 6.55 on 2 chunks. Healthy ~27B range — no quant blowup. Harness:
 `scripts/eval_exl3_ppl.py`; result `logs/exl3-4bpw-ppl-20261007-105637/ppl-full.json`.
 2.2bpw comparison pending download (`SC_2.20bpw_H3_V3` @ `25019f16…`).
+
+## EXL3 2.2bpw comparison (2026-10-07)
+
+**Serve + bench + PPL all green: decode 8.8 tok/s (+36–38% vs 4bpw), PPL 6.78 vs 6.36.** Required real plugin work (3 local patches, all saved under `logs/exl3-2bpw-20261007-124800/`):
+`no-dpas.patch` (+NT=4 fix for K=3/5 MR=8 — upstream ALL_CODEBOOKS never compiled),
+`k1-fallback.patch` (Triton reconstruct for K=1, no C++ instantiation exists),
+`mixed-k.patch` (per-shard bitrates over Kmax-padded trellis; caught + fixed a
+`shard_of_nb` activation-indexing bug via garbage-output differential).
+Eager B=1: 1024 → 8.82 tok/s / 4.59 s; 2048 → 8.79 / 5.36 s (2 `results.csv` rows).
+Quality cost of ~45% fewer bytes is small (+0.42 PPL). Retained under Option B as quality fallback.
+
+## EXL3 staged probe: 2.2bpw + FP8 KV + 32K (2026-10-07)
+
+**Pool-bound max ≈ 230K tokens at 0.65 util (230,589 in 9.31 GiB, 43.4 KB/tok — 3.2× the fp16 pool).** fp8 boots clean; short + 23.5K retrieval probes accurate. Tradeoff: fp8 prefill −65% (TTFT 4.7 vs 1.65 s), decode −15% (7.53 vs 8.82) — capacity, not speed. 64K+ still untested; fp8 needs full-suite re-qualification before trusted use. Evidence: `logs/exl3-2bpw-fp8-20261007-140828/`, 1 `results.csv` row.
