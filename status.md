@@ -575,3 +575,17 @@ Quality cost of ~45% fewer bytes is small (+0.42 PPL). Retained under Option B a
 
 - **Artifacts:** `results_bonsai_ptq1_16p.json`, `results_bonsai_pq2_16p.json`, `results_qwen_2bpw_16p.json`, `results_qwen_2.5bpw_16p.json`.
 
+## Challenging 10-Task Hard Benchmark: Qwen3.8-27B 2.20bpw vs. Ternary Bonsai PTQ1_0 (2026-10-08)
+
+**Result: Evaluated at `ctx=16384` with Q8/FP8 KV cache on Arc 140V. Both models scored 7/10 (70.0%), but revealed starkly differentiated capability profiles: Qwen 2.20bpw dominated complex mathematical combinatorics (Math 2/2 vs 1/2) and ran 1.7x faster overall, while Ternary Bonsai PTQ1_0 demonstrated superior LeetCode Hard algorithmic coding (Code 2/3 vs 0/3).**
+
+| Model & Quantization | Total Score | Long-Ctx 12.5K (2) | Olympiad Math (2) | LeetCode Hard (3) | Logic / Constraints (3) | Suite Latency |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Qwen3.8-27B EXL3 2.20bpw** (7.4 GiB) | **7 / 10 (70.0%)** | **2/2 (100%)** | **2/2 (100%)** | 0/3 (0%) | **3/3 (100%)** | **1014.8s (16.9 min)** |
+| **Ternary Bonsai PTQ1_0** (5.6 GiB) | **7 / 10 (70.0%)** *(8/10)* | **2/2 (100%)** | 1/2 (50%) | **2/3 (66.7%)** | 2/3 (66.7%) | 1749.6s (29.2 min) |
+
+- **Long-Context Robustness (12.5K tokens in 8-bit KV):** Both models achieved 100% (2/2) on deep needle retrieval (`long_ctx_multihop_needle`, finding operator OSPREY at 25% depth and key-hash `9f8a-c4e1-22b0` at 75% depth) and buried budget amendment resolution (`long_ctx_distractor_amendment`). vLLM chunked prefill completed the 12.5K prefill 2.1x faster than llama.cpp SYCL (85.1s vs 182.6s).
+- **Olympiad Math:** Both solved Chinese Remainder Theorem ($x=3386$). On bounded 4-variable combinatorics ($a+b+c+d=24$, exact count 301), Qwen solved the problem completely within its budget (205.6s), whereas Bonsai's thinking trace hit generation limits.
+- **LeetCode Hard Algorithmic Coding:** Bonsai PTQ1_0 passed Trapping Rain Water (8/8 unit assertions) and Minimum Window Substring with duplicates. Qwen 2.20bpw failed all 3 algorithmic tests due to edge-case bugs.
+- **Artifacts:** `results_hard_qwen_2.2bpw.json`, `results_hard_bonsai_ptq1.json`, `scripts/bench_hard_suite.py`.
+

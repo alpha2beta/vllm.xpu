@@ -610,7 +610,13 @@ K=2 adds nothing. Production verdict unchanged (DROP).
   while consuming the smallest disk and VRAM footprint in the entire benchmark. Probed the single failed test (`format_no_letter_e`):
   demonstrated that `ctx=4096` was never truncated, and the test failed solely because `xhigh` reasoning consumed all 2048 generation tokens
   before emitting `</think>`. With `reasoning_effort=low`, PTQ1_0 solved the negative constraint in 93.9s (*"That salty, vast body of fluid is grand."*),
-  achieving **16/16 (100%)**.
+- [x] **E8.7 — Challenging 10-Task Hard Benchmark at 16K context (Qwen 2.20bpw vs. Bonsai PTQ1_0).**
+  Created `scripts/bench_hard_suite.py` testing 12.5K-token multi-hop needle retrieval, distractor resolution,
+  Olympiad math (Chinese Remainder Theorem, bounded combinatorics), LeetCode Hard algorithms (Trapping Rain Water,
+  LRU Cache, Min Window Substring), and multi-constraint logic. Evaluated at `ctx=16384` with Q8/FP8 KV cache.
+  Both models scored **7/10 (70.0%)**, revealing stark divergence: Qwen dominated Olympiad Math (2/2 vs 1/2) and was
+  1.7x faster overall, while Bonsai PTQ1_0 dominated LeetCode Hard coding (2/3 vs 0/3). Both achieved 100% (2/2) on 12.5K
+  long-context retrieval. Artifacts: `results_hard_qwen_2.2bpw.json`, `results_hard_bonsai_ptq1.json`.
 
 ---
 
