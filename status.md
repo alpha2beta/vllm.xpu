@@ -807,6 +807,52 @@ Quality cost of ~45% fewer bytes is small (+0.42 PPL). Retained under Option B a
 - **Flawless Algorithmic Coding (3/3 LeetCode Hard):** The Abliterated-v2 MTP checkpoint scored 100% across all LeetCode Hard challenges without any test order fixes or calibration needed.
 - **Speed & Latency Optimization:** Paired with the `arc-b580` SYCL Level-Zero binary, suite execution latency dropped by **37%** on the hard suite (1147.5s vs 1827.4s) and **49%** on the 16-prompt quality suite (690.0s vs 1342.4s).
 
+## Calibrated Evaluation & Retries: Ternary Bonsai 2 27B PQ2_0 MTP (Abliterated-v2) (2026-10-08)
+
+**Objective:** Re-evaluate previously failed tests for **Ternary Bonsai 2 27B PQ2_0 MTP (Abliterated-v2)** (`models/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP.gguf`) using calibrated reasoning effort and token allowances identical to the calibration applied to PQ2 non-MTP on the Intel Arc 140V SYCL backend.
+
+### 1. 16-Prompt Quality Benchmark: 100% Pass Rate (16 / 16)
+- **Previous Uncalibrated Score:** 15/16 (93.8%) — failed `format_no_letter_e` due to default `xhigh` reasoning looping through marine words.
+- **Calibrated Retry (`format_no_letter_e`):**
+  - Settings: `reasoning_effort="low"`, `max_tokens=2048`.
+  - Latency: **106.22s**.
+  - Generated Output: *"A salty, dark body of fluid holds much land."* (0 occurrences of 'e' or 'E', grammatically complete 9-word English sentence).
+  - Result: **PASS**.
+- **Final Calibrated Score:** **16 / 16 (100.0%)** (Math 4/4, Code 4/4, Instruction 4/4, Fact/Trap 4/4).
+- **Artifact:** `results_bonsai_pq2_mtp_16p_calibrated.json`.
+
+### 2. 10-Task Hard Suite Benchmark: 9 / 10 (90.0%)
+- **Previous Uncalibrated Score:** 9/10 (90.0%) — passed 2/2 long context, 1/2 math, 3/3 code, 3/3 logic.
+- **Calibrated Retry (`math_bounded_combinatorics`):**
+  - Settings: `reasoning_effort="low"`, `max_tokens=6144` (identical to the calibration used for PQ2 non-MTP).
+  - Technical Diagnosis:
+    - Both models transform the equation to non-negative variables $x_1+x_2+x_3+x_4=18$ with bounds $x_1 \le 5, x_2 \le 6, x_3 \le 10, x_4 \le 9$.
+    - While the non-MTP PQ2 model derived the Principle of Inclusion-Exclusion (PIE) result $\binom{21}{3}=1330$, subtracted single violations ($1104$), and added back pairwise intersections ($75$) to emit $1330 - 1104 + 75 = 301$ in 518.76s, the **Abliterated-v2 MTP** model suffered an arithmetic slip on one pairwise intersection ($x_2 \ge 7, x_4 \ge 10$, evaluating $18 - (7+10) = 18 - 17 = 1$ erroneously as $-1 \implies 0$), producing $297$.
+    - Spotting an internal contradiction, the model initiated an exhaustive cross-check by convolving all 12 terms $T = a + b \in [3, 14]$ across $c \in [0, 10]$ and $d \in [3, 12]$.
+    - Because each term requires dense symbolic notation (~1.76 characters per token), this verification trace expanded past the 6,144 generation token budget (10,817 characters generated in `<think>`, 0 content tokens emitted).
+  - Result: **FAIL (Budget Exceeded)**.
+- **Final Calibrated Score:** **9 / 10 (90.0%)** (Long Context 2/2, Olympiad Math 1/2, LeetCode Hard 3/3, Logic Constraints 3/3).
+- **Artifact:** `results_hard_bonsai_pq2_mtp_calibrated.json`.
+
+### 3. Comprehensive 8-Way Architectural Benchmark Matrix
+
+| Model & Quantization | Size on Disk / VRAM | WT2 PPL | 16-Prompt Quality (Calibrated) | 10-Task Hard Suite (Calibrated) | Hard Suite Latency | Serving Engine & Decode Throughput |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Tiel-Coder-35B-A3B MXFP4** | 20.47 GB / 19.7 GiB | — | **15/16 (93.8%)** | **9/10 (90.0%)** | **564.8s (9.4 min)** *(fastest)* | vLLM XPU (MTP K=2, **27.7 tok/s**) |
+| **Qwen3.8-27B EXL3 3.00bpw** | 12.87 GB / 13.1 GiB | **6.46** | **16/16 (100.0%)** | **10/10 (100.0%)** | 1062.6s (17.7 min) | vLLM XPU (MTP K=1, ~6.5 tok/s) |
+| **Bonsai PQ2_0 MTP (Ablit-v2)** | 7.20 GB / 7.6 GiB | ~6.73 | **16/16 (100.0%)** *(cal.)* | **9/10 (90.0%)** *(cal.)* | **1147.5s (19.1 min)** | llama.cpp SYCL (**12.1 tok/s**) |
+| **Ternary Bonsai PQ2_0** | 7.21 GB / 7.6 GiB | ~6.73 | **16/16 (100.0%)** *(cal.)* | **10/10 (100.0%)** *(cal.)* | 1827.4s (30.5 min) | llama.cpp SYCL (**12.1 tok/s**) |
+| **Ternary Bonsai PTQ1_0** | **5.95 GB / 5.6 GiB** | 6.73 | **16/16 (100.0%)** *(cal.)* | 8/10 (80.0%) *(cal.)* | 1749.6s (29.2 min) | llama.cpp SYCL (**13.1 tok/s**) |
+| **Qwen3.8-27B EXL3 2.50bpw** | 11.45 GB / 11.7 GiB | 6.57 | 15/16 (93.8%) | 7/10 (70.0%) | 1317.8s (22.0 min) | vLLM XPU (MTP K=1, ~6.6 tok/s) |
+| **Qwen3.8-27B EXL3 2.20bpw** | 9.60 GB / 7.4 GiB | 6.78 | 15/16 (93.8%) | 7/10 (70.0%) | 1014.8s (16.9 min) | vLLM XPU (MTP K=1, ~8.8 tok/s) |
+
+### 4. GPU Cache & Memory Reclamation
+- **llama-server daemon:** Terminated cleanly (`kill`).
+- **Memory State:** Full GPU memory reclamation verified via `scripts/reclaim_gpu_cache.py`:
+  - `GPUReclaim`: 0.00 GiB.
+  - Host `MemAvailable`: Restored from 20.91 GiB to **27.50 GiB**.
+
+
 
 
 

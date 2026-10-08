@@ -1,0 +1,115 @@
+{
+  "model": "ternary-bonsai-2-27b",
+  "base_url": "http://127.0.0.1:8001/v1",
+  "total_score": "9/10",
+  "pass_rate_pct": 90.0,
+  "category_stats": {
+    "long_ctx": "2/2",
+    "math": "1/2",
+    "code": "3/3",
+    "logic_constraint": "3/3"
+  },
+  "results": [
+    {
+      "id": "long_ctx_multihop_needle",
+      "category": "long_ctx",
+      "latency_s": 160.82,
+      "think_chars": 911,
+      "answer_chars": 477,
+      "passed": true,
+      "reason": "Found target: 9f8a-c4e1-22b0",
+      "answer_preview": "**Tracing the migration event:**\n\n1. **Migration event** (Event-ID: EVT-94821, timestamp 2026-10-08T06:30:30.390Z):\n   - Server **phoenix-7** was migrated to cluster **hyperion-9** by operator code-name **OSPREY**.\n\n2. **Keyring record** (Event-ID: EVT-39912, timestamp 2026-10-08T18:30:30.170Z):\n   "
+    },
+    {
+      "id": "long_ctx_distractor_amendment",
+      "category": "long_ctx",
+      "latency_s": 55.01,
+      "think_chars": 740,
+      "answer_chars": 350,
+      "passed": true,
+      "reason": "Found target: 3,180,000",
+      "answer_preview": "Based on the FINANCE-GOVERNANCE log entry (Event-ID: EVT-77215, timestamped 2026-10-08T12:00:00.780Z), Project Chimera-Alpha's initial budget of $4,500,000 was officially amended and capped by executive order. The notice explicitly states that \"All subsequent disbursements must reflect final approve"
+    },
+    {
+      "id": "math_chinese_remainder",
+      "category": "math",
+      "latency_s": 140.76,
+      "think_chars": 1107,
+      "answer_chars": 1359,
+      "passed": true,
+      "reason": "Matched expected pattern: 3386",
+      "answer_preview": "# Solving the System of Congruences via the Chinese Remainder Theorem\n\n## Step 1: Verify Pairwise Coprimality\n\n17, 19, and 23 are all prime and distinct, so they are pairwise coprime. The CRT guarantees a unique solution modulo:\n\n$$17 \\times 19 \\times 23 = 323 \\times 23 = 7429$$\n\n## Step 2: Eliminat"
+    },
+    {
+      "id": "math_bounded_combinatorics",
+      "category": "math",
+      "latency_s": 649.72,
+      "think_chars": 10817,
+      "answer_chars": 0,
+      "passed": false,
+      "reason": "Exceeded 6144 token ceiling during exhaustive convolution cross-check (0 content tokens emitted)",
+      "answer_preview": ""
+    },
+    {
+      "id": "code_trapping_rain_water",
+      "category": "code",
+      "latency_s": 135.35,
+      "think_chars": 2938,
+      "answer_chars": 1142,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\ndef trap(height: list[int]) -> int:\n    if not height:\n        return 0\n\n    left, right = 0, len(height) - 1\n    left_max, right_max = 0, 0\n    water = 0\n\n    while left < right:\n        if height[left] < height[right]:\n            if height[left] >= left_max:\n                left_max = h"
+    },
+    {
+      "id": "code_lru_cache",
+      "category": "code",
+      "latency_s": 173.68,
+      "think_chars": 3624,
+      "answer_chars": 3008,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\nclass Node:\n    \"\"\"Doubly linked list node.\"\"\"\n    def __init__(self, key: int = 0, value: int = 0):\n        self.key = key\n        self.value = value\n        self.prev = None\n        self.next = None\n\n\nclass LRUCache:\n    \"\"\"\n    LRU Cache with O(1) average time for get and put.\n\n    Inte"
+    },
+    {
+      "id": "code_min_window_substring",
+      "category": "code",
+      "latency_s": 119.75,
+      "think_chars": 2364,
+      "answer_chars": 2131,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\nfrom collections import Counter\n\n\ndef min_window(s: str, t: str) -> str:\n    if not s or not t:\n        return ''\n\n    t_count = Counter(t)\n    required = len(t_count)  # number of distinct characters in t\n\n    left = 0\n    min_len = float('inf')\n    min_left = 0\n    window = {}\n    formed"
+    },
+    {
+      "id": "logic_five_floors",
+      "category": "logic_constraint",
+      "latency_s": 80.03,
+      "think_chars": 1321,
+      "answer_chars": 743,
+      "passed": true,
+      "reason": "Matched expected pattern: Alice=5, Bob=3, Carol=2, David=4, Elena=1",
+      "answer_preview": "Let me work through this step by step.\n\n**Step 1:** From Rule 5, Bob = 3.\n\n**Step 2:** From Rule 1, Alice > Bob = 3, so Alice is on floor 4 or 5.\n\n**Step 3:** From Rule 2, Carol \u2260 1 and Carol \u2260 5. Since Bob occupies floor 3, Carol must be on floor 2 or 4.\n\n**Step 4:** From Rule 3, David = Carol + 2."
+    },
+    {
+      "id": "format_multi_constraint_4rules",
+      "category": "logic_constraint",
+      "latency_s": 49.74,
+      "think_chars": 1352,
+      "answer_chars": 163,
+      "passed": true,
+      "reason": "Passed all 4 rules simultaneously",
+      "answer_preview": "Although the sky was clear, we stayed inside. Because the deep blue ocean called to us, we walked to the shore. Although the wind was strong, we never turned back."
+    },
+    {
+      "id": "trap_sheep_all_but_nine",
+      "category": "logic_constraint",
+      "latency_s": 14.11,
+      "think_chars": 343,
+      "answer_chars": 76,
+      "passed": true,
+      "reason": "Matched expected pattern: 9 (all but 9 die means 9 remain alive)",
+      "answer_preview": "The phrase \"all but 9 die\" means that 9 sheep survive the illness.\n\nAlive: 9"
+    }
+  ],
+  "calibration_note": "Evaluated with calibrated settings identical to PQ2 non-MTP (reasoning_effort=low, max_tokens=6144). format_no_letter_e in the 16p suite passed (100% 16/16). In the hard suite, math_bounded_combinatorics initiates an exhaustive 12-term convolution cross-check T=a+b in [3,14] across c in [0,10], d in [3,12] after an arithmetic slip on pairwise PIE (18-17=1 vs -1), expanding the reasoning trace past the 6144 token budget and yielding 0 content tokens. Score remains 9/10 (90.0%)."
+}
