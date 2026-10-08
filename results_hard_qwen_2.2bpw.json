@@ -1,0 +1,114 @@
+{
+  "model": "qwen3.8-27b-2.2bpw",
+  "base_url": "http://127.0.0.1:8001/v1",
+  "total_score": "7/10",
+  "pass_rate_pct": 70.0,
+  "category_stats": {
+    "long_ctx": "2/2",
+    "math": "2/2",
+    "code": "0/3",
+    "logic_constraint": "3/3"
+  },
+  "results": [
+    {
+      "id": "long_ctx_multihop_needle",
+      "category": "long_ctx",
+      "latency_s": 85.05,
+      "think_chars": 764,
+      "answer_chars": 208,
+      "passed": true,
+      "reason": "Found target: 9f8a-c4e1-22b0",
+      "answer_preview": "The migration event for server **phoenix-7** identifies the operator as **OSPREY**. The keyring record for operator **OSPREY** lists the cryptographic key-hash as **9f8a-c4e1-22b0**.\n\nKey-hash: 9f8a-c4e1-22b0"
+    },
+    {
+      "id": "long_ctx_distractor_amendment",
+      "category": "long_ctx",
+      "latency_s": 63.16,
+      "think_chars": 1179,
+      "answer_chars": 235,
+      "passed": true,
+      "reason": "Found target: 3,180,000",
+      "answer_preview": "The logs show that Project Chimera-Alpha\u2019s initial budget of $4,500,000 was amended and capped by executive order, with all subsequent disbursements required to reflect the final approved budget of $3,180,000.\n\nFinal budget: $3,180,000"
+    },
+    {
+      "id": "math_chinese_remainder",
+      "category": "math",
+      "latency_s": 171.62,
+      "think_chars": 1215,
+      "answer_chars": 2106,
+      "passed": true,
+      "reason": "Matched expected pattern: 3386",
+      "answer_preview": "We need the smallest positive integer \\(x\\) satisfying\n\n\\[\nx \\equiv 3 \\pmod{17}, \\qquad x \\equiv 4 \\pmod{19}, \\qquad x \\equiv 5 \\pmod{23}.\n\\]\n\nSince \\(17, 19, 23\\) are pairwise coprime, the Chinese Remainder Theorem guarantees a unique solution modulo\n\n\\[\n17 \\cdot 19 \\cdot 23 = 7429.\n\\]\n\n---\n\n### St"
+    },
+    {
+      "id": "math_bounded_combinatorics",
+      "category": "math",
+      "latency_s": 205.64,
+      "think_chars": 0,
+      "answer_chars": 3790,
+      "passed": true,
+      "reason": "Matched expected pattern in answer: 301",
+      "answer_preview": "We need answer math counting integer solutions to a+b+c+d=24 with bounds:\n1<=a<=6\n2<=b<=8\n0<=c<=10\n3<=d<=12\nNeed exact number. Need final line 'Total solutions: [number]'.\n\nWe need compute carefully. Let's solve.\n\nWe can transform variables to nonnegative:\na' = a-1, 0<=a'<=5\nb' = b-2, 0<=b'<=6\nc' = "
+    },
+    {
+      "id": "code_trapping_rain_water",
+      "category": "code",
+      "latency_s": 30.25,
+      "think_chars": 604,
+      "answer_chars": 461,
+      "passed": false,
+      "reason": "Assertion failed: Standard elevation test 1",
+      "answer_preview": "```python\ndef trap(height: list[int]) -> int:\n    left, right = 0, len(height) - 1\n    left_max = right_max = 0\n    water = 0\n\n    while left < right:\n        if left_max < right_max:\n            left_max = max(left_max, height[left])\n            water += left_max - height[left]\n            left += "
+    },
+    {
+      "id": "code_lru_cache",
+      "category": "code",
+      "latency_s": 135.02,
+      "think_chars": 3351,
+      "answer_chars": 1831,
+      "passed": false,
+      "reason": "Assertion failed: Key 2 was recently accessed, should remain",
+      "answer_preview": "```python\nclass Node:\n    __slots__ = (\"key\", \"value\", \"prev\", \"next\")\n\n    def __init__(self, key: int = 0, value: int = 0):\n        self.key = key\n        self.value = value\n        self.prev = None\n        self.next = None\n\n\nclass LRUCache:\n    def __init__(self, capacity: int):\n        self.capa"
+    },
+    {
+      "id": "code_min_window_substring",
+      "category": "code",
+      "latency_s": 128.65,
+      "think_chars": 3548,
+      "answer_chars": 805,
+      "passed": false,
+      "reason": "Assertion failed: Duplicate letters in target",
+      "answer_preview": "```python\nfrom collections import Counter\n\ndef min_window(s: str, t: str) -> str:\n    if not s or not t:\n        return \"\"\n\n    need = Counter(t)\n    remaining = len(t)\n\n    left = 0\n    best_start = 0\n    best_len = len(s) + 1\n\n    for right, ch in enumerate(s):\n        if ch in need:\n            n"
+    },
+    {
+      "id": "logic_five_floors",
+      "category": "logic_constraint",
+      "latency_s": 49.38,
+      "think_chars": 1027,
+      "answer_chars": 392,
+      "passed": true,
+      "reason": "Matched expected pattern: Alice=5, Bob=3, Carol=2, David=4, Elena=1",
+      "answer_preview": "Bob works on floor 3.  \nAlice must be higher than Bob, so Alice is on floor 4 or 5.  \nCarol cannot be on floor 1 or 5, and David is exactly two floors above Carol. Since Bob is on floor 3, Carol cannot be on floor 3, so Carol must be on floor 2.  \nTherefore David is on floor 4.  \nThe remaining floor"
+    },
+    {
+      "id": "format_multi_constraint_4rules",
+      "category": "logic_constraint",
+      "latency_s": 102.8,
+      "think_chars": 2985,
+      "answer_chars": 157,
+      "passed": true,
+      "reason": "Passed all 4 rules simultaneously",
+      "answer_preview": "Although the sky is clear, the wind blows softly.\nBecause the water is calm, we see the deep blue ocean.\nAlthough the sun sets early, the stars shine bright."
+    },
+    {
+      "id": "trap_sheep_all_but_nine",
+      "category": "logic_constraint",
+      "latency_s": 8.44,
+      "think_chars": 211,
+      "answer_chars": 8,
+      "passed": true,
+      "reason": "Matched expected pattern: 9 (all but 9 die means 9 remain alive)",
+      "answer_preview": "Alive: 9"
+    }
+  ]
+}
