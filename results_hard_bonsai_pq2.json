@@ -1,0 +1,114 @@
+{
+  "model": "ternary-bonsai-2-27b",
+  "base_url": "http://127.0.0.1:8002/v1",
+  "total_score": "8/10",
+  "pass_rate_pct": 80.0,
+  "category_stats": {
+    "long_ctx": "2/2",
+    "math": "1/2",
+    "code": "2/3",
+    "logic_constraint": "3/3"
+  },
+  "results": [
+    {
+      "id": "long_ctx_multihop_needle",
+      "category": "long_ctx",
+      "latency_s": 326.2,
+      "think_chars": 721,
+      "answer_chars": 210,
+      "passed": true,
+      "reason": "Found target: 9f8a-c4e1-22b0",
+      "answer_preview": "The migration event for server **phoenix-7** identifies the operator as **OSPREY**. The keyring record for operator **OSPREY** lists their cryptographic key-hash as **9f8a-c4e1-22b0**.\n\nKey-hash: 9f8a-c4e1-22b0"
+    },
+    {
+      "id": "long_ctx_distractor_amendment",
+      "category": "long_ctx",
+      "latency_s": 66.1,
+      "think_chars": 550,
+      "answer_chars": 123,
+      "passed": true,
+      "reason": "Found target: 3,180,000",
+      "answer_preview": "The final approved budget for Project Chimera-Alpha after the executive amendment was $3,180,000.\n\nFinal budget: $3,180,000"
+    },
+    {
+      "id": "math_chinese_remainder",
+      "category": "math",
+      "latency_s": 256.0,
+      "think_chars": 1423,
+      "answer_chars": 1419,
+      "passed": true,
+      "reason": "Matched expected pattern: 3386",
+      "answer_preview": "Smallest positive integer: 3386"
+    },
+    {
+      "id": "math_bounded_combinatorics",
+      "category": "math",
+      "latency_s": 357.8,
+      "think_chars": 3827,
+      "answer_chars": 0,
+      "passed": false,
+      "reason": "Did not find pattern for 301 in: ''",
+      "answer_preview": ""
+    },
+    {
+      "id": "code_trapping_rain_water",
+      "category": "code",
+      "latency_s": 61.0,
+      "think_chars": 777,
+      "answer_chars": 574,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "def trap(height: list[int]) -> int:"
+    },
+    {
+      "id": "code_lru_cache",
+      "category": "code",
+      "latency_s": 353.7,
+      "think_chars": 6493,
+      "answer_chars": 1678,
+      "passed": false,
+      "reason": "Execution error: NameError: name '_Node' is not defined",
+      "answer_preview": "class LRUCache:"
+    },
+    {
+      "id": "code_min_window_substring",
+      "category": "code",
+      "latency_s": 246.4,
+      "think_chars": 4449,
+      "answer_chars": 977,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\ndef min_window(s: str, t: str) -> str:\n    if not t:\n        return \"\"\n\n    need = {}\n    for ch in t:\n        need[ch] = need.get(ch, 0) + 1\n\n    required = len(need)\n    window = {ch: 0 for ch in need}\n    formed = 0\n\n    left = 0\n    best_len = len(s) + 1\n    best_left = 0\n    best_righ"
+    },
+    {
+      "id": "logic_five_floors",
+      "category": "logic_constraint",
+      "latency_s": 73.4,
+      "think_chars": 824,
+      "answer_chars": 481,
+      "passed": true,
+      "reason": "Matched expected pattern: Alice=5, Bob=3, Carol=2, David=4, Elena=1",
+      "answer_preview": "Bob is on floor 3.  \nAlice must be higher than Bob, so Alice is on floor 4 or 5.  \nCarol cannot be on floor 1 or 5, and David is exactly two floors above Carol.  \nIf Carol were on floor 4, David would be on floor 6, which is impossible.  \nSo Carol is on floor 2, and David is on floor 4.  \nThat leave"
+    },
+    {
+      "id": "format_multi_constraint_4rules",
+      "category": "logic_constraint",
+      "latency_s": 68.9,
+      "think_chars": 1437,
+      "answer_chars": 153,
+      "passed": true,
+      "reason": "Passed all 4 rules simultaneously",
+      "answer_preview": "Although the sky is clear, the wind feels cold.\nBecause the light fades, the deep blue ocean glows.\nAlthough the night is quiet, the stars remain bright."
+    },
+    {
+      "id": "trap_sheep_all_but_nine",
+      "category": "logic_constraint",
+      "latency_s": 17.91,
+      "think_chars": 352,
+      "answer_chars": 8,
+      "passed": true,
+      "reason": "Matched expected pattern: 9 (all but 9 die means 9 remain alive)",
+      "answer_preview": "Alive: 9"
+    }
+  ]
+}

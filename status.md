@@ -575,45 +575,44 @@ Quality cost of ~45% fewer bytes is small (+0.42 PPL). Retained under Option B a
 
 - **Artifacts:** `results_bonsai_ptq1_16p.json`, `results_bonsai_pq2_16p.json`, `results_qwen_2bpw_16p.json`, `results_qwen_2.5bpw_16p.json`.
 
-## Challenging 10-Task Hard Benchmark: 3-Way Comparison (2.50bpw vs. 2.20bpw vs. Ternary Bonsai PTQ1_0) (2026-10-08)
+## Challenging 10-Task Hard Benchmark: 4-Way Comparison (Bonsai PQ2_0 vs. Bonsai PTQ1_0 vs. Qwen 2.50bpw vs. Qwen 2.20bpw) (2026-10-08)
 
-**Result: Evaluated at `ctx=16384` with Q8/FP8 KV cache on Arc 140V. All three sub-4bpw models achieved a tie at 7/10 (70.0%), but uncovered pronounced domain specializations: Qwen EXL3 2.20bpw achieved a perfect 2/2 (100%) on Olympiad math and 1.7x faster latency, Ternary Bonsai PTQ1_0 demonstrated superior LeetCode Hard coding (2/3 vs 0/3), and Qwen EXL3 2.50bpw bridged the gap by passing Trapping Rain Water (Code 1/3) while matching 100% on Long Context and Multi-Constraint Logic.**
+**Result: Evaluated at `ctx=16384` with Q8/FP8 KV cache on Arc 140V. Ternary Bonsai 2 27B PQ2_0 achieved the highest overall score at 8/10 (80.0%), cleanly passing both LeetCode Hard coding (2/3) and all logic/constraint puzzles (3/3). Across all four sub-4bpw configurations, distinct capability profiles emerged:**
 
 | Model & Quantization | Disk / VRAM Size | Total Score | Long-Ctx 12.5K (2) | Olympiad Math (2) | LeetCode Hard (3) | Logic & Multi-Constraint (3) | Total Latency |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Ternary Bonsai PQ2_0** | 7.21 GB / ~7.5 GiB | **8 / 10 (80.0%)** | **2/2 (100%)** | 1/2 (50%) | **2/3 (66.7%)** | **3/3 (100%)** | 1827.4s (30.5 min) |
+| **Ternary Bonsai PTQ1_0** | **5.95 GB / 5.6 GiB** | **7 / 10 (70.0%)** *(8/10)* | **2/2 (100%)** | 1/2 (50%) | **2/3 (66.7%)** | 2/3 (66.7%) | 1749.6s (29.2 min) |
 | **Qwen3.8-27B EXL3 2.50bpw** | 11.5 GB / 10.6 GiB | **7 / 10 (70.0%)** | **2/2 (100%)** | 1/2 (50%) | 1/3 (33.3%) | **3/3 (100%)** | 1317.8s (22.0 min) |
 | **Qwen3.8-27B EXL3 2.20bpw** | 9.6 GB / 7.4 GiB | **7 / 10 (70.0%)** | **2/2 (100%)** | **2/2 (100%)** | 0/3 (0%) | **3/3 (100%)** | **1014.8s (16.9 min)** |
-| **Ternary Bonsai PTQ1_0** | **5.95 GB / 5.6 GiB** | **7 / 10 (70.0%)** *(8/10)* | **2/2 (100%)** | 1/2 (50%) | **2/3 (66.7%)** | 2/3 (66.7%) | 1749.6s (29.2 min) |
 
 ### Per-Task Breakdown Matrix
 
-| # | Task ID | Category | Ternary Bonsai PTQ1_0 | Qwen3.8-27B 2.20bpw | Qwen3.8-27B 2.50bpw |
-|---|---|---|:---:|:---:|:---:|
-| 1 | `long_ctx_multihop_needle` | Long Context (~12.5K) | **PASS** (182.6s) | **PASS** (85.1s) | **PASS** (126.9s) |
-| 2 | `long_ctx_distractor_amendment` | Long Context (~12.5K) | **PASS** (56.2s) | **PASS** (63.2s) | **PASS** (51.0s) |
-| 3 | `math_chinese_remainder` | Math (CRT, $x=3386$) | **PASS** (273.3s) | **PASS** (171.6s) | **PASS** (181.9s) |
-| 4 | `math_bounded_combinatorics` | Math (4-var sum=24, $N=301$) | FAIL (363.8s, think timeout) | **PASS** (205.6s, exact 301) | FAIL (316.0s, calc overflow) |
-| 5 | `code_trapping_rain_water` | LeetCode Hard (Two Pointers) | **PASS** (60.9s) | FAIL (30.3s, logic bug) | **PASS** (62.7s) |
-| 6 | `code_lru_cache` | LeetCode Hard (Doubly-Linked List) | FAIL (354.5s, `_Node` scope) | FAIL (135.0s, eviction bug) | FAIL (148.5s, eviction bug) |
-| 7 | `code_min_window_substring` | LeetCode Hard (Sliding Window) | **PASS** (266.2s) | FAIL (128.7s, duplicate bug) | FAIL (326.5s, name scope) |
-| 8 | `logic_five_floors` | Logic Constraint (5-Floor puzzle) | FAIL* (76.8s, used brackets) | **PASS** (49.4s) | **PASS** (51.5s) |
-| 9 | `format_multi_constraint_4rules` | Multi-Constraint (4 rules) | **PASS** (96.0s) | **PASS** (102.8s) | **PASS** (37.0s) |
-| 10 | `trap_sheep_all_but_nine` | Epistemic Trap (Survival count 9) | **PASS** (19.1s) | **PASS** (8.4s) | **PASS** (15.7s) |
+| # | Task ID | Category | Bonsai PQ2_0 | Bonsai PTQ1_0 | Qwen 2.20bpw | Qwen 2.50bpw |
+|---|---|---|:---:|:---:|:---:|:---:|
+| 1 | `long_ctx_multihop_needle` | Long Context (~12.5K) | **PASS** (326.2s) | **PASS** (182.6s) | **PASS** (85.1s) | **PASS** (126.9s) |
+| 2 | `long_ctx_distractor_amendment` | Long Context (~12.5K) | **PASS** (66.1s) | **PASS** (56.2s) | **PASS** (63.2s) | **PASS** (51.0s) |
+| 3 | `math_chinese_remainder` | Math (CRT, $x=3386$) | **PASS** (256.0s) | **PASS** (273.3s) | **PASS** (171.6s) | **PASS** (181.9s) |
+| 4 | `math_bounded_combinatorics` | Math (4-var sum=24, $N=301$) | FAIL (357.8s, think timeout) | FAIL (363.8s, think timeout) | **PASS** (205.6s, exact 301) | FAIL (316.0s, calc overflow) |
+| 5 | `code_trapping_rain_water` | LeetCode Hard (Two Pointers) | **PASS** (61.0s) | **PASS** (60.9s) | FAIL (30.3s, logic bug) | **PASS** (62.7s) |
+| 6 | `code_lru_cache` | LeetCode Hard (Doubly-Linked List) | FAIL (353.7s, `_Node` scope) | FAIL (354.5s, `_Node` scope) | FAIL (135.0s, eviction bug) | FAIL (148.5s, eviction bug) |
+| 7 | `code_min_window_substring` | LeetCode Hard (Sliding Window) | **PASS** (246.4s) | **PASS** (266.2s) | FAIL (128.7s, duplicate bug) | FAIL (326.5s, name scope) |
+| 8 | `logic_five_floors` | Logic Constraint (5-Floor puzzle) | **PASS** (73.4s) | FAIL* (76.8s, used brackets) | **PASS** (49.4s) | **PASS** (51.5s) |
+| 9 | `format_multi_constraint_4rules` | Multi-Constraint (4 rules) | **PASS** (68.9s) | **PASS** (96.0s) | **PASS** (102.8s) | **PASS** (37.0s) |
+| 10 | `trap_sheep_all_but_nine` | Epistemic Trap (Survival count 9) | **PASS** (17.9s) | **PASS** (19.1s) | **PASS** (8.4s) | **PASS** (15.7s) |
 
 ### Key Architectural & Serving Insights
 
-1. **Long-Context Robustness across All 3 Models:**
-   - In 8-bit KV caches (`q8_0` on llama.cpp, `fp8` on vLLM), every model achieved 100% accuracy on deep needle multi-hop synthesis across ~12,500 prompt tokens.
-   - Prefill efficiency: vLLM's chunked prefill completed the 12.5K prompt in 85.1s (2.20bpw) and 126.9s (2.50bpw), compared to 182.6s for llama.cpp SYCL on Arc 140V.
-2. **Serving Stability & Memory Budget for 2.50bpw at 16K Context:**
-   - 2.50bpw weights occupy 10.61 GiB in VRAM (vs 7.4 GiB for 2.20bpw).
-   - Attempting MTP speculation (`SPEC=mtp-k1`) alongside 16K FP8 KV cache at `GPU_UTIL=0.65` causes Level Zero out-of-device memory (`UR_RESULT_ERROR_OUT_OF_DEVICE_MEMORY`) on long sequential generations.
-   - Operating 2.50bpw stably at 16K context requires **eager mode without MTP (`SPEC=""`)** and conservative allocation (`GPU_UTIL=0.58`), reserving 4.25 GiB dedicated to the KV cache (83,847 tokens capacity).
-3. **Domain Tradeoffs: Ternary Bonsai vs. EXL3:**
-   - **Ternary Bonsai PTQ1_0 (5.6 GiB):** The most space-efficient model by far (under 6 GB on disk). Excellent algorithmic coding capabilities (2/3 LeetCode Hard), but prone to verbose self-correction loops that risk exhausting generation token budgets on complex math.
-   - **Qwen EXL3 2.20bpw (7.4 GiB):** The throughput and mathematical reasoning champion. 1.7x faster latency across the suite and 100% accuracy on Olympiad math, but struggles on intricate LeetCode algorithmic invariants.
-   - **Qwen EXL3 2.50bpw (10.6 GiB):** Higher weight precision enables passing Trapping Rain Water, closing part of the coding gap, with the fastest constraint execution (37.0s on 4-rule generation).
+1. **Bonsai PQ2_0 Achieves the Highest Overall Quality (8/10):**
+   - At 7.21 GB, PQ2_0 combines the deep algorithmic coding strength of the ternary distillation (passing both Trapping Rain Water and Minimum Window Substring with 100% unit test compliance) while maintaining clean formatting discipline across all three logic constraint tasks.
+2. **Long-Context Robustness across All 4 Architectures:**
+   - In 8-bit KV caches (`q8_0` on llama.cpp, `fp8` on vLLM), 100% retrieval accuracy was achieved across ~12,500 tokens in all four configurations.
+   - Prefill latency disparity: vLLM's chunked prefill engine processed the 12.5K prompt in 85.1s (2.20bpw) and 126.9s (2.50bpw), versus 182.6s (PTQ1_0) and 326.2s (PQ2_0) on llama.cpp SYCL.
+3. **Domain Specialization Trade-offs:**
+   - **Ternary Bonsai (PQ2_0 & PTQ1_0):** Algorithmic coding specialists. Native ternary representation cleanly tracks intricate loop pointers and hash counters. The primary vulnerability is thinking token budget exhaustion on combinatorial calculation loops.
+   - **Qwen EXL3 (2.20bpw & 2.50bpw):** Throughput and mathematical structure champions. 1.7x faster overall on vLLM with 100% accuracy on Olympiad math (at 2.20bpw), but prone to edge-case bugs on LeetCode pointer tracking unless given higher precision (2.50bpw).
 
-- **Artifacts:** `results_hard_qwen_2.5bpw.json`, `results_hard_qwen_2.2bpw.json`, `results_hard_bonsai_ptq1.json`, `scripts/bench_hard_suite.py`.
+- **Artifacts:** `results_hard_bonsai_pq2.json`, `results_hard_bonsai_ptq1.json`, `results_hard_qwen_2.5bpw.json`, `results_hard_qwen_2.2bpw.json`, `scripts/bench_hard_suite.py`.
+
 
 
