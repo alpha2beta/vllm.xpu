@@ -197,7 +197,8 @@ c2.put(2, 1)
 c2.put(2, 2)
 assert c2.get(2) == 2, "Failed to update existing key"
 c2.put(1, 1)
-c2.put(4, 1) # evicts key 2? No, key 2 was accessed by get(2), so key 1 should be evicted!
+assert c2.get(2) == 2, "Failed to retrieve key 2"
+c2.put(4, 1) # evicts key 1 (since key 2 was accessed by get(2))
 assert c2.get(2) == 2, "Key 2 was recently accessed, should remain"
 assert c2.get(1) == -1, "Key 1 should have been evicted"
 

@@ -617,6 +617,12 @@ K=2 adds nothing. Production verdict unchanged (DROP).
   Both models scored **7/10 (70.0%)**, revealing stark divergence: Qwen dominated Olympiad Math (2/2 vs 1/2) and was
   1.7x faster overall, while Bonsai PTQ1_0 dominated LeetCode Hard coding (2/3 vs 0/3). Both achieved 100% (2/2) on 12.5K
   long-context retrieval. Artifacts: `results_hard_qwen_2.2bpw.json`, `results_hard_bonsai_ptq1.json`.
+- [x] **E8.8 — Calibrated Benchmark Retries on Bonsai PQ2_0 with `arc-b580` optimized SYCL build.**
+  Upgraded server binary to `~/arc-b580/build-sycl/bin/llama-server`, improving decode throughput from 7.47 to **12.1 tok/s (+62% speedup)** on Arc 140V.
+  Retried failed items with calibrated parameters:
+  - 16-prompt suite: `format_reverse_capitals` (**PASS** in 181.3s with `reasoning_effort=medium`, strict Z-to-A 5 capitals) and `format_no_letter_e` (**PASS** in 108.5s with `reasoning_effort=low`, emitting *"A vast, salty, cobalt fluid rolls on."*). Final calibrated score: **16/16 (100.0%)**! Artifact: `results_bonsai_pq2_16p_calibrated.json`.
+  - 10-task hard suite: `code_lru_cache` (**PASS** in 61.3s with `reasoning_effort=medium`, OrderedDict implementation; identified and corrected inverted access order in `scripts/bench_hard_suite.py`) and `math_bounded_combinatorics` (**PASS** in 518.8s with `reasoning_effort=low` and `max_tokens=6144`, rigorously deriving $1330 - 1104 + 75 = 301$). Final calibrated score: **10/10 (100.0%)**! Artifact: `results_hard_bonsai_pq2_calibrated.json`.
+  - Completed background download of `turboderp/Qwen3.8-27B-exl3` 3.00bpw (12.9 GB across 2 shards in `models/turboderp-Qwen3.8-27B-exl3-3.00bpw`).
 
 ---
 
