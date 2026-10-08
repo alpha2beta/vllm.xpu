@@ -712,12 +712,13 @@ Quality cost of ~45% fewer bytes is small (+0.42 PPL). Retained under Option B a
   - Qwen3.8-27B 2.20bpw: PPL **6.78** (+0.42 PPL penalty vs 4.00bpw)
 - **Artifact:** `results_qwen_3bpw_ppl.json`.
 
-### 4. Comprehensive 6-Way Multi-Benchmark Comparison Matrix
+### 4. Comprehensive 7-Way Multi-Benchmark Comparison Matrix
 
 | Model & Quantization | Size on Disk / VRAM | WT2 PPL | 16-Prompt Score | 10-Task Hard Score | Hard Suite Latency | Serving Engine & Decode Throughput |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | **Tiel-Coder-35B-A3B MXFP4** | 20.47 GB / 19.7 GiB | — | **15/16 (93.8%)** | **9/10 (90.0%)** | **564.8s (9.4 min)** *(fastest)* | vLLM XPU (MTP K=2, **27.7 tok/s**) |
 | **Qwen3.8-27B EXL3 3.00bpw** | 12.87 GB / 13.1 GiB | **6.46** | **16/16 (100.0%)** | **10/10 (100.0%)** | 1062.6s (17.7 min) | vLLM XPU (MTP K=1, ~6.5 tok/s) |
+| **Bonsai PQ2_0 MTP (Ablit-v2)** | 7.20 GB / 7.6 GiB | ~6.73 | **15/16 (93.8%)** | **9/10 (90.0%)** | **1147.5s (19.1 min)** | llama.cpp SYCL (**12.1 tok/s**) |
 | **Ternary Bonsai PQ2_0** | 7.21 GB / 7.6 GiB | ~6.73 | **16/16 (100.0%)** *(cal.)* | **10/10 (100.0%)** *(cal.)* | 1827.4s (30.5 min) | llama.cpp SYCL (**12.1 tok/s**) |
 | **Ternary Bonsai PTQ1_0** | **5.95 GB / 5.6 GiB** | 6.73 | **16/16 (100.0%)** *(cal.)* | 8/10 (80.0%) *(cal.)* | 1749.6s (29.2 min) | llama.cpp SYCL (**13.1 tok/s**) |
 | **Qwen3.8-27B EXL3 2.50bpw** | 11.45 GB / 11.7 GiB | 6.57 | 15/16 (93.8%) | 7/10 (70.0%) | 1317.8s (22.0 min) | vLLM XPU (MTP K=1, ~6.6 tok/s) |
@@ -769,6 +770,43 @@ Quality cost of ~45% fewer bytes is small (+0.42 PPL). Retained under Option B a
 - **Dual-Model Strategy Validated:**
   - **Daily Driver:** `Tiel-Coder-35B-A3B MXFP4` delivers high coding quality (90% hard suite, 93.8% quality suite) at high interactive speed (27.7 tok/s) and sub-minute long context processing.
   - **Designated Fallback:** `Qwen3.8-27B EXL3 3.00bpw` (or Bonsai PQ2_0) provides 100% reasoning convergence (10/10 and 16/16) when zero-typo perfection or extreme negative constraints (`format_no_letter_e`) are required.
+
+## Comprehensive Benchmark: Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (2026-10-08)
+
+**Objective:** Evaluate **`~/llama.cpp/models/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP.gguf`** (7.20 GB, 7.6 GiB VRAM allocation, SYCL Level-Zero backend with `arc-b580` optimized build, 16K context, Q8_0 KV cache) across both standardized benchmark suites on Intel Arc 140V:
+1. Curated 16-Prompt Quality Benchmark (`scripts/bench_quality_16p.py`)
+2. Challenging 10-Task Hard Benchmark Suite at 16K context (`scripts/bench_hard_suite.py`)
+
+### 1. 16-Prompt Quality Suite: 15 / 16 (93.8%) in 690.0s (~11.5 min)
+- **Result:** **15 / 16 (93.8%)** out-of-the-box (almost 2× faster suite latency vs 1342.4s previously).
+  - **Math (4/4):** `math_bridge` (68.0s), `math_lcm` (47.3s), `math_speed` (33.4s), `math_probability` (32.3s).
+  - **Code (4/4):** `code_palindrome` (15.9s), `code_merge_intervals` (44.2s), `code_two_sum` (22.7s), `code_flatten_dict` (66.0s). All unit assertions passed.
+  - **Instruction Following (3/4):** Cleanly passed `format_json_only` (16.2s), `format_reverse_capitals` (82.3s, exact reverse alphabetical list), and `format_word_count` (46.5s, exact 17 words). Failed `format_no_letter_e` (207.1s, hit 2048 token limit inside thinking).
+  - **Factuality & Premise Traps (4/4):** `fact_capital_australia` (5.1s), `trap_us_president_1650` (34.2s), `trap_steel_vs_feathers` (10.1s), `reasoning_shortest_person` (8.7s).
+- **Artifact:** `results_bonsai_pq2_mtp_16p.json`.
+
+### 2. 10-Task Hard Suite Benchmark (16K Context): 9 / 10 (90.0%) in 1147.5s (~19.1 min)
+- **Result:** **9 / 10 (90.0%)** out-of-the-box in **1147.5s** (37% faster than previous Bonsai PQ2_0 at 1827.4s, and scoring higher out-of-the-box than previous 8/10).
+  - **Long Context Retrieval (~12.5K context, 2/2):**
+    - `long_ctx_multihop_needle`: Correct cryptographic key-hash `9f8a-c4e1-22b0` retrieved in **160.8s** (2× faster than previous 326.2s).
+    - `long_ctx_distractor_amendment`: Correct post-amendment executive budget `$3,180,000` retrieved in **55.0s**.
+  - **Olympiad Math (1/2):**
+    - `math_chinese_remainder`: Solved mod 17, 19, 23 system yielding exact unique solution $x = 3386$ in 140.8s.
+    - `math_bounded_combinatorics`: Hit the 2048 token ceiling inside combinatorial calculation loop.
+  - **LeetCode Hard Algorithms (3/3, 100%):**
+    - `code_trapping_rain_water`: Optimal two-pointer implementation passing all unit assertions in 135.3s.
+    - `code_lru_cache`: Doubly-linked list + hash map passing all unit assertions in 173.7s.
+    - `code_min_window_substring`: Linear sliding-window algorithm passing all duplicate character unit assertions in 119.7s.
+  - **Logic & Constraints (3/3, 100%):**
+    - `logic_five_floors`: Exact floor assignment (Alice=5, Bob=3, Carol=2, David=4, Elena=1) in 80.0s.
+    - `format_multi_constraint_4rules`: Satisfied all 4 complex grammatical constraints simultaneously in 49.7s.
+    - `trap_sheep_all_but_nine`: Deduced exact surviving sheep count (9) in 14.1s.
+- **Artifact:** `results_hard_bonsai_pq2_mtp.json`.
+
+### 3. Key Findings: Abliterated-v2 with MTP
+- **Flawless Algorithmic Coding (3/3 LeetCode Hard):** The Abliterated-v2 MTP checkpoint scored 100% across all LeetCode Hard challenges without any test order fixes or calibration needed.
+- **Speed & Latency Optimization:** Paired with the `arc-b580` SYCL Level-Zero binary, suite execution latency dropped by **37%** on the hard suite (1147.5s vs 1827.4s) and **49%** on the 16-prompt quality suite (690.0s vs 1342.4s).
+
 
 
 

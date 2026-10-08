@@ -637,6 +637,13 @@ K=2 adds nothing. Production verdict unchanged (DROP).
   - 10-task hard suite (16K context): Scored **9 / 10 (90.0%)** in record time **564.8s (~9.4 min)** (1.88× faster than Qwen 3.00bpw, 3.23× faster than Bonsai PQ2_0). Long Context 2/2 in 48.7s & 35.8s, Olympiad Math 2/2 (CRT $x=3386$ and combinatorics $N=301$), LeetCode Hard 2/3 (LRU Cache in 76.1s, Min Window Substring in 96.7s; Trapping Rain Water had single syntax typo in type annotation), Logic Constraints 3/3 (5-Floors, 4-rules, 9 sheep). Artifact: `results_hard_tiel_mxfp4.json`.
   - Expanded comparison matrix to 6 models in `status.md`.
 
+- [x] **E8.11 — Benchmark Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP on 16-Prompt and 10-Task Suites.**
+  Evaluated `~/llama.cpp/models/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP.gguf` (7.20 GB, SYCL Level-Zero backend with `arc-b580` build, 16K context, Q8_0 KV cache):
+  - 16-prompt quality suite: Scored **15 / 16 (93.8%)** out-of-the-box in 690.0s (~11.5 min) (almost 2× faster than previous PQ2_0 run at 1342.4s). Math 4/4, Code 4/4, Instruction 3/4, Fact/Trap 4/4. Solved `format_reverse_capitals` on first try in 82.3s. Artifact: `results_bonsai_pq2_mtp_16p.json`.
+  - 10-task hard suite (16K context): Scored **9 / 10 (90.0%)** out-of-the-box in 1147.5s (~19.1 min) (37% faster than previous Bonsai PQ2_0 at 1827.4s). Long Context 2/2 (160.8s, 55.0s), Olympiad Math 1/2 (CRT $x=3386$ in 140.8s), LeetCode Hard **3/3 (100%)** (Trapping Rain Water in 135.3s, LRU Cache in 173.7s, Min Window Substring in 119.7s), Logic Constraints **3/3 (100%)** (5-Floors in 80.0s, 4-rules in 49.7s, sheep trap in 14.1s). Artifact: `results_hard_bonsai_pq2_mtp.json`.
+  - Created standalone SYCL launcher `scripts/launch_bonsai_sycl.sh`.
+  - Expanded comparison matrix to 7 models in `status.md`.
+
 ---
 
 ## Phase E6 — Report, Recommendation, and Reversibility

@@ -322,8 +322,12 @@ def run_benchmark(base_url: str, model_name: str, out_file: str, max_tokens: int
                 max_tokens=max_tokens
             )
             dur = time.time() - t0
-            raw_content = resp.choices[0].message.content or ""
+            msg = resp.choices[0].message
+            raw_content = msg.content or ""
+            reasoning_content = getattr(msg, "reasoning_content", "") or ""
             think, answer = extract_clean_answer(raw_content)
+            if not think and reasoning_content:
+                think = reasoning_content
             passed, reason = evaluate_item(item, answer)
         except Exception as e:
             dur = time.time() - t0
