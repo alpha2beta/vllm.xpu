@@ -1,7 +1,7 @@
  
 :: initializing oneAPI environment ...
    launch_vllm_exl3.sh: BASH_VERSION = 5.3.20(1)-release
-   args: Using "$@" for setvars.sh arguments: --enable-auto-tool-choice --tool-call-parser qwen3_xml
+   args: Using "$@" for setvars.sh arguments: 
 :: compiler -- latest
 :: debugger -- latest
 :: mkl -- latest

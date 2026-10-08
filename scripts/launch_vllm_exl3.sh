@@ -13,7 +13,7 @@
 # Env overrides:
 #   MODEL, SERVED, MAX_LEN, MAX_SEQS, BATCHED_TOKENS, GPU_UTIL, PORT, HOST,
 #   EAGER=1/0, KV_DTYPE (default fp8), EXL3_BACKEND (default auto),
-#   SPEC=mtp-k1/mtp-k2 (default mtp-k1; empty disables speculation),
+#   SPEC=mtp-k1/mtp-k2/ngram-k<N> (default mtp-k1; empty disables speculation),
 #   PINNED=1/0, WARMUP=1/0
 set -uo pipefail
 
@@ -32,7 +32,8 @@ EAGER=${EAGER:-1}
 KV_DTYPE=${KV_DTYPE:-fp8}
 PINNED=${PINNED:-1}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-cd "${SCRIPT_DIR}" || exit 1
+ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
+cd "${ROOT_DIR}" || exit 1
 mkdir -p logs
 LOG="logs/server-${LABEL}.log"
 
@@ -72,11 +73,20 @@ fi
 EAGER_FLAG=(--enforce-eager)
 [ "$EAGER" = "0" ] && EAGER_FLAG=()
 
-# MTP speculation (default k=1; SPEC=mtp-k2 for depth 2, SPEC= for off).
-SPEC=${SPEC:-mtp-k1}
+# Speculative decoding (SPEC=mtp-k1 default; mtp-k2, ngram-k<N> e.g.
+# ngram-k4; SPEC= for off).
+# Note: ${SPEC-mtp-k1} (no colon) so an explicit empty SPEC= disables,
+# while an unset SPEC defaults to mtp-k1.
+SPEC=${SPEC-mtp-k1}
 SPEC_FLAG=()
 [ "$SPEC" = "mtp-k1" ] && SPEC_FLAG=(--speculative-config '{"method":"mtp","num_speculative_tokens":1}')
 [ "$SPEC" = "mtp-k2" ] && SPEC_FLAG=(--speculative-config '{"method":"mtp","num_speculative_tokens":2}')
+case "$SPEC" in
+  ngram-k*)
+    K="${SPEC#ngram-k}"
+    SPEC_FLAG=(--speculative-config "{\"method\":\"ngram\",\"num_speculative_tokens\":${K},\"prompt_lookup_max\":${K},\"prompt_lookup_min\":2}")
+    ;;
+esac
 
 ARGS=(
   --model "$MODEL"

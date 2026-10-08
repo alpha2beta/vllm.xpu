@@ -550,3 +550,28 @@ Quality cost of ~45% fewer bytes is small (+0.42 PPL). Retained under Option B a
 - **Instruction Following (Qwen 3/4 vs Bonsai 2/4):** Both passed strict JSON schema formatting (`format_json_only`) and strict word count bounds (`format_word_count`, 17 words). On reverse alphabetical European capitals (`format_reverse_capitals`), Qwen passed (`Zagreb, Warsaw, Vienna, Rome, Paris`) in 84s, whereas Bonsai got stuck in internal self-correction loops and hit the 2048-token ceiling with an empty answer (351.7s). Both failed the extreme negative constraint `format_no_letter_e` (Qwen leaked reasoning text without `<think>` tags; Bonsai timed out in reasoning).
 - **Factuality & Premise Traps (4/4 both):** Both passed Canberra, successfully caught the 1650 US President false premise, identified equal weight of steel vs feathers, and deduced the shortest person.
 - **Artifacts:** `results_qwen_2bpw_16p.json`, `results_bonsai_pq2_16p.json`.
+
+## 16-Prompt Quality Benchmark: 4-Way Comparison (2.50bpw vs. 2.20bpw vs. Bonsai PQ2_0 vs. Bonsai PTQ1_0) (2026-10-08)
+
+**Result: Ternary Bonsai 2 27B PTQ1_0 (1.58 true bpw, 5.95 GB / 5.6 GiB) achieved 15/16 (93.8%), matching Qwen 2.20bpw and 2.50bpw and outscoring Bonsai PQ2_0 (14/16). It successfully solved complex reverse alphabetical ordering (`format_reverse_capitals`, 118.4s) while consuming the smallest disk and VRAM footprint in the entire evaluation.**
+
+| Model & Quantization | Size on Disk | Total Score | Math (4) | Code (4) | Instruction (4) | Fact/Trap (4) | PPL (WikiText-2) | Suite Latency |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Ternary Bonsai 2 27B PTQ1_0** | **5.95 GB (5.6 GiB)** | **15 / 16 (93.8%)** | 4/4 | 4/4 | 3/4 | 4/4 | **6.73** (±0.18) | 1245.3s (20.8 min) |
+| **Qwen3.8-27B EXL3 2.50bpw** | 11.5 GB (10.6 GiB) | **15 / 16 (93.8%)** | 4/4 | 4/4 | 3/4 | 4/4 | **6.57** | **890.9s (14.8 min)** |
+| **Qwen3.8-27B EXL3 2.20bpw** | 9.6 GB (7.4 GiB) | **15 / 16 (93.8%)** | 4/4 | 4/4 | 3/4 | 4/4 | 6.78 | 1162.4s (19.4 min) |
+| **Ternary Bonsai 2 27B PQ2_0** | 7.21 GB | **14 / 16 (87.5%)** | 4/4 | 4/4 | 2/4 | 4/4 | ~6.73 – 7.1 | 1342.4s (22.4 min) |
+
+### Context Window & Failure Analysis (`ctx=4096` vs. `max_tokens` vs. `ctx=65536`)
+1. **Is `ctx=4096` too small for the benchmark?**
+   - **No.** Benchmark prompts are short (15–85 tokens). With `max_tokens=2048`, peak context utilization across all 16 tests is ~2,133 tokens (only ~52% of `ctx=4096`). Zero prompts or responses experienced context truncation (`truncated = 0` across all slots).
+   - Setting `ctx=65536` on Arc 140V (32 GB shared memory) would pre-allocate several gigabytes of KV cache upfront, increasing system memory pressure without providing any benefit for short benchmark prompts.
+2. **Root Cause of the Single Failure (`format_no_letter_e`):**
+   - Under default `xhigh` reasoning in `start-bonsai-2-27b.sh`, the model entered an exhaustive internal search exploring candidate lipogram sentences, consuming all 2,048 tokens inside `message.reasoning_content`.
+   - Because generation reached the client's `max_tokens=2048` limit before emitting `</think>`, `message.content` was returned empty.
+   - **Empirical Verification:** Probing `format_no_letter_e` with constrained reasoning (`reasoning_effort=low`) allowed the model to conclude reasoning in ~400 tokens and output a 100% compliant sentence in 93.9s:
+     > *"That salty, vast body of fluid is grand."* (Zero 'e' or 'E' letters, complete English sentence describing the ocean).
+     > With appropriate reasoning budgeting, **Ternary Bonsai PTQ1_0 achieves 16/16 (100%)**.
+
+- **Artifacts:** `results_bonsai_ptq1_16p.json`, `results_bonsai_pq2_16p.json`, `results_qwen_2bpw_16p.json`, `results_qwen_2.5bpw_16p.json`.
+

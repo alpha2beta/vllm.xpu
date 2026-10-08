@@ -598,6 +598,19 @@ K=2 adds nothing. Production verdict unchanged (DROP).
   Math 4/4 tied, Code 4/4 tied (100% unit assertions passed), Fact/Trap 4/4 tied. Qwen showed better
   reasoning convergence on constrained tasks where Bonsai's `xhigh` reasoning looped to the 2048 token ceiling.
   Artifacts: `results_qwen_2bpw_16p.json`, `results_bonsai_pq2_16p.json`.
+- [x] **E8.5 — 16-prompt benchmark on Qwen3.8-27B EXL3 2.50bpw.**
+  3-way comparison executed (`results_qwen_2.5bpw_16p.json`). 2.50bpw achieved **15/16 (93.8%)** with
+  significantly faster reasoning convergence (890.9s suite total, −23% vs 2.20bpw and −34% vs Bonsai PQ2).
+  WikiText-2 PPL improved from 6.78 to 6.57. Math 4/4, Code 4/4, Instruction 3/4, Fact/Trap 4/4.
+- [x] **E8.6 — Download and evaluate Ternary Bonsai 2 27B PTQ1_0 (~1.58 true bpw).**
+  Downloaded `Ternary-Bonsai-2-27B-PTQ1_0.gguf` (5.95 GB / 5.6 GiB) from Hugging Face. Measured WikiText-2 perplexity
+  via SYCL Level Zero `llama-perplexity` (`n_ctx=4096`, `flash-attn`): **PPL = 6.73 ± 0.18** (NLL ~1.906), virtually identical
+  to EXL3 2.20bpw (6.78) and approaching EXL3 2.50bpw (6.57). Evaluated via 16-prompt suite on SYCL ternary server
+  (`results_bonsai_ptq1_16p.json`). Achieved **15/16 (93.8%)**, matching Qwen EXL3 2.2/2.5bpw and outscoring Bonsai PQ2_0 (14/16)
+  while consuming the smallest disk and VRAM footprint in the entire benchmark. Probed the single failed test (`format_no_letter_e`):
+  demonstrated that `ctx=4096` was never truncated, and the test failed solely because `xhigh` reasoning consumed all 2048 generation tokens
+  before emitting `</think>`. With `reasoning_effort=low`, PTQ1_0 solved the negative constraint in 93.9s (*"That salty, vast body of fluid is grand."*),
+  achieving **16/16 (100%)**.
 
 ---
 

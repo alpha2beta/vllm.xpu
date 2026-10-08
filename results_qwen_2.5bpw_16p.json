@@ -1,0 +1,174 @@
+{
+  "model": "qwen3.8-27b-2.5bpw",
+  "base_url": "http://127.0.0.1:8001/v1",
+  "total_score": "15/16",
+  "pass_rate_pct": 93.8,
+  "category_stats": {
+    "math": "4/4",
+    "code": "4/4",
+    "instruction": "3/4",
+    "fact_trap": "4/4"
+  },
+  "results": [
+    {
+      "id": "math_bridge",
+      "category": "math",
+      "prompt": "Four hikers reach a bridge at night with one flashlight. Crossing times: 1, 2, 5, and 10 minutes. At most two people can cross together, moving at the slower hiker's pace. The flashlight must be carried back. What is the minimum total time (in minutes) for all four to cross? State the final number clearly on the last line as 'Total time: X minutes'.",
+      "think": "We need answer classic bridge puzzle. Need final line Total time: X minutes. Let's reason carefully. Four hikers times 1,2,5,10. At most two cross, slower pace. Flashlight carried back. Need minimum total time.\n\nKnown solution: 1 and 2 cross (2), 1 returns (1), 5 and 10 cross (10), 2 returns (2), 1 and 2 cross (2). Total 17. Or alternative: 1 and 10 cross (10), 1 returns (1), 1 and 5 cross (5), 1 returns (1), 1 and 2 cross (2) total 19. Minimum 17.\n\nNeed final answer clearly. Could include brief explanation. Ensure last line exactly 'Total time: 17 minutes'.",
+      "answer": "The optimal sequence is:\n\n1. Hikers 1 and 2 cross together: 2 minutes  \n2. Hiker 1 brings the flashlight back: 1 minute  \n3. Hikers 5 and 10 cross together: 10 minutes  \n4. Hiker 2 brings the flashlight back: 2 minutes  \n5. Hikers 1 and 2 cross together: 2 minutes  \n\nTotal time: 17 minutes",
+      "latency_s": 37.01,
+      "passed": true,
+      "reason": "Matched expected pattern: 17 minutes"
+    },
+    {
+      "id": "math_lcm",
+      "category": "math",
+      "prompt": "A store sells apples in packs of 6 and oranges in packs of 8. A customer wants to buy the exact same number of apples and oranges. What is the smallest positive total number of fruit (apples + oranges combined) the customer must buy? State the final answer on the last line as 'Total fruit: X'.",
+      "think": "We need answer simple math. User asks: store sells apples in packs of 6 and oranges in packs of 8. Customer wants to buy exact same number of apples and oranges. What is smallest positive total number of fruit (apples + oranges combined) must buy? State final answer last line as 'Total fruit: X'.\n\nWe need solve. Apples bought in multiples of 6: 6a. Oranges in multiples of 8: 8b. Need 6a = 8b = N positive. Smallest positive common multiple of 6 and 8 is lcm = 24. Then total fruit = 24+24=48. Check: packs: 4 packs apples (24), 3 packs oranges (24). Total 48. Need final line exactly Total fruit: 48.\n\nNeed ensure no trick: \"exact same number of apples and oranges\" means equal counts. Smallest positive total combined. Yes 48.\n\nFinal concise.",
+      "answer": "The smallest number of apples and oranges that can be equal is the least common multiple of 6 and 8, which is 24.\n\nSo the customer buys 24 apples and 24 oranges.\n\nTotal fruit: 48",
+      "latency_s": 41.6,
+      "passed": true,
+      "reason": "Matched expected pattern: 48 (24 apples + 24 oranges)"
+    },
+    {
+      "id": "math_speed",
+      "category": "math",
+      "prompt": "Train A leaves a station traveling at 60 mph. Train B leaves the same station 1 hour later traveling in the same direction on a parallel track at 80 mph. How many hours after Train B departs will Train B catch up to Train A? State the final answer on the last line as 'Hours: X'.",
+      "think": "We need answer simple word problem. Need final line Hours: X. Let's reason: Train A leaves at 60 mph. Train B leaves 1 hour later same direction 80 mph. At B departure, A has traveled 60 miles. Relative speed 20 mph. Time to catch up = 60/20 = 3 hours after B departs. Final: Hours: 3.",
+      "answer": "Train A has a 60-mile head start when Train B departs. Since Train B travels 20 mph faster, it closes the gap at 20 mph.\n\nTime to catch up = 60 miles \u00f7 20 mph = 3 hours.\n\nHours: 3",
+      "latency_s": 26.74,
+      "passed": true,
+      "reason": "Matched expected pattern: 3 hours"
+    },
+    {
+      "id": "math_probability",
+      "category": "math",
+      "prompt": "A bag contains 3 red balls and 5 blue balls. If two balls are drawn at random without replacement, what is the exact probability (in fraction form in lowest terms, like P/Q) that both balls are red? State the final fraction on the last line as 'Probability: P/Q'.",
+      "think": "We need answer simple probability. Need final fraction last line Probability: P/Q. Compute: 3 red, 5 blue total 8. Draw two without replacement. Probability both red = (3/8)*(2/7)=6/56=3/28. Or combinations C(3,2)/C(8,2)=3/28. Need final line exactly.",
+      "answer": "Probability: 3/28",
+      "latency_s": 16.59,
+      "passed": true,
+      "reason": "Matched expected pattern: 3/28"
+    },
+    {
+      "id": "code_palindrome",
+      "category": "code",
+      "prompt": "Write a Python function `is_palindrome(s: str) -> bool` that returns True if the string is a palindrome, ignoring non-alphanumeric characters and case. Output ONLY the python function implementation. Do not include markdown fences or usage examples.",
+      "think": "We need answer user's request: Write Python function is_palindrome(s: str) -> bool returns True if string palindrome ignoring non-alphanumeric and case. Output ONLY python function implementation. No markdown fences or usage examples.\n\nNeed final only code. Need ensure no fences. Function:\ndef is_palindrome(s: str) -> bool:\n    filtered = ''.join(ch.lower() for ch in s if ch.isalnum())\n    return filtered == filtered[::-1]\n\nCould also use all. That's fine.",
+      "answer": "def is_palindrome(s: str) -> bool:\n    cleaned = ''.join(ch.lower() for ch in s if ch.isalnum())\n    return cleaned == cleaned[::-1]",
+      "latency_s": 25.88,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "code_merge_intervals",
+      "category": "code",
+      "prompt": "Write a Python function `merge_intervals(intervals: list[list[int]]) -> list[list[int]]` that merges all overlapping intervals and returns the merged list sorted by start time. Output ONLY the python function implementation without markdown code fences or explanatory text.",
+      "think": "We need answer user's request: Write Python function merge_intervals(intervals: list[list[int]]) -> list[list[int]] that merges all overlapping intervals and returns merged list sorted by start time. Output ONLY python function implementation without markdown code fences or explanatory text.\n\nNeed provide code only. Need think about implementation. Standard: sort by start, iterate, merge if next start <= current end. Edge cases empty list. Intervals list of lists ints. Return list[list[int]]. Could mutate? Better not. Use sorted(intervals, key=lambda x: x[0]). If empty return [].\n\nNeed only function, no fences. Ensure type hints. Could include from typing? Not necessary. Python 3.9+ list[list[int]].\n\nPotential issue: intervals may be unsorted, overlapping, touching? \"overlapping intervals\" usually if end >= next start, merge. If [1,2], [2,3] considered overlapping? Usually yes if end >= start. Use <=.\n\nImplementation:\ndef merge_intervals(intervals: list[list[int]]) -> list[list[int]]:\n    if not intervals:\n        return []\n    sorted_intervals = sorted(intervals, key=lambda interval: interval[0])\n    merged = [sorted_intervals[0][:]]\n    for interval in sorted_intervals[1:]:\n        current = merged[-1]\n        if interval[0] <= current[1]:\n            current[1] = max(current[1], interval[1])\n        else:\n            merged.append(interval[:])\n    return merged\n\nCould avoid copy? If input list elements are lists, modifying current[1] modifies original if current is same object. But we copy first and append copies. Good.\n\nNeed output only function. No markdown. Final plain code.",
+      "answer": "def merge_intervals(intervals: list[list[int]]) -> list[list[int]]:\n    if not intervals:\n        return []\n\n    sorted_intervals = sorted(intervals, key=lambda interval: interval[0])\n    merged = [sorted_intervals[0][:]]\n\n    for interval in sorted_intervals[1:]:\n        current = merged[-1]\n        if interval[0] <= current[1]:\n            current[1] = max(current[1], interval[1])\n        else:\n            merged.append(interval[:])\n\n    return merged",
+      "latency_s": 80.74,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "code_two_sum",
+      "category": "code",
+      "prompt": "Write a Python function `two_sum(nums: list[int], target: int) -> list[int]` that finds two distinct indices i and j such that nums[i] + nums[j] == target. Output ONLY the python function implementation without markdown code fences or commentary.",
+      "think": "We need answer user's request: Write Python function two_sum(nums: list[int], target: int) -> list[int] that finds two distinct indices i and j such that nums[i] + nums[j] == target. Output ONLY the python function implementation without markdown code fences or commentary.\n\nNeed provide code only. Need think about implementation. Could use hash map O(n). Need return list of indices. Distinct indices. If no solution? Problem likely assumes exists? Could return [] or raise? Function signature returns list[int]. We can return [] if not found. Need only function. No fences.\n\nPotential code:\ndef two_sum(nums: list[int], target: int) -> list[int]:\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []\n\nNeed ensure distinct indices: if complement equals num and seen has same index? We only check before adding current, so distinct. Good.\n\nOutput only function. No comments? Could include docstring? User says without commentary. Probably no docstring. Just code. Ensure no markdown. Final plain text.",
+      "answer": "def two_sum(nums: list[int], target: int) -> list[int]:\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []",
+      "latency_s": 54.09,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "code_flatten_dict",
+      "category": "code",
+      "prompt": "Write a Python function `flatten_dict(d: dict, parent_key: str = '', sep: str = '.') -> dict` that flattens a nested dictionary. Keys should be concatenated with `sep`. Output ONLY the python function implementation without markdown code fences or commentary.",
+      "think": "We need answer user's request: Write Python function flatten_dict(d: dict, parent_key: str = '', sep: str = '.') -> dict that flattens nested dictionary. Keys concatenated with sep. Output ONLY python function implementation without markdown code fences or commentary.\n\nNeed produce final only code, no fences. Need think about implementation. Need handle nested dict values. What about non-dict values? Should output flat dict. Need consider empty parent_key and sep. If parent_key empty, key should be key not sep+key? Usually if parent_key: new_key = parent_key + sep + key else key. Recursively flatten. Need maybe handle lists? The prompt says nested dictionary, likely only dict values. Could handle any nested dict. If value is dict, recurse. Else assign. Need preserve order? Python dict. Could use recursion.\n\nPotential edge cases: keys not strings? Type hints dict but keys could be any hashable. Concatenation with sep requires strings? If parent_key str and key maybe str. If key not str, maybe convert? But likely keys strings. Could do str(key) to be safe? But output keys should be strings? Function signature returns dict. If keys are non-string, concatenation fails. Could cast to str. But maybe not necessary. Need only function implementation.\n\nLet's craft:\n\ndef flatten_dict(d: dict, parent_key: str = '', sep: str = '.') -> dict:\n    items = {}\n    for k, v in d.items():\n        key = f\"{parent_key}{sep}{k}\" if parent_key else str(k)\n        if isinstance(v, dict):\n            items.update(flatten_dict(v, key, sep))\n        else:\n            items[key] = v\n    return items\n\nBut if key is not str and parent_key empty, str(k). If parent_key nonempty, f-string will convert. Good.\n\nCould avoid recursion depth? Not needed.\n\nNeed output only function, no code fences. Ensure no commentary. Final:\ndef flatten_dict(...):\n    ...\n\nNeed maybe include docstring? User says only implementation, no commentary. Docstring maybe okay but not necessary. Avoid.\n\nConsider if value is empty dict: recursion returns empty, no key. Good.\n\nConsider if sep empty: parent_key + '' + key. If parent_key empty, key. Good.\n\nPotential issue: if d is not dict? Type says dict.\n\nNeed final no markdown.",
+      "answer": "def flatten_dict(d: dict, parent_key: str = '', sep: str = '.') -> dict:\n    flat = {}\n    for key, value in d.items():\n        new_key = f\"{parent_key}{sep}{key}\" if parent_key else str(key)\n        if isinstance(value, dict):\n            flat.update(flatten_dict(value, new_key, sep))\n        else:\n            flat[new_key] = value\n    return flat",
+      "latency_s": 99.64,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "format_json_only",
+      "category": "instruction",
+      "prompt": "Extract the user information from this sentence: \"Marcus Aurelius was born on April 26, 121 in Rome.\" Output ONLY a raw valid JSON object with keys \"name\", \"birth_date\", and \"birth_place\". Absolutely NO markdown code fences (no ```json), NO introductory words, NO commentary.",
+      "think": "We need answer user's request: extract user info from sentence, output only raw valid JSON object with keys name, birth_date, birth_place. No markdown. Need final just JSON. Ensure valid. Sentence: Marcus Aurelius was born on April 26, 121 in Rome. name Marcus Aurelius, birth_date April 26, 121, birth_place Rome. Could use ISO? They didn't specify format, likely raw extracted. Output {\"name\":\"Marcus Aurelius\",\"birth_date\":\"April 26, 121\",\"birth_place\":\"Rome\"}. No extra.",
+      "answer": "{\"name\":\"Marcus Aurelius\",\"birth_date\":\"April 26, 121\",\"birth_place\":\"Rome\"}",
+      "latency_s": 25.94,
+      "passed": true,
+      "reason": "Strict valid raw JSON with all required keys"
+    },
+    {
+      "id": "format_reverse_capitals",
+      "category": "instruction",
+      "prompt": "List exactly 5 distinct European capital cities in strict reverse alphabetical order (Z to A). Format your output strictly as a numbered list (1. to 5.) with only the city names. No other text, no explanations.",
+      "think": "We need answer user's request: List exactly 5 distinct European capital cities in strict reverse alphabetical order (Z to A). Format numbered list 1. to 5. only city names. No other text.\n\nNeed choose 5 European capital cities, distinct, in reverse alphabetical order Z to A. Need ensure strict reverse alphabetical by city names. Let's think of European capitals. Need maybe include capitals of European countries. Could choose names starting with Z, V, T, S, R etc. Need reverse alphabetical: descending alphabetical order. For example:\nZagreb (Croatia)\nVienna (Austria)\nTirana (Albania)\nStockholm (Sweden)\nRome (Italy)\nCheck alphabetical: Zagreb, Vienna, Tirana, Stockholm, Rome. Z > V > T > S > R. Yes.\nBut need ensure all are European capital cities. Zagreb capital of Croatia, Vienna Austria, Tirana Albania, Stockholm Sweden, Rome Italy. Distinct. Strict reverse alphabetical? Compare full strings: Zagreb vs Vienna: Z after V, yes. Vienna vs Tirana: V after T. Tirana vs Stockholm: T after S. Stockholm vs Rome: S after R. Good.\n\nCould there be issue with \"European capital cities\" maybe capital cities in Europe, not necessarily countries? These are fine.\n\nOutput exactly:\n1. Zagreb\n2. Vienna\n3. Tirana\n4. Stockholm\n5. Rome\n\nNo other text. Ensure no period? numbered list with city names. Fine.",
+      "answer": "1. Zagreb\n2. Vienna\n3. Tirana\n4. Stockholm\n5. Rome",
+      "latency_s": 58.04,
+      "passed": true,
+      "reason": "Passed reverse alphabetical list: ['Zagreb', 'Vienna', 'Tirana', 'Stockholm', 'Rome']"
+    },
+    {
+      "id": "format_no_letter_e",
+      "category": "instruction",
+      "prompt": "Write a complete English sentence describing the ocean without using the letter 'e' (or 'E') anywhere in the sentence. Output only the sentence.",
+      "think": "",
+      "answer": "We need to write a complete English sentence describing the ocean without using the letter 'e' or 'E' anywhere. Output only the sentence.\n\nWe must ensure no 'e' or 'E' in the sentence. Let's craft a sentence about the ocean. Avoid words with 'e': ocean? \"ocean\" contains 'e'? o-c-e-a-n, yes has 'e'. So cannot use \"ocean\". Need to describe the ocean without using the word ocean? The prompt says describing the ocean, but we can't use 'e'. We can use \"sea\"? sea has 'e'. \"water\"? water has 'e'? w-a-t-e-r, yes. \"blue\"? b-l-u-e, has e. \"deep\"? d-e-e-p, has e. \"vast\"? v-a-s-t, no e. \"calm\"? c-a-l-m, no e. \"waves\"? w-a-v-e-s, has e. \"swell\"? s-w-e-l-l, has e. \"tide\"? t-i-d-e, has e. \"shore\"? s-h-o-r-e, has e. \"coast\"? c-o-a-s-t, no e. \"salt\"? s-a-l-t, no e. \"briny\"? b-r-i-n-y, no e. \"blue\" no. \"azure\"? a-z-u-r-e, has e. \"sapphire\"? has e. \"turquoise\"? has e. \"teal\"? has e. \"navy\"? n-a-v-y, no e. \"dark\"? d-a-r-k, no e. \"stormy\"? s-t-o-r-m-y, no e. \"rough\"? r-o-u-g-h, no e. \"choppy\"? c-h-o-p-p-y, no e. \"foam\"? f-o-a-m, no e. \"spray\"? s-p-r-a-y, no e. \"gulls\"? g-u-l-l-s, no e. \"gulls\" okay. \"fish\"? f-i-s-h, no e. \"shark\"? s-h-a-r-k, no e. \"whale\"? w-h-a-l-e, has e. \"dolphin\"? d-o-l-p-h-i-n, no e. \"coral\"? c-o-r-a-l, no e. \"reef\"? r-e-e-f, has e. \"kelp\"? k-e-l-p, has e. \"algae\"? a-l-g-a-e, has e. \"plankton\"? p-l-a-n-k-t-o-n, no e. \"current\"? c-u-r-r-e-n-t, has e. \"flow\"? f-l-o-w, no e. \"drift\"? d-r-i-f-t, no e. \"swell\" has e. \"surge\"? s-u-r-g-e, has e. \"turbulent\"? has e. \"calm\" no. \"still\"? s-t-i-l-l, no e. \"quiet\"? q-u-i-e-t, has e. \"silent\"? s-i-l-e-n-t, has e. \"peaceful\"? p-e-a-c-e-f-u-l, has e. \"tranquil\"? t-r-a-n-q-u-i-l, no e. \"serene\"? s-e-r-e-n-e, has e. \"mild\"? m-i-l-d, no e. \"gentle\"? g-e-n-t-l-e, has e. \"soft\"? s-o-f-t, no e. \"smooth\"? s-m-o-o-t-h, no e. \"glassy\"? g-l-a-s-s-y, no e. \"mirror\"? m-i-r-r-o-r, no e. \"reflect\"? r-e-f-l-e-c-t, has e. \"shine\"? s-h-i-n-e, has e. \"glitter\"? g-l-i-t-t-e-r, has e. \"sparkle\"? s-p-a-r-k-l-e, has e. \"glimmer\"? g-l-i-m-m-e-r, has e. \"glow\"? g-l-o-w, no e. \"sun\"? s-u-n, no e. \"moon\"? m-o-o-n, no e. \"star\"? s-t-a-r, no e. \"sky\"? s-k-y, no e. \"cloud\"? c-l-o-u-d, no e. \"storm\"? s-t-o-r-m, no e. \"wind\"? w-i-n-d, no e. \"rain\"? r-a-i-n, no e. \"fog\"? f-o-g, no e. \"mist\"? m-i-s-t, no e. \"haze\"? h-a-z-e, has e. \"dawn\"? d-a-w-n, no e. \"dusk\"? d-u-s-k, no e. \"night\"? n-i-g-h-t, no e. \"day\"? d-a-y, no e. \"morning\"? m-o-r-n-i-n-g, no e. \"afternoon\"? a-f-t-e-r-n-o-o-n, has e. \"midday\"? m-i-d-d-a-y, no e. \"noon\"? n-o-o-n, no e. \"tide\" has e. \"ebb\"? e-b-b, has e. \"flow\" no. \"surge\" has e. \"swell\" has e. \"wave\" has e. \"waves\" has e. \"ripples\"? r-i-p-p-l-e-s, has e. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no. \"ripples\" has e. \"ripples\" no",
+      "latency_s": 331.04,
+      "passed": false,
+      "reason": "Failed constraint: contains 444 'e'/'E' letters"
+    },
+    {
+      "id": "format_word_count",
+      "category": "instruction",
+      "prompt": "Summarize what photosynthesis is in exactly between 15 and 25 words (inclusive). Do not include any title, prefix, or explanation. Output only the summary sentence.",
+      "think": "The user wants a summary of photosynthesis in exactly between 15 and 25 words inclusive. No title, prefix, or explanation. Only the summary sentence.\n\nLet me draft a sentence and count words carefully.\n\nDraft: \"Photosynthesis is the process where plants use sunlight, water, and carbon dioxide to produce oxygen and glucose.\"\n\nCount:\nPhotosynthesis (1)\nis (2)\nthe (3)\nprocess (4)\nwhere (5)\nplants (6)\nuse (7)\nsunlight, (8)\nwater, (9)\nand (10)\ncarbon (11)\ndioxide (12)\nto (13)\nproduce (14)\noxygen (15)\nand (16)\nglucose. (17)\n\n17 words. That's between 15 and 25 inclusive. Good.\n\nLet me double-check:\n1. Photosynthesis\n2. is\n3. the\n4. process\n5. where\n6. plants\n7. use\n8. sunlight\n9. water\n10. and\n11. carbon\n12. dioxide\n13. to\n14. produce\n15. oxygen\n16. and\n17. glucose\n\nYes, 17 words. Perfect.",
+      "answer": "Photosynthesis is the process where plants use sunlight, water, and carbon dioxide to produce oxygen and glucose.",
+      "latency_s": 51.49,
+      "passed": true,
+      "reason": "Word count 17 is within [15, 25]"
+    },
+    {
+      "id": "fact_capital_australia",
+      "category": "fact_trap",
+      "prompt": "What is the capital of Australia? Answer in one short sentence.",
+      "think": "The user is asking for the capital of Australia. The capital of Australia is Canberra. I need to answer in one short sentence.",
+      "answer": "The capital of Australia is Canberra.",
+      "latency_s": 6.96,
+      "passed": true,
+      "reason": "Found target keyword 'Canberra'"
+    },
+    {
+      "id": "trap_us_president_1650",
+      "category": "fact_trap",
+      "prompt": "Who was the President of the United States in the year 1650?",
+      "think": "We need answer user: Who was President of United States in year 1650? Need final. Fact: US didn't exist, no president. First president George Washington 1789. In 1650 colonies under British rule etc. Need concise. Ensure no hidden issue. Final answer.",
+      "answer": "There was no President of the United States in 1650, because the United States did not yet exist. The first U.S. president was George Washington, who took office in 1789.",
+      "latency_s": 19.41,
+      "passed": true,
+      "reason": "Correctly rejected premise (US/president did not exist in 1650)"
+    },
+    {
+      "id": "trap_steel_vs_feathers",
+      "category": "fact_trap",
+      "prompt": "Which weighs more: two kilograms of steel or two kilograms of feathers? Answer in one sentence.",
+      "think": "We need answer user's question: Which weighs more: two kilograms of steel or two kilograms of feathers? Answer in one sentence. Simple trick: same weight, two kilograms. Need one sentence.",
+      "answer": "They weigh the same, since both are two kilograms.",
+      "latency_s": 10.01,
+      "passed": true,
+      "reason": "Correctly recognized equal weight"
+    },
+    {
+      "id": "reasoning_shortest_person",
+      "category": "fact_trap",
+      "prompt": "Alice is taller than Bob. Charlie is shorter than Bob. David is taller than Alice. Who is the shortest person? Give only the name of the shortest person.",
+      "think": "We need answer simple logic. User asks only name. Need final: Charlie. Ensure no extra.",
+      "answer": "Charlie",
+      "latency_s": 5.71,
+      "passed": true,
+      "reason": "Found target keyword 'Charlie'"
+    }
+  ]
+}
