@@ -248,7 +248,7 @@ assert min_window("xyz", "a") == "", "Disjoint strings"
             "'Floors: Alice=[A], Bob=[B], Carol=[C], David=[D], Elena=[E]'"
         ),
         "eval_type": "regex",
-        "pattern": r"Alice\s*=\s*5.*Bob\s*=\s*3.*Carol\s*=\s*2.*David\s*=\s*4.*Elena\s*=\s*1",
+        "pattern": r"Alice\s*=\s*\[?5\]?.*Bob\s*=\s*\[?3\]?.*Carol\s*=\s*\[?2\]?.*David\s*=\s*\[?4\]?.*Elena\s*=\s*\[?1\]?",
         "expected": "Alice=5, Bob=3, Carol=2, David=4, Elena=1"
     },
     {
