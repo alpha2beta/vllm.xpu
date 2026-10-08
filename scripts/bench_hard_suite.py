@@ -361,13 +361,15 @@ def evaluate_hard_item(item: dict, answer: str) -> tuple[bool, str]:
     return False, "Unknown evaluation type"
 
 
-def run_hard_benchmark(base_url: str, model_name: str, out_file: str, max_tokens: int = 2048, skip_long_ctx: bool = False):
+def run_hard_benchmark(base_url: str, model_name: str, out_file: str, max_tokens: int = 2048, skip_long_ctx: bool = False, start_task: int = 1):
     client = OpenAI(base_url=base_url, api_key="dummy")
     print(f"=== Starting Challenging 10-Task Hard Benchmark ===")
     print(f"Target: {model_name} @ {base_url}")
     print(f"Sampling: greedy (temperature=0.0), max_tokens={max_tokens}")
     if skip_long_ctx:
         print("Note: --skip-long-ctx enabled (skipping 12K token prompts)")
+    if start_task > 1:
+        print(f"Note: Resuming from task {start_task}/10")
     print()
 
     # Pre-generate long context once
@@ -377,7 +379,27 @@ def run_hard_benchmark(base_url: str, model_name: str, out_file: str, max_tokens
     results = []
     category_stats = {"long_ctx": [0, 0], "math": [0, 0], "code": [0, 0], "logic_constraint": [0, 0]}
 
+    # If resuming and out_file exists, load previous successful results
+    import os
+    if start_task > 1 and os.path.exists(out_file):
+        try:
+            with open(out_file) as f:
+                prev_data = json.load(f)
+            prev_results = prev_data.get("results", [])
+            for r in prev_results[:start_task - 1]:
+                results.append(r)
+                cat = r["category"]
+                category_stats[cat][1] += 1
+                if r.get("passed", False):
+                    category_stats[cat][0] += 1
+            print(f"Loaded {len(results)} previous task results from {out_file}")
+        except Exception as e:
+            print(f"Warning: could not load existing {out_file}: {e}")
+
     for i, item in enumerate(HARD_BENCHMARK_PROMPTS, 1):
+        if i < start_task:
+            continue
+
         pid = item["id"]
         cat = item["category"]
         is_long = item.get("is_long_ctx", False)
@@ -480,6 +502,8 @@ if __name__ == "__main__":
     parser.add_argument("--out", default="results_hard_bench.json")
     parser.add_argument("--max-tokens", type=int, default=2048)
     parser.add_argument("--skip-long-ctx", action="store_true")
+    parser.add_argument("--start-task", type=int, default=1, help="Start from task index (1-based)")
     args = parser.parse_args()
 
-    run_hard_benchmark(args.base_url, args.model, args.out, args.max_tokens, args.skip_long_ctx)
+    run_hard_benchmark(args.base_url, args.model, args.out, args.max_tokens, args.skip_long_ctx, args.start_task)
+

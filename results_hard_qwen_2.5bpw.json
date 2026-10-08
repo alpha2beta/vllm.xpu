@@ -1,0 +1,114 @@
+{
+  "model": "qwen3.8-27b-2.5bpw",
+  "base_url": "http://127.0.0.1:8001/v1",
+  "total_score": "7/10",
+  "pass_rate_pct": 70.0,
+  "category_stats": {
+    "long_ctx": "2/2",
+    "math": "1/2",
+    "code": "1/3",
+    "logic_constraint": "3/3"
+  },
+  "results": [
+    {
+      "id": "long_ctx_multihop_needle",
+      "category": "long_ctx",
+      "latency_s": 126.86,
+      "think_chars": 1072,
+      "answer_chars": 423,
+      "passed": true,
+      "reason": "Found target: 9f8a-c4e1-22b0",
+      "answer_preview": "**Trace:**\n\n1. **Migration event** (2026-10-08T06:30:30.390Z): Server phoenix-7 was migrated to cluster hyperion-9 by operator code-name **OSPREY** (Event-ID: EVT-94821, authorization: DIRECTIVE-ALPHA-7).\n\n2. **Keyring record** (2026-10-08T18:30:30.170Z): Operator code-name OSPREY holds cryptographi"
+    },
+    {
+      "id": "long_ctx_distractor_amendment",
+      "category": "long_ctx",
+      "latency_s": 51.04,
+      "think_chars": 866,
+      "answer_chars": 236,
+      "passed": true,
+      "reason": "Found target: 3,180,000",
+      "answer_preview": "The log states that Project Chimera-Alpha\u2019s initial budget of $4,500,000 was amended and capped by executive order, with all subsequent disbursements required to reflect the final approved budget of $3,180,000.\n\nFinal budget: $3,180,000"
+    },
+    {
+      "id": "math_chinese_remainder",
+      "category": "math",
+      "latency_s": 181.93,
+      "think_chars": 1646,
+      "answer_chars": 1637,
+      "passed": true,
+      "reason": "Matched expected pattern: 3386",
+      "answer_preview": "We need to solve the system\n\n\\[\n\\begin{cases}\nx \\equiv 3 \\pmod{17}\\\\\nx \\equiv 4 \\pmod{19}\\\\\nx \\equiv 5 \\pmod{23}\n\\end{cases}\n\\]\n\nSince \\(17, 19, 23\\) are pairwise coprime, the solution is unique modulo\n\n\\[\n17 \\cdot 19 \\cdot 23 = 7429.\n\\]\n\n### Step 1: Use the first congruence\n\nWrite\n\n\\[\nx = 3 + 17a\n\\"
+    },
+    {
+      "id": "math_bounded_combinatorics",
+      "category": "math",
+      "latency_s": 315.99,
+      "think_chars": 0,
+      "answer_chars": 3506,
+      "passed": false,
+      "reason": "Did not find pattern for 301 in: \"s) = max(0, -1)=0? Wait 12-s for s=13 is -1, so L=0. But d<=12 condition: d=24-s-c <=12 => c >= s-12 =1. I used 12-s incorrectly? Let's derive: d=24 - (a+b+c). d >=3 => a+b+c <=21. d <=12 => a+b+c >=1\"",
+      "answer_preview": "We need answer count integer solutions to a+b+c+d=24 with constraints: 1<=a<=6, 2<=b<=8, 0<=c<=10, 3<=d<=12. Need exact number. Need compute. Let's solve carefully.\n\nWe can transform variables to nonnegative:\na' = a-1, 0<=a'<=5\nb' = b-2, 0<=b'<=6\nc' = c-0, 0<=c'<=10\nd' = d-3, 0<=d'<=9\nEquation: a'+b"
+    },
+    {
+      "id": "code_trapping_rain_water",
+      "category": "code",
+      "latency_s": 62.65,
+      "think_chars": 882,
+      "answer_chars": 582,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\ndef trap(height: list[int]) -> int:\n    left = 0\n    right = len(height) - 1\n    left_max = 0\n    right_max = 0\n    water = 0\n\n    while left < right:\n        if height[left] < height[right]:\n            if height[left] > left_max:\n                left_max = height[left]\n            else:\n"
+    },
+    {
+      "id": "code_lru_cache",
+      "category": "code",
+      "latency_s": 148.53,
+      "think_chars": 2021,
+      "answer_chars": 1531,
+      "passed": false,
+      "reason": "Assertion failed: Key 2 was recently accessed, should remain",
+      "answer_preview": "```python\nclass Node:\n    def __init__(self, key: int = 0, value: int = 0):\n        self.key = key\n        self.value = value\n        self.prev = None\n        self.next = None\n\n\nclass LRUCache:\n    def __init__(self, capacity: int):\n        self.capacity = capacity\n        self.cache = {}\n\n        #"
+    },
+    {
+      "id": "code_min_window_substring",
+      "category": "code",
+      "latency_s": 326.5,
+      "think_chars": 0,
+      "answer_chars": 6740,
+      "passed": false,
+      "reason": "Execution error: NameError: name 'min_window' is not defined",
+      "answer_preview": "We need answer user: write Python function min_window(s: str, t: str) -> str that finds minimum window substring of s such that every character in t (including duplicate occurrences) included. If no such substring exists return ''. Optimize for O(|s| + |t|) time. Wrap code in python block.\n\nNeed pro"
+    },
+    {
+      "id": "logic_five_floors",
+      "category": "logic_constraint",
+      "latency_s": 51.49,
+      "think_chars": 884,
+      "answer_chars": 49,
+      "passed": true,
+      "reason": "Matched expected pattern: Alice=5, Bob=3, Carol=2, David=4, Elena=1",
+      "answer_preview": "Floors: Alice=5, Bob=3, Carol=2, David=4, Elena=1"
+    },
+    {
+      "id": "format_multi_constraint_4rules",
+      "category": "logic_constraint",
+      "latency_s": 37.02,
+      "think_chars": 783,
+      "answer_chars": 149,
+      "passed": true,
+      "reason": "Passed all 4 rules simultaneously",
+      "answer_preview": "Although the sky is clear, the wind is soft.\nBecause the waves meet the shore, the deep blue ocean glows.\nAlthough the light fades, the calm remains."
+    },
+    {
+      "id": "trap_sheep_all_but_nine",
+      "category": "logic_constraint",
+      "latency_s": 15.72,
+      "think_chars": 354,
+      "answer_chars": 8,
+      "passed": true,
+      "reason": "Matched expected pattern: 9 (all but 9 die means 9 remain alive)",
+      "answer_preview": "Alive: 9"
+    }
+  ]
+}
