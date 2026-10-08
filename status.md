@@ -712,11 +712,12 @@ Quality cost of ~45% fewer bytes is small (+0.42 PPL). Retained under Option B a
   - Qwen3.8-27B 2.20bpw: PPL **6.78** (+0.42 PPL penalty vs 4.00bpw)
 - **Artifact:** `results_qwen_3bpw_ppl.json`.
 
-### 4. Comprehensive 5-Way Multi-Benchmark Comparison Matrix
+### 4. Comprehensive 6-Way Multi-Benchmark Comparison Matrix
 
 | Model & Quantization | Size on Disk / VRAM | WT2 PPL | 16-Prompt Score | 10-Task Hard Score | Hard Suite Latency | Serving Engine & Decode Throughput |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Qwen3.8-27B EXL3 3.00bpw** | 12.87 GB / 13.1 GiB | **6.46** | **16/16 (100.0%)** | **10/10 (100.0%)** | **1062.6s (17.7 min)** | vLLM XPU (MTP K=1, ~6.5 tok/s) |
+| **Tiel-Coder-35B-A3B MXFP4** | 20.47 GB / 19.7 GiB | — | **15/16 (93.8%)** | **9/10 (90.0%)** | **564.8s (9.4 min)** *(fastest)* | vLLM XPU (MTP K=2, **27.7 tok/s**) |
+| **Qwen3.8-27B EXL3 3.00bpw** | 12.87 GB / 13.1 GiB | **6.46** | **16/16 (100.0%)** | **10/10 (100.0%)** | 1062.6s (17.7 min) | vLLM XPU (MTP K=1, ~6.5 tok/s) |
 | **Ternary Bonsai PQ2_0** | 7.21 GB / 7.6 GiB | ~6.73 | **16/16 (100.0%)** *(cal.)* | **10/10 (100.0%)** *(cal.)* | 1827.4s (30.5 min) | llama.cpp SYCL (**12.1 tok/s**) |
 | **Ternary Bonsai PTQ1_0** | **5.95 GB / 5.6 GiB** | 6.73 | **16/16 (100.0%)** *(cal.)* | 8/10 (80.0%) *(cal.)* | 1749.6s (29.2 min) | llama.cpp SYCL (**13.1 tok/s**) |
 | **Qwen3.8-27B EXL3 2.50bpw** | 11.45 GB / 11.7 GiB | 6.57 | 15/16 (93.8%) | 7/10 (70.0%) | 1317.8s (22.0 min) | vLLM XPU (MTP K=1, ~6.6 tok/s) |
@@ -730,6 +731,45 @@ Quality cost of ~45% fewer bytes is small (+0.42 PPL). Retained under Option B a
 2. **Dense EXL3 Trellis Coding vs. Native Ternary Distillation:**
    - **Ternary Bonsai (PQ2_0 & PTQ1_0):** Unmatched hardware efficiency. By natively quantizing to 1.58–1.7 bpw during distillation, Bonsai fits 27B parameters into just 5.95–7.21 GB of memory, enabling **12.1–13.1 tok/s** on Intel Arc 140V (Xe2-LPG). With calibrated reasoning effort, PQ2_0 achieves parity with Qwen 3.00bpw at 10/10 and 16/16.
    - **Qwen EXL3 3.00bpw:** The peak reasoning champion. It solves LeetCode Hard, Olympiad Math, and 12.5K context retrieval with zero tuning, executing the hard suite in 1062.6s (1.7× faster than Bonsai due to vLLM's efficient chunked prefill).
+
+## Comprehensive Benchmark: Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4 (2026-10-08)
+
+**Objective:** Evaluate the production daily driver model **`models/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4`** (20.47 GB weights, 19.71 GiB resident VRAM, MTP $K=2$ speculative decoding, 3.0 GB pinned KV cache) across both standardized benchmark suites on Intel Arc 140V:
+1. Curated 16-Prompt Quality Benchmark (`scripts/bench_quality_16p.py`)
+2. Challenging 10-Task Hard Benchmark Suite at 16K context (`scripts/bench_hard_suite.py`)
+
+### 1. 16-Prompt Quality Suite: 15 / 16 (93.8%) in Record Time (292.0s / ~4.9 min)
+- **Result:** **15 / 16 (93.8%)** passing 15 tasks in just **292.0s** (2.2× faster than Qwen 3.00bpw at 638.1s, 4.3× faster than Bonsai PTQ1_0 at 1245.3s).
+  - **Math (4/4):** `math_bridge` (23.6s), `math_lcm` (16.1s), `math_speed` (19.7s), `math_probability` (11.1s).
+  - **Code (4/4):** `code_palindrome` (8.6s), `code_merge_intervals` (31.7s), `code_two_sum` (6.5s), `code_flatten_dict` (9.5s). All unit assertions passed.
+  - **Instruction Following (3/4):** `format_json_only` (5.4s), `format_reverse_capitals` (29.6s, exact reverse alphabetical list), `format_word_count` (27.3s, exact 17 words). Failed negative constraint `format_no_letter_e` (74.2s, contained 'e' letters).
+  - **Factuality & Premise Traps (4/4):** `fact_capital_australia` (3.3s), `trap_us_president_1650` (16.9s), `trap_steel_vs_feathers` (3.6s), `reasoning_shortest_person` (4.9s).
+- **Artifact:** `results_tiel_mxfp4_16p.json`.
+
+### 2. 10-Task Hard Suite Benchmark (16K Context): 9 / 10 (90.0%) in 564.8s (~9.4 min)
+- **Result:** **9 / 10 (90.0%)** out-of-the-box in **564.8s** (almost 2× faster than Qwen 3.00bpw at 1062.6s and 3.2× faster than Bonsai PQ2_0 at 1827.4s).
+  - **Long Context Retrieval (~12.5K context, 2/2):**
+    - `long_ctx_multihop_needle`: Correct cryptographic key-hash `9f8a-c4e1-22b0` retrieved in **48.7s** (vs Qwen 117.1s, Bonsai 182.6s).
+    - `long_ctx_distractor_amendment`: Correct post-amendment executive budget `$3,180,000` retrieved in **35.8s** (vs Qwen 54.7s, Bonsai 56.2s).
+  - **Olympiad Math (2/2):**
+    - `math_chinese_remainder`: Solved mod 17, 19, 23 system yielding exact unique solution $x = 3386$ in 103.2s.
+    - `math_bounded_combinatorics`: Derived exact constrained non-negative integer solution count $N = 301$ in 95.8s via generating functions and inclusion-exclusion.
+  - **LeetCode Hard Algorithms (2/3):**
+    - `code_lru_cache`: Doubly-linked list + hash map with explicit `Node` class passing all unit assertions in 76.1s.
+    - `code_min_window_substring`: Linear sliding-window algorithm passing all duplicate character unit assertions in 96.7s.
+    - `code_trapping_rain_water`: Failed due to syntax error in function type annotation (`def trap(height: list[int -> int:` missing closing bracket `]`), despite algorithm logic being correct two-pointers.
+  - **Logic & Constraints (3/3):**
+    - `logic_five_floors`: Exact floor assignment (Alice=5, Bob=3, Carol=2, David=4, Elena=1) in 39.0s.
+    - `format_multi_constraint_4rules`: Satisfied all 4 complex grammatical constraints simultaneously in 15.3s.
+    - `trap_sheep_all_but_nine`: Deduced exact surviving sheep count (9) in 3.9s.
+- **Artifact:** `results_hard_tiel_mxfp4.json`.
+
+### 3. Key Findings: MoE Speed vs Dense Reasoning Fallback
+- **Throughput Leader:** With MoE routing activating only 3.5B parameters per token combined with MTP $K=2$ speculative decoding (~27.7 tok/s), Tiel-Coder-35B completed the entire 10-task hard benchmark in **9.4 minutes** (564.8s), outperforming every dense and ternary model tested by 1.88× to 3.23× in wall-clock time.
+- **Dual-Model Strategy Validated:**
+  - **Daily Driver:** `Tiel-Coder-35B-A3B MXFP4` delivers high coding quality (90% hard suite, 93.8% quality suite) at high interactive speed (27.7 tok/s) and sub-minute long context processing.
+  - **Designated Fallback:** `Qwen3.8-27B EXL3 3.00bpw` (or Bonsai PQ2_0) provides 100% reasoning convergence (10/10 and 16/16) when zero-typo perfection or extreme negative constraints (`format_no_letter_e`) are required.
+
 
 
 

@@ -631,6 +631,12 @@ K=2 adds nothing. Production verdict unchanged (DROP).
   - WikiText-2 raw test perplexity: **PPL = 6.460** (NLL = 1.8657, 294,840 tokens, 72 chunks, 1655.1s). (+0.10 PPL vs 4.00bpw 6.36, saving 2.8 GB). Artifact: `results_qwen_3bpw_ppl.json`.
   - Compiled comprehensive 5-way multi-model benchmark matrix in `status.md`.
 
+- [x] **E8.10 — Benchmark Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4 on 16-Prompt Quality and 10-Task Hard Suites.**
+  Evaluated production daily driver `models/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4` (20.47 GB, MTP $K=2$, 27.7 tok/s) on Arc 140V sequentially:
+  - 16-prompt quality suite: Scored **15 / 16 (93.8%)** in record time **292.0s (~4.9 min)** (2.2× faster than Qwen 3.00bpw, 4.3× faster than Bonsai PTQ1). Math 4/4, Code 4/4, Instruction 3/4, Fact/Trap 4/4. Solved `format_reverse_capitals` in 29.6s. Artifact: `results_tiel_mxfp4_16p.json`.
+  - 10-task hard suite (16K context): Scored **9 / 10 (90.0%)** in record time **564.8s (~9.4 min)** (1.88× faster than Qwen 3.00bpw, 3.23× faster than Bonsai PQ2_0). Long Context 2/2 in 48.7s & 35.8s, Olympiad Math 2/2 (CRT $x=3386$ and combinatorics $N=301$), LeetCode Hard 2/3 (LRU Cache in 76.1s, Min Window Substring in 96.7s; Trapping Rain Water had single syntax typo in type annotation), Logic Constraints 3/3 (5-Floors, 4-rules, 9 sheep). Artifact: `results_hard_tiel_mxfp4.json`.
+  - Expanded comparison matrix to 6 models in `status.md`.
+
 ---
 
 ## Phase E6 — Report, Recommendation, and Reversibility

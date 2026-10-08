@@ -1,0 +1,114 @@
+{
+  "model": "Tiel-Coder-35B-A3B",
+  "base_url": "http://127.0.0.1:8001/v1",
+  "total_score": "9/10",
+  "pass_rate_pct": 90.0,
+  "category_stats": {
+    "long_ctx": "2/2",
+    "math": "2/2",
+    "code": "2/3",
+    "logic_constraint": "3/3"
+  },
+  "results": [
+    {
+      "id": "long_ctx_multihop_needle",
+      "category": "long_ctx",
+      "latency_s": 48.67,
+      "think_chars": 1149,
+      "answer_chars": 918,
+      "passed": true,
+      "reason": "Found target: 9f8a-c4e1-22b0",
+      "answer_preview": "## Audit Trace\n\n**Step 1: Identify the migration event for server phoenix-7**\n\nScanning the logs, I found the CRITICAL-AUDIT entry:\n```\n[2026-10-08T06:30:30.390Z] [CRITICAL-AUDIT] [infra-migrator] Event-ID: EVT-94821 | Source: dc-west-zone-2 |\nACTION: Server phoenix-7 was migrated to cluster hyperio"
+    },
+    {
+      "id": "long_ctx_distractor_amendment",
+      "category": "long_ctx",
+      "latency_s": 35.84,
+      "think_chars": 1125,
+      "answer_chars": 915,
+      "passed": true,
+      "reason": "Found target: 3,180,000",
+      "answer_preview": "## Financial Compliance Audit \u2014 Project Chimera-Alpha Budget\n\n**Relevant log entry:**\n```\n[2026-10-08T12:00:00.780Z] [FINANCE-GOVERNANCE] [budget-controller] Event-ID: EVT-77215 | Scope: project-chimera | NOTICE: Project Chimera-Alpha initial budget of $4,500,000 was officially amended and capped at"
+    },
+    {
+      "id": "math_chinese_remainder",
+      "category": "math",
+      "latency_s": 103.24,
+      "think_chars": 2089,
+      "answer_chars": 1519,
+      "passed": true,
+      "reason": "Matched expected pattern: 3386",
+      "answer_preview": "# Solving the System of Congruences\n\nWe need to find the smallest positive integer $x$ satisfying:\n$$x \\equiv 3 \\pmod{17}, \\quad x \\equiv 4 \\pmod{19}, \\quad x \\equiv 5 \\pmod{23}$$\n\nSince $17, 19, 23$ are pairwise coprime, the Chinese Remainder Theorem guarantees a unique solution modulo $17 \\cdot 19"
+    },
+    {
+      "id": "math_bounded_combinatorics",
+      "category": "math",
+      "latency_s": 95.84,
+      "think_chars": 0,
+      "answer_chars": 3969,
+      "passed": true,
+      "reason": "Matched expected pattern in answer: 301",
+      "answer_preview": "We need to count integer solutions to a + b + c + d = 24 with:\n- 1 <= a <= 6\n- 2 <= b <= 8\n- 0 <= c <= 10\n- 3 <= d <= 12\n\nLet me use generating functions / inclusion-exclusion.\n\nFirst, let me shift variables to make them start at 0.\n\nLet a' = a - 1, so 0 <= a' <= 5\nLet b' = b - 2, so 0 <= b' <= 6\nLe"
+    },
+    {
+      "id": "code_trapping_rain_water",
+      "category": "code",
+      "latency_s": 50.35,
+      "think_chars": 2477,
+      "answer_chars": 574,
+      "passed": false,
+      "reason": "Execution error: SyntaxError: invalid syntax (<string>, line 1)",
+      "answer_preview": "```python\ndef trap(height: list[int -> int:\n    left, right = 0, len(height) - 1\n    left_max, right_max = 0, 0\n    water = 0\n\n    while left < right:\n        if height[left] < height[right]:\n            if height[left] >= left_max:\n                left_max = height[left]\n            else:\n         "
+    },
+    {
+      "id": "code_lru_cache",
+      "category": "code",
+      "latency_s": 76.07,
+      "think_chars": 3350,
+      "answer_chars": 2978,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "Here's a clean, optimal implementation using a **hash map + doubly linked list** combination, which gives O(1) for both `get` and `put`.\n\n```python\nclass Node:\n    def __init__(self, key=0, value=0):\n        self.key = key\n        self.value = value\n        self.prev = None\n        self.next = None\n"
+    },
+    {
+      "id": "code_min_window_substring",
+      "category": "code",
+      "latency_s": 96.69,
+      "think_chars": 0,
+      "answer_chars": 7145,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "The task is to implement the classic \"Minimum Window Substring\" problem (LeetCode 430/76).\n\nLet me think about the algorithm:\n\nWe need to find the smallest substring of `s` that contains all characters of `t` (including duplicates).\n\nThe standard approach is the sliding window technique:\n\n1. First, "
+    },
+    {
+      "id": "logic_five_floors",
+      "category": "logic_constraint",
+      "latency_s": 39.01,
+      "think_chars": 1158,
+      "answer_chars": 850,
+      "passed": true,
+      "reason": "Matched expected pattern: Alice=5, Bob=3, Carol=2, David=4, Elena=1",
+      "answer_preview": "# Solving Step by Step\n\n**Starting with the most specific clue:**\n\n**Rule 5:** Bob = 3.\n\n**Applying Rule 1:** Alice > Bob, so Alice must be 4 or 5.\n\n**Analyzing Rules 2 & 3 together:**\n- Rule 2 says Carol is on floor 2, 3, or 4 (not 1 or 5).\n- Rule 3 says David = Carol + 2.\n  - If Carol = 2 \u2192 David "
+    },
+    {
+      "id": "format_multi_constraint_4rules",
+      "category": "logic_constraint",
+      "latency_s": 15.33,
+      "think_chars": 1085,
+      "answer_chars": 220,
+      "passed": true,
+      "reason": "Passed all 4 rules simultaneously",
+      "answer_preview": "Although the waves crashed against the shore, the sailor felt a strange calm. Because the deep blue ocean stretched endlessly, he remembered his childhood dreams. Although the journey was long, his heart remained steady."
+    },
+    {
+      "id": "trap_sheep_all_but_nine",
+      "category": "logic_constraint",
+      "latency_s": 3.91,
+      "think_chars": 97,
+      "answer_chars": 107,
+      "passed": true,
+      "reason": "Matched expected pattern: 9 (all but 9 die means 9 remain alive)",
+      "answer_preview": "A farmer has 17 sheep, and all but 9 die. \"All but 9\" means all except 9 dies, so 9 remain alive.\n\nAlive: 9"
+    }
+  ]
+}
