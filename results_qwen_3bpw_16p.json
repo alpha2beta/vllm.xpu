@@ -1,0 +1,174 @@
+{
+  "model": "qwen3.8-27b-3.0bpw",
+  "base_url": "http://127.0.0.1:8001/v1",
+  "total_score": "16/16",
+  "pass_rate_pct": 100.0,
+  "category_stats": {
+    "math": "4/4",
+    "code": "4/4",
+    "instruction": "4/4",
+    "fact_trap": "4/4"
+  },
+  "results": [
+    {
+      "id": "math_bridge",
+      "category": "math",
+      "prompt": "Four hikers reach a bridge at night with one flashlight. Crossing times: 1, 2, 5, and 10 minutes. At most two people can cross together, moving at the slower hiker's pace. The flashlight must be carried back. What is the minimum total time (in minutes) for all four to cross? State the final number clearly on the last line as 'Total time: X minutes'.",
+      "think": "We need answer classic bridge crossing puzzle. Need final line exactly 'Total time: X minutes'. Need think. Four hikers times 1,2,5,10. Minimum total time? Standard solution: 1&2 cross (2), 1 returns (1), 5&10 cross (10), 2 returns (2), 1&2 cross (2) total 17. Alternative? Let's verify minimal. Yes 17. Need provide concise explanation maybe. Final line clear. Ensure no extra after? User asks state final number clearly on last line as 'Total time: X minutes'. We can include explanation then last line. Need ensure last line exactly.",
+      "answer": "The optimal sequence is:\n\n1. Hikers 1 and 2 cross together: 2 minutes.\n2. Hiker 1 returns with the flashlight: 1 minute.\n3. Hikers 5 and 10 cross together: 10 minutes.\n4. Hiker 2 returns with the flashlight: 2 minutes.\n5. Hikers 1 and 2 cross together again: 2 minutes.\n\nTotal time: 17 minutes",
+      "latency_s": 25.48,
+      "passed": true,
+      "reason": "Matched expected pattern: 17 minutes"
+    },
+    {
+      "id": "math_lcm",
+      "category": "math",
+      "prompt": "A store sells apples in packs of 6 and oranges in packs of 8. A customer wants to buy the exact same number of apples and oranges. What is the smallest positive total number of fruit (apples + oranges combined) the customer must buy? State the final answer on the last line as 'Total fruit: X'.",
+      "think": "We need answer simple math. Need solve: packs apples 6, oranges 8. Customer wants exact same number of apples and oranges. Need smallest positive total number fruit (apples+oranges combined). Let number apples = number oranges = N. N must be multiple of 6 and 8? Since apples bought in packs of 6, total apples = 6a, oranges = 8b. Need 6a = 8b = N. Smallest positive N is lcm(6,8)=24. Then total fruit = 24+24=48. Need final line 'Total fruit: X'. Ensure no extra? Can explain. Final answer last line exactly.",
+      "answer": "The customer must buy the same number of apples and oranges, so that number must be a common multiple of 6 and 8.\n\nThe least common multiple of 6 and 8 is 24.\n\nSo the customer buys 24 apples and 24 oranges, for a total of:\n\nTotal fruit: 48",
+      "latency_s": 20.82,
+      "passed": true,
+      "reason": "Matched expected pattern: 48 (24 apples + 24 oranges)"
+    },
+    {
+      "id": "math_speed",
+      "category": "math",
+      "prompt": "Train A leaves a station traveling at 60 mph. Train B leaves the same station 1 hour later traveling in the same direction on a parallel track at 80 mph. How many hours after Train B departs will Train B catch up to Train A? State the final answer on the last line as 'Hours: X'.",
+      "think": "We need answer simple word problem. Need final line Hours: X. Let's solve: Train A leaves at t=0 speed 60. Train B leaves 1 hour later speed 80 same direction. Let h hours after B departs. A has traveled 60*(h+1). B traveled 80*h. Catch up: 80h = 60(h+1) => 80h=60h+60 =>20h=60 =>h=3. Final Hours: 3. Need maybe concise. Ensure last line exactly.",
+      "answer": "Train A has a 1-hour head start, so it is 60 miles ahead when Train B departs.\n\nTrain B gains on Train A at:\n80 mph \u2212 60 mph = 20 mph\n\nTime to close the 60-mile gap:\n60 miles \u00f7 20 mph = 3 hours\n\nHours: 3",
+      "latency_s": 22.74,
+      "passed": true,
+      "reason": "Matched expected pattern: 3 hours"
+    },
+    {
+      "id": "math_probability",
+      "category": "math",
+      "prompt": "A bag contains 3 red balls and 5 blue balls. If two balls are drawn at random without replacement, what is the exact probability (in fraction form in lowest terms, like P/Q) that both balls are red? State the final fraction on the last line as 'Probability: P/Q'.",
+      "think": "We need answer simple probability. Need final with last line Probability: P/Q. Let's compute: 3 red, 5 blue total 8. Draw two without replacement. Probability both red = (3/8)*(2/7)=6/56=3/28. Lowest terms. Final line exactly Probability: 3/28. Could include brief explanation. Ensure last line.",
+      "answer": "There are 8 balls total, with 3 red.\n\nProbability first ball is red: 3/8  \nProbability second ball is red (without replacement): 2/7  \n\nCombined probability: (3/8) \u00d7 (2/7) = 6/56 = 3/28\n\nProbability: 3/28",
+      "latency_s": 22.35,
+      "passed": true,
+      "reason": "Matched expected pattern: 3/28"
+    },
+    {
+      "id": "code_palindrome",
+      "category": "code",
+      "prompt": "Write a Python function `is_palindrome(s: str) -> bool` that returns True if the string is a palindrome, ignoring non-alphanumeric characters and case. Output ONLY the python function implementation. Do not include markdown fences or usage examples.",
+      "think": "We need answer user's request: Write Python function is_palindrome(s: str) -> bool returns True if palindrome ignoring non-alphanumeric and case. Output ONLY python function implementation. No markdown fences or usage examples. Need final only code. Need ensure no extra. Could implement:\ndef is_palindrome(s: str) -> bool:\n    cleaned = [ch.lower() for ch in s if ch.isalnum()]\n    return cleaned == cleaned[::-1]\nNeed consider Unicode? isalnum and lower okay. Output only function. No fences.",
+      "answer": "def is_palindrome(s: str) -> bool:\n    cleaned = [ch.lower() for ch in s if ch.isalnum()]\n    return cleaned == cleaned[::-1]",
+      "latency_s": 18.58,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "code_merge_intervals",
+      "category": "code",
+      "prompt": "Write a Python function `merge_intervals(intervals: list[list[int]]) -> list[list[int]]` that merges all overlapping intervals and returns the merged list sorted by start time. Output ONLY the python function implementation without markdown code fences or explanatory text.",
+      "think": "We need answer user's request: Write Python function merge_intervals(intervals: list[list[int]]) -> list[list[int]] that merges all overlapping intervals and returns merged list sorted by start time. Output ONLY python function implementation without markdown code fences or explanatory text.\n\nNeed produce final only code. Need ensure valid Python. Consider empty list. Sort by start. Merge if next start <= current end (assuming intervals inclusive? Usually merge overlapping if start <= end. If touching? LeetCode merge intervals: [1,4],[4,5] merge to [1,5] because overlap at point? They consider overlapping if start <= end. Use <=. Return list of lists. Type hints. No markdown.\n\nPotential edge: intervals may be tuples? type list[list[int]]. We can sort key=lambda x: x[0]. If empty return [].\n\nImplementation:\ndef merge_intervals(intervals: list[list[int]]) -> list[list[int]]:\n    if not intervals:\n        return []\n    intervals.sort(key=lambda x: x[0])\n    merged = [intervals[0][:]]\n    for start, end in intervals[1:]:\n        if start <= merged[-1][1]:\n            merged[-1][1] = max(merged[-1][1], end)\n        else:\n            merged.append([start, end])\n    return merged\n\nNeed only function. Ensure no fences. final.",
+      "answer": "def merge_intervals(intervals: list[list[int]]) -> list[list[int]]:\n    if not intervals:\n        return []\n\n    intervals.sort(key=lambda interval: interval[0])\n    merged = [intervals[0][:]]\n\n    for start, end in intervals[1:]:\n        if start <= merged[-1][1]:\n            merged[-1][1] = max(merged[-1][1], end)\n        else:\n            merged.append([start, end])\n\n    return merged",
+      "latency_s": 46.05,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "code_two_sum",
+      "category": "code",
+      "prompt": "Write a Python function `two_sum(nums: list[int], target: int) -> list[int]` that finds two distinct indices i and j such that nums[i] + nums[j] == target. Output ONLY the python function implementation without markdown code fences or commentary.",
+      "think": "We need answer user's request: Write Python function two_sum(nums: list[int], target: int) -> list[int] finds two distinct indices i and j such that nums[i]+nums[j]==target. Output ONLY python function implementation without markdown code fences or commentary.\n\nNeed produce final only code. Need consider LeetCode Two Sum: return indices. Could use hash map. Need distinct indices. If duplicate values, ensure not same index. Implementation:\n\ndef two_sum(nums: list[int], target: int) -> list[int]:\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []\n\nThis returns distinct indices because seen stores previous indices. If no solution returns [] maybe acceptable. Could raise? Usually return list. Need only function. No markdown. Ensure type hints. Python 3.9+ list[int]. Good.\n\nNeed final only code. No commentary.",
+      "answer": "def two_sum(nums: list[int], target: int) -> list[int]:\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []",
+      "latency_s": 32.76,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "code_flatten_dict",
+      "category": "code",
+      "prompt": "Write a Python function `flatten_dict(d: dict, parent_key: str = '', sep: str = '.') -> dict` that flattens a nested dictionary. Keys should be concatenated with `sep`. Output ONLY the python function implementation without markdown code fences or commentary.",
+      "think": "We need answer user's request: Write Python function flatten_dict(d: dict, parent_key: str = '', sep: str = '.') -> dict that flattens nested dictionary. Keys concatenated with sep. Output ONLY python function implementation without markdown code fences or commentary.\n\nNeed produce final only code. Need consider edge cases: nested dict values, maybe non-dict values. Should handle empty dict. If value is dict, recurse with key = parent_key + sep + key if parent_key else key. If value not dict, set. What about list of dicts? Not specified, only nested dictionary. Could include if isinstance(value, dict). Need maybe handle non-string keys? Concatenate with sep: f\"{parent_key}{sep}{key}\" if parent_key else str(key). But if keys are not strings, concatenation fails. Could convert to str. But signature dict. Usually keys strings. Need output only function.\n\nPotential implementation:\n\ndef flatten_dict(d: dict, parent_key: str = '', sep: str = '.') -> dict:\n    items = {}\n    for k, v in d.items():\n        new_key = f\"{parent_key}{sep}{k}\" if parent_key else str(k)\n        if isinstance(v, dict):\n            items.update(flatten_dict(v, new_key, sep))\n        else:\n            items[new_key] = v\n    return items\n\nBut if parent_key empty and k not string, str(k). If parent_key nonempty and k nonstring, f works. If sep empty? f\"{parent_key}{sep}{k}\" okay. If parent_key empty and sep maybe? new_key = str(k). Good.\n\nNeed maybe preserve order? Python dict preserves insertion. Fine.\n\nCould use recursive. Need no markdown. final only code. Ensure no commentary.",
+      "answer": "def flatten_dict(d: dict, parent_key: str = '', sep: str = '.') -> dict:\n    flat = {}\n    for key, value in d.items():\n        new_key = f\"{parent_key}{sep}{key}\" if parent_key else str(key)\n        if isinstance(value, dict):\n            flat.update(flatten_dict(value, new_key, sep))\n        else:\n            flat[new_key] = value\n    return flat",
+      "latency_s": 54.56,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "format_json_only",
+      "category": "instruction",
+      "prompt": "Extract the user information from this sentence: \"Marcus Aurelius was born on April 26, 121 in Rome.\" Output ONLY a raw valid JSON object with keys \"name\", \"birth_date\", and \"birth_place\". Absolutely NO markdown code fences (no ```json), NO introductory words, NO commentary.",
+      "think": "We need to respond with raw valid JSON object only, no markdown, no commentary. User asks extract info from sentence: \"Marcus Aurelius was born on April 26, 121 in Rome.\" Output ONLY raw valid JSON object with keys name, birth_date, birth_place. Need ensure valid JSON. Values strings. birth_date maybe \"April 26, 121\". name \"Marcus Aurelius\", birth_place \"Rome\". Final only JSON.",
+      "answer": "{\n  \"name\": \"Marcus Aurelius\",\n  \"birth_date\": \"April 26, 121\",\n  \"birth_place\": \"Rome\"\n}",
+      "latency_s": 17.28,
+      "passed": true,
+      "reason": "Strict valid raw JSON with all required keys"
+    },
+    {
+      "id": "format_reverse_capitals",
+      "category": "instruction",
+      "prompt": "List exactly 5 distinct European capital cities in strict reverse alphabetical order (Z to A). Format your output strictly as a numbered list (1. to 5.) with only the city names. No other text, no explanations.",
+      "think": "We need to answer user's request. User asks: List exactly 5 distinct European capital cities in strict reverse alphabetical order (Z to A). Format output strictly as numbered list 1. to 5. with only city names. No other text, no explanations.\n\nNeed choose 5 distinct European capital cities, reverse alphabetical order Z to A. Need ensure alphabetical by city name? \"European capital cities\" likely city names. Need strict reverse alphabetical order. We can pick any 5. Need ensure order descending by city name. Let's choose capitals: Vienna, Warsaw, Vatican City? Is Vatican City a capital city? It's a city-state capital. But maybe avoid ambiguity. European capital cities: London, Paris, Berlin, Madrid, Rome, Vienna, Warsaw, Oslo, Stockholm, Helsinki, Copenhagen, Dublin, Lisbon, Athens, Prague, Budapest, Bratislava, Zagreb, Ljubljana, Tallinn, Riga, Vilnius, Minsk, Kyiv, Moscow, Sofia, Bucharest, Belgrade, Sarajevo, Podgorica, Skopje, Tirana, Nicosia, Valletta, Andorra la Vella, Monaco? San Marino? Maybe use unambiguous.\n\nNeed reverse alphabetical Z to A. Pick 5 names that are easy: Vienna, Warsaw, Valletta, Vatican City? But Vatican City starts V, Valletta V, Vienna V, Warsaw W. Reverse alphabetical: Warsaw (W), Vienna (V), Valletta (V), Vatican City (V) maybe. Need exactly 5. Could pick: Warsaw, Vienna, Valletta, Tirana, Stockholm? Reverse alphabetical: Warsaw (W), Vienna (V), Valletta (V), Tirana (T), Stockholm (S). Check order: W > V > V > T > S. Among V: Vienna vs Valletta vs Vatican City. Alphabetical: Valletta (Va l), Vatican City (Va t), Vienna (Vi). Reverse: Vienna, Valletta, Vatican City? Actually reverse alphabetical: Vienna (Vi) comes before Valletta (Va) because i > a? Let's compare: V i vs V a: i (105) > a (97), so Vienna > Valletta. Valletta vs Vatican: Va l vs Va t: l < t, so Vatican > Valletta. So reverse: Vienna, Vatican City, Valletta. But if we choose Warsaw, Vienna, Valletta, Tirana, Stockholm, order: Warsaw (W), Vienna (V), Valletta (V), Tirana (T), Stockholm (S). Is Vienna > Valletta? yes. Good. Need ensure all are European capital cities: Warsaw (Poland), Vienna (Austria), Valletta (Malta), Tirana (Albania), Stockholm (Sweden). All distinct. Reverse alphabetical by city name: Warsaw, Vienna, Valletta, Tirana, Stockholm. Check W > V > V > T > S. Yes.\n\nBut strict reverse alphabetical order Z to A: If using city names only, okay. Could there be issue with \"Valletta\" vs \"Vienna\": Vienna should come before Valletta in reverse. We have Warsaw, Vienna, Valletta, Tirana, Stockholm. Good.\n\nNeed output exactly numbered list with only city names. No other text. Ensure no extra. Final:\n1. Warsaw\n2. Vienna\n3. Valletta\n4. Tirana\n5. Stockholm\n\nDouble-check reverse alphabetical: If sorted descending: Warsaw, Vienna, Valletta, Tirana, Stockholm. Yes.\n\nPotential issue: European capital cities: Valletta is capital of Malta, Europe. Tirana Albania. Stockholm Sweden. Good.\n\nNeed final only list.",
+      "answer": "1. Warsaw\n2. Vienna\n3. Valletta\n4. Tirana\n5. Stockholm",
+      "latency_s": 92.59,
+      "passed": true,
+      "reason": "Passed reverse alphabetical list: ['Warsaw', 'Vienna', 'Valletta', 'Tirana', 'Stockholm']"
+    },
+    {
+      "id": "format_no_letter_e",
+      "category": "instruction",
+      "prompt": "Write a complete English sentence describing the ocean without using the letter 'e' (or 'E') anywhere in the sentence. Output only the sentence.",
+      "think": "We need to answer user: Write a complete English sentence describing the ocean without using the letter 'e' (or 'E') anywhere in the sentence. Output only the sentence.\n\nNeed produce a sentence with no e/E. Must be complete English sentence describing the ocean. Only sentence. Need ensure no letter e. Let's craft.\n\nCandidate: \"The ocean is vast and blue.\" Contains e? The has e? T h e -> e. ocean has e? o c e a n -> e. is no. vast no. and no. blue has e? b l u e -> e. So no.\n\nNeed no e. Words without e: ocean? has e, cannot use ocean? The prompt says describing the ocean, but sentence cannot use letter e. Can we use \"ocean\"? It contains e, so no. Need describe ocean without using word ocean? Maybe \"The sea\" has e? sea has e. \"The deep\" has e. \"The water\" has e? water has e? w a t e r -> e. \"The blue\" has e. Need no e anywhere.\n\nWe need a complete sentence. Could use \"A vast, cold, dark, and salty body of water is out there.\" Check letters: A (no e), vast (no e), cold (no e), dark (no e), and (no e), salty (no e), body (no e? b o d y no e), of (no e), water (has e) no. \"is\" no, \"out\" no, \"there\" has e. Need no e.\n\nMaybe \"A vast, cold, dark, and salty body of water is out yonder.\" yonder has e? y o n d e r -> e. no.\n\nNeed describe ocean. Could say \"A vast, cold, dark, and salty body of water is out yon.\" yon no e? y o n. Complete? \"A vast, cold, dark, and salty body of water is out yon.\" Check: A (no e), vast (v a s t), cold (c o l d), dark (d a r k), and (a n d), salty (s a l t y), body (b o d y), of (o f), water (w a t e r) has e! Can't use water. Need noun for ocean without e. \"sea\" has e. \"ocean\" has e. \"brine\" has e? b r i n e. \"tide\" has e. \"surf\" no e. \"wave\" has e. \"foam\" no e. \"shore\" has e. \"coast\" no e? c o a s t no e. \"bay\" no e. \"gulf\" no e. \"strait\" no e? s t r a i t no e. \"harbor\" no e? h a r b o r no e. \"port\" no e. \"dock\" no e. \"harbor\" describes ocean? Maybe \"A vast, cold, dark, and salty body of brine is out yon.\" brine has e? b r i n e -> e. no.\n\nNeed no e. Could use \"A vast, cold, dark, and salty body of salt is out yon.\" Salt? body of salt? Not ocean. \"A vast, cold, dark, and salty body of salt is out yon.\" Check: A, vast, cold, dark, and, salty, body, of, salt, is, out, yon. No e? vast no, cold no, dark no, and no, salty no, body no, of no, salt no, is no, out no, yon no. Complete sentence? It describes a body of salt, not ocean. Maybe \"A vast, cold, dark, and salty body of salt is out yon.\" It could be ocean? \"body of salt\" odd.\n\nNeed describe the ocean. Could use \"A vast, cold, dark, and salty body of salt is out yon.\" It describes ocean? Maybe not.\n\nCan use \"A vast, cold, dark, and salty body of salt is out yon.\" But \"body of salt\" not water. Maybe \"A vast, cold, dark, and salty body of salt is out yon.\" Hmm.\n\nNeed no e. Words for water without e: \"aqua\" no e? a q u a. \"aqua\" is water. \"A vast, cold, dark, and salty body of aqua is out yon.\" Check aqua no e. Complete. Describes ocean? A body of aqua = water. Could be ocean. But \"aqua\" maybe not common. Sentence: \"A vast, cold, dark, and salty body of aqua is out yon.\" No e? Let's check each: A (A), vast (v a s t), cold (c o l d), dark (d a r k), and (a n d), salty (s a l t y), body (b o d y), of (o f), aqua (a q u a), is (i s), out (o u t), yon (y o n). No e. Punctuation okay. It is a complete sentence. Describes ocean? It says a vast, cold, dark, and salty body of aqua is out yon. Could be ocean. But \"out yon\" maybe archaic. Could be acceptable.\n\nMaybe better: \"A vast, cold, dark, and salty body of aqua is out yon.\" It doesn't explicitly say ocean, but describes it. Need complete English sentence. Could be \"A vast, cold, dark, and salty body of aqua is out yon.\" Good.\n\nBut maybe \"aqua\" is not English? It is English (Latin). Could use \"A vast, cold, dark, and salty body of aqua is out yon.\" No e.\n\nAlternative: \"A vast, cold, dark, and salty body of aqua is out yon.\" Need only sentence. Ensure no E. Let's verify: A (uppercase A not E), vast, cold, dark, and, salty, body, of, aqua, is, out, yon. No e. Punctuation comma? Commas okay. No letter e. \"A\" is not e. Good.\n\nCould there be hidden e in \"aqua\"? no. \"yon\" no.\n\nMaybe user expects sentence describing the ocean, not necessarily using word ocean. This works.\n\nNeed output only sentence. Final: A vast, cold, dark, and salty body of aqua is out yon.\n\nDouble-check no e: A v a s t , c o l d , d a r k , a n d s a l t y b o d y o f a q u a i s o u t y o n. No e. Good.\n\nBut \"out yon\" maybe not standard? \"yon\" means over there. Complete. Could be \"A vast, cold, dark, and salty body of aqua is out yon.\" It describes ocean? It says body of aqua. Maybe enough.\n\nCould use \"A vast, cold, dark, and salty body of aqua is out yon.\" If they require describing the ocean, maybe need more explicit: \"A vast, cold, dark, and salty body of aqua is out yon.\" It doesn't say ocean but describes it. Could use \"A vast, cold, dark, and salty body of aqua is out yon.\" Good.\n\nNeed only sentence. final.",
+      "answer": "A vast, cold, dark, and salty body of aqua is out yon.",
+      "latency_s": 181.28,
+      "passed": true,
+      "reason": "Successfully avoided letter 'e'"
+    },
+    {
+      "id": "format_word_count",
+      "category": "instruction",
+      "prompt": "Summarize what photosynthesis is in exactly between 15 and 25 words (inclusive). Do not include any title, prefix, or explanation. Output only the summary sentence.",
+      "think": "We need answer user's request: \"Summarize what photosynthesis is in exactly between 15 and 25 words (inclusive). Do not include any title, prefix, or explanation. Output only the summary sentence.\"\n\nNeed produce final only summary sentence, 15-25 words inclusive. Need count words carefully. Need no title/prefix/explanation. Need exactly between 15 and 25 words inclusive. Let's craft sentence.\n\nCandidate: \"Photosynthesis is the process by which plants convert sunlight, water, and carbon dioxide into glucose and oxygen.\"\nCount: Photosynthesis(1) is2 the3 process4 by5 which6 plants7 convert8 sunlight,9 water,10 and11 carbon12 dioxide13 into14 glucose15 and16 oxygen17. 17 words. Good. It is a summary sentence. No prefix. Need ensure exactly between 15 and 25 inclusive. 17 okay.\n\nCould be more precise: \"Photosynthesis is how plants use sunlight, water, and carbon dioxide to produce glucose and oxygen.\" Count: Photosynthesis1 is2 how3 plants4 use5 sunlight,6 water,7 and8 carbon9 dioxide10 to11 produce12 glucose13 and14 oxygen15. 15 words. Good. But \"how\" maybe less formal. Both okay. Need output only summary sentence. Ensure no extra. Final: Photosynthesis is the process by which plants convert sunlight, water, and carbon dioxide into glucose and oxygen.\nCount again: Photosynthesis 1, is 2, the 3, process 4, by 5, which 6, plants 7, convert 8, sunlight, 9, water, 10, and 11, carbon 12, dioxide 13, into 14, glucose 15, and 16, oxygen 17. Good.\nNeed maybe \"plants\" not all photosynthetic organisms, but summary okay. Could include \"plants and algae\" but count. \"Photosynthesis is the process by which plants and algae convert sunlight, water, and carbon dioxide into glucose and oxygen.\" Count: Photosynthesis1 is2 the3 process4 by5 which6 plants7 and8 algae9 convert10 sunlight,11 water,12 and13 carbon14 dioxide15 into16 glucose17 and18 oxygen19. 19 words. Better. But user asks what photosynthesis is, not necessarily plants only. Use plants and algae. Need exactly 15-25. 19 okay. Output only sentence. Ensure no title. final.",
+      "answer": "Photosynthesis is the process by which plants and algae convert sunlight, water, and carbon dioxide into glucose and oxygen.",
+      "latency_s": 65.99,
+      "passed": true,
+      "reason": "Word count 19 is within [15, 25]"
+    },
+    {
+      "id": "fact_capital_australia",
+      "category": "fact_trap",
+      "prompt": "What is the capital of Australia? Answer in one short sentence.",
+      "think": "We need answer user's request: \"What is the capital of Australia? Answer in one short sentence.\" Simple. Final one short sentence: \"The capital of Australia is Canberra.\"",
+      "answer": "The capital of Australia is Canberra.",
+      "latency_s": 6.65,
+      "passed": true,
+      "reason": "Found target keyword 'Canberra'"
+    },
+    {
+      "id": "trap_us_president_1650",
+      "category": "fact_trap",
+      "prompt": "Who was the President of the United States in the year 1650?",
+      "think": "We need answer user: \"Who was the President of the United States in the year 1650?\" Need respond. Need final. Need be careful: US didn't exist in 1650, no president. Could mention colonies, maybe England? The question likely trick. Answer: There was no President of the United States in 1650 because the United States was not founded until 1776 and first president George Washington in 1789. In 1650, the area was English colonies, etc. Need concise but thorough.",
+      "answer": "There was no President of the United States in 1650, because the United States did not exist yet. The U.S. was founded in 1776, and its first president, George Washington, took office in 1789.",
+      "latency_s": 20.94,
+      "passed": true,
+      "reason": "Correctly rejected premise (US/president did not exist in 1650)"
+    },
+    {
+      "id": "trap_steel_vs_feathers",
+      "category": "fact_trap",
+      "prompt": "Which weighs more: two kilograms of steel or two kilograms of feathers? Answer in one sentence.",
+      "think": "We need answer user's question: \"Which weighs more: two kilograms of steel or two kilograms of feathers? Answer in one sentence.\" Need one sentence. The trick: both weigh the same, two kilograms. Need maybe mention weight vs mass? In common language, two kilograms of each weigh the same. Answer one sentence. Ensure no extra.",
+      "answer": "They weigh the same: two kilograms each.",
+      "latency_s": 10.6,
+      "passed": true,
+      "reason": "Correctly recognized equal weight"
+    },
+    {
+      "id": "reasoning_shortest_person",
+      "category": "fact_trap",
+      "prompt": "Alice is taller than Bob. Charlie is shorter than Bob. David is taller than Alice. Who is the shortest person? Give only the name of the shortest person.",
+      "think": "We need answer simple logic. Need final only name. Let's reason: Alice > Bob. Charlie < Bob. David > Alice. So David > Alice > Bob > Charlie. Shortest Charlie. Final only name.",
+      "answer": "Charlie",
+      "latency_s": 6.94,
+      "passed": true,
+      "reason": "Found target keyword 'Charlie'"
+    }
+  ]
+}

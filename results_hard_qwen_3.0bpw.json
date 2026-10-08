@@ -1,0 +1,114 @@
+{
+  "model": "qwen3.8-27b-3.0bpw",
+  "base_url": "http://127.0.0.1:8001/v1",
+  "total_score": "10/10",
+  "pass_rate_pct": 100.0,
+  "category_stats": {
+    "long_ctx": "2/2",
+    "math": "2/2",
+    "code": "3/3",
+    "logic_constraint": "3/3"
+  },
+  "results": [
+    {
+      "id": "long_ctx_multihop_needle",
+      "category": "long_ctx",
+      "latency_s": 117.08,
+      "think_chars": 1068,
+      "answer_chars": 200,
+      "passed": true,
+      "reason": "Found target: 9f8a-c4e1-22b0",
+      "answer_preview": "The migration event for server `phoenix-7` identifies the operator as `OSPREY`. The keyring record for operator `OSPREY` lists the cryptographic key-hash as `9f8a-c4e1-22b0`.\n\nKey-hash: 9f8a-c4e1-22b0"
+    },
+    {
+      "id": "long_ctx_distractor_amendment",
+      "category": "long_ctx",
+      "latency_s": 54.71,
+      "think_chars": 1001,
+      "answer_chars": 124,
+      "passed": true,
+      "reason": "Found target: 3,180,000",
+      "answer_preview": "The final approved budget for Project Chimera-Alpha, after the executive amendment, is $3,180,000.\n\nFinal budget: $3,180,000"
+    },
+    {
+      "id": "math_chinese_remainder",
+      "category": "math",
+      "latency_s": 159.53,
+      "think_chars": 1518,
+      "answer_chars": 1470,
+      "passed": true,
+      "reason": "Matched expected pattern: 3386",
+      "answer_preview": "We need to solve the system\n\n\\[\nx \\equiv 3 \\pmod{17}\n\\]\n\\[\nx \\equiv 4 \\pmod{19}\n\\]\n\\[\nx \\equiv 5 \\pmod{23}\n\\]\n\nSince \\(17, 19,\\) and \\(23\\) are pairwise relatively prime, the Chinese Remainder Theorem guarantees a unique solution modulo\n\n\\[\n17 \\cdot 19 \\cdot 23 = 7429.\n\\]\n\nFirst combine the first tw"
+    },
+    {
+      "id": "math_bounded_combinatorics",
+      "category": "math",
+      "latency_s": 218.54,
+      "think_chars": 0,
+      "answer_chars": 3507,
+      "passed": true,
+      "reason": "Matched expected pattern in answer: 301",
+      "answer_preview": "We need answer user: count integer solutions to a+b+c+d=24 with bounds: 1<=a<=6, 2<=b<=8, 0<=c<=10, 3<=d<=12. Need exact number, final line Total solutions: [number]. Need solve carefully.\n\nWe can count via generating functions or inclusion-exclusion. Let's compute.\n\nLet variables shifted:\na' = a-1:"
+    },
+    {
+      "id": "code_trapping_rain_water",
+      "category": "code",
+      "latency_s": 44.64,
+      "think_chars": 912,
+      "answer_chars": 584,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\ndef trap(height: list[int]) -> int:\n    left = 0\n    right = len(height) - 1\n    left_max = 0\n    right_max = 0\n    water = 0\n\n    while left < right:\n        if height[left] < height[right]:\n            if height[left] >= left_max:\n                left_max = height[left]\n            else:"
+    },
+    {
+      "id": "code_lru_cache",
+      "category": "code",
+      "latency_s": 123.59,
+      "think_chars": 2818,
+      "answer_chars": 1766,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\nclass Node:\n    __slots__ = (\"key\", \"value\", \"prev\", \"next\")\n\n    def __init__(self, key: int = 0, value: int = 0):\n        self.key = key\n        self.value = value\n        self.prev = None\n        self.next = None\n\n\nclass LRUCache:\n    def __init__(self, capacity: int):\n        self.capa"
+    },
+    {
+      "id": "code_min_window_substring",
+      "category": "code",
+      "latency_s": 233.46,
+      "think_chars": 0,
+      "answer_chars": 7384,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "We need answer user: Write Python function min_window(s: str, t: str) -> str finds minimum window substring of s containing all chars of t including duplicates. If none return ''. Optimize O(|s|+|t|). Wrap code in python block.\n\nNeed produce final with code only? likely include explanation? User ask"
+    },
+    {
+      "id": "logic_five_floors",
+      "category": "logic_constraint",
+      "latency_s": 52.7,
+      "think_chars": 959,
+      "answer_chars": 475,
+      "passed": true,
+      "reason": "Matched expected pattern: Alice=5, Bob=3, Carol=2, David=4, Elena=1",
+      "answer_preview": "Bob works on floor 3.\n\n- Alice must be higher than Bob, so Alice is on floor 4 or 5.\n- Carol cannot be on floor 1 or 5, and David is exactly two floors above Carol.\n  - Carol cannot be on floor 3 because Bob is there.\n  - So Carol must be on floor 2, making David on floor 4.\n- The remaining floors a"
+    },
+    {
+      "id": "format_multi_constraint_4rules",
+      "category": "logic_constraint",
+      "latency_s": 46.35,
+      "think_chars": 1363,
+      "answer_chars": 157,
+      "passed": true,
+      "reason": "Passed all 4 rules simultaneously",
+      "answer_preview": "Although the sky is clear, the wind feels cold.\nBecause the deep blue ocean glows, the shore feels calm.\nAlthough the night is quiet, the stars shine bright."
+    },
+    {
+      "id": "trap_sheep_all_but_nine",
+      "category": "logic_constraint",
+      "latency_s": 12.05,
+      "think_chars": 365,
+      "answer_chars": 8,
+      "passed": true,
+      "reason": "Matched expected pattern: 9 (all but 9 die means 9 remain alive)",
+      "answer_preview": "Alive: 9"
+    }
+  ]
+}

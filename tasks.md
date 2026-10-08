@@ -624,6 +624,13 @@ K=2 adds nothing. Production verdict unchanged (DROP).
   - 10-task hard suite: `code_lru_cache` (**PASS** in 61.3s with `reasoning_effort=medium`, OrderedDict implementation; identified and corrected inverted access order in `scripts/bench_hard_suite.py`) and `math_bounded_combinatorics` (**PASS** in 518.8s with `reasoning_effort=low` and `max_tokens=6144`, rigorously deriving $1330 - 1104 + 75 = 301$). Final calibrated score: **10/10 (100.0%)**! Artifact: `results_hard_bonsai_pq2_calibrated.json`.
   - Completed background download of `turboderp/Qwen3.8-27B-exl3` 3.00bpw (12.9 GB across 2 shards in `models/turboderp-Qwen3.8-27B-exl3-3.00bpw`).
 
+- [x] **E8.9 — Benchmark Qwen3.8-27B EXL3 3.00bpw across 16-Prompt Quality, 10-Task Hard Suite, and WikiText-2 PPL.**
+  Evaluated `models/turboderp-Qwen3.8-27B-exl3-3.00bpw` on Arc 140V sequentially:
+  - 16-prompt quality suite: Scored **16 / 16 (100.0%)** out-of-the-box in 638.1s (~10.6 min). Math 4/4, Code 4/4, Instruction 4/4, Fact/Trap 4/4. Solved `format_reverse_capitals` (92.6s) and `format_no_letter_e` (181.3s) without calibration. Artifact: `results_qwen_3bpw_16p.json`.
+  - 10-task hard suite (16K context): Scored **10 / 10 (100.0%)** out-of-the-box in 1062.6s (~17.7 min). Long Context 2/2 (12.5K), Olympiad Math 2/2 (CRT $x=3386$ and combinatorics $N=301$), LeetCode Hard 3/3 (Trapping Rain Water, LRU Cache, Min Window Substring), Logic Constraints 3/3 (5-Floors, 4-rules, 9 sheep). Artifact: `results_hard_qwen_3.0bpw.json`.
+  - WikiText-2 raw test perplexity: **PPL = 6.460** (NLL = 1.8657, 294,840 tokens, 72 chunks, 1655.1s). (+0.10 PPL vs 4.00bpw 6.36, saving 2.8 GB). Artifact: `results_qwen_3bpw_ppl.json`.
+  - Compiled comprehensive 5-way multi-model benchmark matrix in `status.md`.
+
 ---
 
 ## Phase E6 — Report, Recommendation, and Reversibility

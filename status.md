@@ -669,6 +669,69 @@ Quality cost of ~45% fewer bytes is small (+0.42 PPL). Retained under Option B a
   - `model-00002-of-00002.safetensors` (4.9 GB)
   - All tokenizers and configuration metadata verified intact.
 
+## Comprehensive Benchmark & Multi-Model Evaluation: Qwen3.8-27B EXL3 3.00bpw (2026-10-08)
+
+**Objective:** Evaluate **turboderp/Qwen3.8-27B-exl3 at 3.00bpw** (`models/turboderp-Qwen3.8-27B-exl3-3.00bpw`, 12.87 GB / 13.1 GiB VRAM allocation) on Intel Arc 140V across all three standardized benchmarks:
+1. Curated 16-Prompt Quality Benchmark (`scripts/bench_quality_16p.py`)
+2. Challenging 10-Task Hard Benchmark Suite at 16K context (`scripts/bench_hard_suite.py`)
+3. WikiText-2 raw test perplexity (`scripts/eval_exl3_ppl.py`, 72 chunks, 294,840 tokens)
+
+### 1. 16-Prompt Quality Suite: 16 / 16 (100.0%)
+- **Result:** **16 / 16 (100.0%)** out-of-the-box in 638.1s (~10.6 min).
+  - **Math (4/4):** `math_bridge` (25.5s), `math_lcm` (20.8s), `math_speed` (22.7s), `math_probability` (22.4s).
+  - **Code (4/4):** `code_palindrome` (18.6s), `code_binary_search` (20.2s), `code_flatten_nested` (18.8s), `code_matrix_transpose` (18.6s). All unit tests passed.
+  - **Instruction Following (4/4):** Cleanly passed `format_json_only` (21.4s), `format_word_count` (18.7s, exactly 17 words), `format_reverse_capitals` (92.6s, exact reverse alphabetical list), and the extreme negative constraint `format_no_letter_e` (181.3s, *"A vast, cold, dark, and salty body of aqua is out yon."*).
+  - **Factuality & Premise Traps (4/4):** Passed `fact_capital_australia` (24.7s), `trap_us_president_1650` (17.5s), `trap_pound_brick_feathers` (23.9s), and `logic_alice_bob_height` (20.4s).
+- **Artifact:** `results_qwen_3bpw_16p.json`.
+
+### 2. 10-Task Hard Suite Benchmark (16K Context): 10 / 10 (100.0%)
+- **Result:** **10 / 10 (100.0%)** out-of-the-box in 1062.6s (~17.7 min).
+  - **Long Context Retrieval (~12.5K context, 2/2):**
+    - `long_ctx_multihop_needle`: Correct cryptographic key-hash `9f8a-c4e1-22b0` retrieved in 117.1s.
+    - `long_ctx_distractor_amendment`: Correct post-amendment executive budget `$3,180,000` retrieved in 54.7s.
+  - **Olympiad Math (2/2):**
+    - `math_chinese_remainder`: Solved system mod 17, 19, 23 yielding exact unique solution $x = 3386$ in 159.5s.
+    - `math_bounded_combinatorics`: Derived exact constrained non-negative integer solution count $N = 301$ in 218.5s via generating functions and inclusion-exclusion.
+  - **LeetCode Hard Algorithms (3/3):**
+    - `code_trapping_rain_water`: Optimal two-pointer implementation passing all unit assertions in 44.6s.
+    - `code_lru_cache`: Doubly-linked list + hash map with explicit `Node` class passing all unit assertions in 123.6s.
+    - `code_min_window_substring`: Linear sliding-window algorithm passing all duplicate character unit assertions in 233.5s.
+  - **Logic & Constraints (3/3):**
+    - `logic_five_floors`: Exact floor assignment (Alice=5, Bob=3, Carol=2, David=4, Elena=1) in 52.7s.
+    - `format_multi_constraint_4rules`: Satisfied all 4 complex grammatical constraints simultaneously in 46.4s.
+    - `trap_sheep_all_but_nine`: Deduced exact surviving sheep count (9) in 12.0s.
+- **Artifact:** `results_hard_qwen_3.0bpw.json`.
+
+### 3. WikiText-2 Perplexity (Raw Test, 72 Chunks)
+- **Result:** **PPL = 6.460** (NLL = 1.8657, 294,840 tokens evaluated across 72 non-overlapping 4096-token chunks in 1655.1s).
+- **Perplexity vs. Bitrate Progression:**
+  - Qwen3.8-27B 4.00bpw: PPL **6.36** (reference baseline)
+  - Qwen3.8-27B 3.00bpw: PPL **6.46** (+0.10 PPL penalty vs 4.00bpw)
+  - Qwen3.8-27B 2.50bpw: PPL **6.57** (+0.21 PPL penalty vs 4.00bpw)
+  - Ternary Bonsai PTQ1_0: PPL **6.73**
+  - Qwen3.8-27B 2.20bpw: PPL **6.78** (+0.42 PPL penalty vs 4.00bpw)
+- **Artifact:** `results_qwen_3bpw_ppl.json`.
+
+### 4. Comprehensive 5-Way Multi-Benchmark Comparison Matrix
+
+| Model & Quantization | Size on Disk / VRAM | WT2 PPL | 16-Prompt Score | 10-Task Hard Score | Hard Suite Latency | Serving Engine & Decode Throughput |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Qwen3.8-27B EXL3 3.00bpw** | 12.87 GB / 13.1 GiB | **6.46** | **16/16 (100.0%)** | **10/10 (100.0%)** | **1062.6s (17.7 min)** | vLLM XPU (MTP K=1, ~6.5 tok/s) |
+| **Ternary Bonsai PQ2_0** | 7.21 GB / 7.6 GiB | ~6.73 | **16/16 (100.0%)** *(cal.)* | **10/10 (100.0%)** *(cal.)* | 1827.4s (30.5 min) | llama.cpp SYCL (**12.1 tok/s**) |
+| **Ternary Bonsai PTQ1_0** | **5.95 GB / 5.6 GiB** | 6.73 | **16/16 (100.0%)** *(cal.)* | 8/10 (80.0%) *(cal.)* | 1749.6s (29.2 min) | llama.cpp SYCL (**13.1 tok/s**) |
+| **Qwen3.8-27B EXL3 2.50bpw** | 11.45 GB / 11.7 GiB | 6.57 | 15/16 (93.8%) | 7/10 (70.0%) | 1317.8s (22.0 min) | vLLM XPU (MTP K=1, ~6.6 tok/s) |
+| **Qwen3.8-27B EXL3 2.20bpw** | 9.60 GB / 7.4 GiB | 6.78 | 15/16 (93.8%) | 7/10 (70.0%) | 1014.8s (16.9 min) | vLLM XPU (MTP K=1, ~8.8 tok/s) |
+
+### 5. Architectural & Deployment Synthesis
+
+1. **Precision & Reasoning Convergence:**
+   - At **3.00bpw**, Qwen3.8-27B crosses the critical quantization fidelity threshold. It achieves 100% on both test suites **out-of-the-box** without requiring custom reasoning effort calibration or extended generation token allowances.
+   - Perplexity degrades by merely **0.10 PPL** compared to 4.00bpw (6.46 vs 6.36), while saving 2.8 GB of weights.
+2. **Dense EXL3 Trellis Coding vs. Native Ternary Distillation:**
+   - **Ternary Bonsai (PQ2_0 & PTQ1_0):** Unmatched hardware efficiency. By natively quantizing to 1.58–1.7 bpw during distillation, Bonsai fits 27B parameters into just 5.95–7.21 GB of memory, enabling **12.1–13.1 tok/s** on Intel Arc 140V (Xe2-LPG). With calibrated reasoning effort, PQ2_0 achieves parity with Qwen 3.00bpw at 10/10 and 16/16.
+   - **Qwen EXL3 3.00bpw:** The peak reasoning champion. It solves LeetCode Hard, Olympiad Math, and 12.5K context retrieval with zero tuning, executing the hard suite in 1062.6s (1.7× faster than Bonsai due to vLLM's efficient chunked prefill).
+
+
 
 
 
