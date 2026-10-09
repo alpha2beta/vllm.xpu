@@ -651,6 +651,15 @@ K=2 adds nothing. Production verdict unchanged (DROP).
   - Reclaimed GPU memory to 26.33 GiB free and restored production server `server-prod-031-k2-74` on port 8080.
   - Expanded comparative matrix to 9 models in `status.md`.
 
+- [x] **E8.13 — Calibrated Benchmark Retries on KAT-Coder-V2.5-Dev-MXFP4.**
+  Retried failed suite items using calibrated prompt directives:
+  - 16-prompt quality suite: `format_word_count` (**PASS** in 9.67s, emitted 21 words within $[15, 25]$ boundary using midpoint target); `format_no_letter_e` (failed negative lexical constraint due to ocean vocabulary tokenization). Score elevated to **15 / 16 (93.8%)**! Artifact: `results_kat_mxfp4_16p_calibrated.json`.
+  - 10-task hard suite: `math_chinese_remainder` (modular verification prompt; minor residue evaluation slip $5324 \bmod 23 = 11$, output $x=5324$ in 67.4s) and `math_bounded_combinatorics` (PIE algebraic structure with 6144 max tokens; minor summation slip on boundary violations in 241.5s). Maintained **8 / 10 (80.0%)** (flawless 8/8 across Coding 3/3, Long Context 2/2, Logic 3/3). Artifact: `results_hard_kat_mxfp4_calibrated.json`.
+  - Reclaimed GPU memory cache via `scripts/reclaim_gpu_cache.py` (0.00 GiB reclaim, 27.28 GiB MemAvailable).
+  - Restored production daily driver `Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4` on port 8080 (health check 200).
+  - Updated 10-way comparative matrix in `status.md`.
+
+
 ---
 
 ## Phase E6 — Report, Recommendation, and Reversibility

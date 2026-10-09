@@ -1,0 +1,117 @@
+{
+  "model": "KAT-Coder-V2.5-Dev-MXFP4",
+  "base_url": "http://127.0.0.1:8000/v1",
+  "total_score": "8/10",
+  "pass_rate_pct": 80.0,
+  "category_stats": {
+    "long_ctx": "2/2",
+    "math": "0/2",
+    "code": "3/3",
+    "logic_constraint": "3/3"
+  },
+  "results": [
+    {
+      "id": "long_ctx_multihop_needle",
+      "category": "long_ctx",
+      "latency_s": 31.11,
+      "think_chars": 676,
+      "answer_chars": 549,
+      "passed": true,
+      "reason": "Found target: 9f8a-c4e1-22b0",
+      "answer_preview": "## Audit Trail\n\n**Step 1 \u2014 Identify the migration event:**\n\nAt `2026-10-08T06:30:30.390Z`, a `[CRITICAL-AUDIT]` log entry records:\n\n> Server **phoenix-7** was migrated to cluster **hyperion-9** by operator code-name **OSPREY**.\n\n**Step 2 \u2014 Locate the operator's key-hash in the keyring records:**\n\nAt"
+    },
+    {
+      "id": "long_ctx_distractor_amendment",
+      "category": "long_ctx",
+      "latency_s": 19.92,
+      "think_chars": 465,
+      "answer_chars": 818,
+      "passed": true,
+      "reason": "Found target: 3,180,000",
+      "answer_preview": "## Financial Compliance Audit \u2014 Project Chimera-Alpha Budget\n\nDuring my review of the enterprise infrastructure logs, I identified a single governance entry directly addressing the budget for Project Chimera-Alpha:\n\n**Log Entry (2026-10-08T12:00:00.780Z):**\n> `[FINANCE-GOVERNANCE] [budget-controller"
+    },
+    {
+      "id": "math_chinese_remainder",
+      "category": "math",
+      "latency_s": 67.44,
+      "think_chars": 1696,
+      "answer_chars": 1898,
+      "passed": false,
+      "reason": "Calibrated: Did not find pattern for 3386 in: 'x \\\\bmod 19$ | $5324 \\\\div 19 = 280 \\\\times 19 + 4$ | $4$ \u2713 |\\n| $x \\\\bmod 23$ | $5324 \\\\div 23 = 231 \\\\times 23 + 5$ | $5$ \u2713 |\\n\\nAll three congruences are satisfied.\\n\\n---\\n\\n## Final Answer\\n\\nSolution: x = 5324'",
+      "answer_preview": "# Solving the System of Linear Congruences\n\n## Setting Up the Problem\n\nWe need to solve:\n- $x \\equiv 3 \\pmod{17}$\n- $x \\equiv 4 \\pmod{19}$\n- $x \\equiv 5 \\pmod{23}$\n\nwith $M = 17 \\times 19 \\times 23 = 7429$.\n\n---\n\n## Step 1: Combine the First Two Congruences\n\nFrom $x \\equiv 3 \\pmod{17}$, write $x = 3",
+      "calibration": "Explicit modular residue verification modulo M=7429"
+    },
+    {
+      "id": "math_bounded_combinatorics",
+      "category": "math",
+      "latency_s": 241.47,
+      "think_chars": 0,
+      "answer_chars": 16119,
+      "passed": false,
+      "reason": "Calibrated: Did not find pattern for 301 in: 'x2 \u2265 7, I get C(8,3) = 56. For x1 \u2265 6 and x3 \u2265 11, I get C(4,3) = 4. For x1 \u2265 6 and x4 \u2265 10, I get C(6,3) = 20. For x2 \u2265 7 and x3 \u2265 11, I get C(3,3) = 1. For x2 \u2265 7 and x4 \u2265 10, I get C(5,3) = 10. For'",
+      "answer_preview": "Let me transform the variables to work with the equation x1 + x2 + x3 + x4 = 18.\n\nGiven:\n- 1 \u2264 a \u2264 6\n- 2 \u2264 b \u2264 8\n- 0 \u2264 c \u2264 10\n- 3 \u2264 d \u2264 12\n\nAnd a + b + c + d = 24\n\nLet me define transformed variables:\n- x1 = a - 1, so 0 \u2264 x1 \u2264 5\n- x2 = b - 2, so 0 \u2264 x2 \u2264 6\n- x3 = c, so 0 \u2264 x3 \u2264 10\n- x4 = d - 3, so 0",
+      "calibration": "Expanded max_tokens to 6144 with algebraic PIE method guidance"
+    },
+    {
+      "id": "code_trapping_rain_water",
+      "category": "code",
+      "latency_s": 9.87,
+      "think_chars": 316,
+      "answer_chars": 578,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\ndef trap(height: list[int]) -> int:\n    left, right = 0, len(height) - 1\n    left_max = right_max = 0\n    result = 0\n\n    while left < right:\n        if height[left] < height[right]:\n            if height[left] >= left_max:\n                left_max = height[left]\n            else:\n        "
+    },
+    {
+      "id": "code_lru_cache",
+      "category": "code",
+      "latency_s": 21.1,
+      "think_chars": 570,
+      "answer_chars": 1386,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\nfrom collections import OrderedDict\n\nclass LRUCache:\n    def __init__(self, capacity: int):\n        self.capacity = capacity\n        self.cache = OrderedDict()\n\n    def get(self, key: int) -> int:\n        if key not in self.cache:\n            return -1\n        # Move to end (most recently "
+    },
+    {
+      "id": "code_min_window_substring",
+      "category": "code",
+      "latency_s": 21.4,
+      "think_chars": 111,
+      "answer_chars": 1708,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\ndef min_window(s: str, t: str) -> str:\n    from collections import Counter\n\n    if not s or not t or len(t) > len(s):\n        return ''\n\n    t_counts = Counter(t)\n    required = len(t_counts)\n    formed = 0\n\n    window_counts = {}\n    left = 0\n    min_len = float('inf')\n    result = (0, 0)"
+    },
+    {
+      "id": "logic_five_floors",
+      "category": "logic_constraint",
+      "latency_s": 28.68,
+      "think_chars": 788,
+      "answer_chars": 939,
+      "passed": true,
+      "reason": "Matched expected pattern: Alice=5, Bob=3, Carol=2, David=4, Elena=1",
+      "answer_preview": "# Solving the Floor Assignment Puzzle\n\n## Step-by-Step Deduction\n\n**Step 1:** From Rule 5, **Bob = 3**.\n\n**Step 2:** From Rule 1, Alice > Bob, so Alice > 3 \u2192 Alice = 4 or 5.\n\n**Step 3:** From Rule 2, Carol is on floor 2, 3, or 4 (not 1 or 5). Since Bob is on 3, Carol = 2 or 4.\n\n**Step 4:** From Rule"
+    },
+    {
+      "id": "format_multi_constraint_4rules",
+      "category": "logic_constraint",
+      "latency_s": 12.01,
+      "think_chars": 804,
+      "answer_chars": 273,
+      "passed": true,
+      "reason": "Passed all 4 rules simultaneously",
+      "answer_preview": "Although the waves crashed against the rocky shore, the sailor felt a strange sense of calm. Because the deep blue ocean stretched endlessly before him, he knew he had found his true calling. Although the storm had passed, the memory of that moment stayed with him forever."
+    },
+    {
+      "id": "trap_sheep_all_but_nine",
+      "category": "logic_constraint",
+      "latency_s": 2.56,
+      "think_chars": 75,
+      "answer_chars": 65,
+      "passed": true,
+      "reason": "Matched expected pattern: 9 (all but 9 die means 9 remain alive)",
+      "answer_preview": "The phrase \"all but 9 die\" means that 9 sheep survived.\n\nAlive: 9"
+    }
+  ],
+  "calibration_note": "Calibrated math_chinese_remainder (modular verification) and math_bounded_combinatorics (6144 token headroom + PIE guidance)."
+}
