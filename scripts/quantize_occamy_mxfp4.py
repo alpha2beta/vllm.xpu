@@ -74,6 +74,20 @@ def is_expert_proj(name):
     return m.group(1) if m else None
 
 
+def download_with_retry(repo_id: str, filename: str, local_dir: str, max_retries: int = 5) -> str:
+    """Download a file from Hugging Face with exponential backoff on transient errors."""
+    for attempt in range(1, max_retries + 1):
+        try:
+            return hf_hub_download(repo_id, filename, local_dir=local_dir)
+        except Exception as e:
+            if attempt == max_retries:
+                print(f"  Download failed after {max_retries} attempts: {e}", flush=True)
+                raise
+            wait = 15 * attempt
+            print(f"  Transient download error ({e}); retrying in {wait}s (attempt {attempt}/{max_retries})...", flush=True)
+            time.sleep(wait)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Quantize Occamy-1.0 to MXFP4 with MTP")
     parser.add_argument("--validate-every", type=int, default=64, help="Validate dequant error every N tensors")
@@ -169,7 +183,7 @@ def main():
         shard_path = os.path.join(STAGING, src)
         if not os.path.exists(shard_path):
             print(f"[{si+1}/{len(source_shards)}] Downloading {src} from {SRC_REPO}...", flush=True)
-            dl_path = hf_hub_download(SRC_REPO, src, local_dir=STAGING)
+            dl_path = download_with_retry(SRC_REPO, src, local_dir=STAGING)
             if dl_path != shard_path:
                 shutil.copy(dl_path, shard_path)
 
@@ -229,7 +243,7 @@ def main():
         mtp_local = os.path.join(STAGING, "mtp-trained.safetensors")
         if not os.path.exists(mtp_local):
             print(f"Downloading {mtp_file} from {SRC_REPO}...", flush=True)
-            p = hf_hub_download(SRC_REPO, mtp_file, local_dir=STAGING)
+            p = download_with_retry(SRC_REPO, mtp_file, local_dir=STAGING)
             if p != mtp_local:
                 shutil.copy(p, mtp_local)
 
