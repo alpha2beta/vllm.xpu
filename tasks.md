@@ -659,6 +659,15 @@ K=2 adds nothing. Production verdict unchanged (DROP).
   - Restored production daily driver `Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4` on port 8080 (health check 200).
   - Updated 10-way comparative matrix in `status.md`.
 
+- [ ] **E8.14 — Create MXFP4 Quantization of Qwen3.6-35B-A3B-occamy-1.0 with MTP.**
+  Stream, quantize, and package `AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP` into `models/Qwen3.6-35B-A3B-occamy-1.0-MXFP4/`:
+  - Stream 14 source shards (0-12 base + visual), quantizing 40L routed MoE experts and 30L linear attention to MXFP4 via `torch.ops.vllm.xpu_mxfp4_quantize`.
+  - Delete source shards on-the-fly to maintain flat disk usage within available 79 GB storage.
+  - Process `MTP/mtp-trained.safetensors`, unfusing/quantizing 256 MTP experts and preserving 17 non-expert tensors in BF16.
+  - Generate `config.json` with `compressed-tensors` schema and MTP enabled (`mtp_num_hidden_layers=1`).
+  - Run independent post-hoc audit (`scripts/audit_occamy_mxfp4.py`).
+
+
 
 ---
 
@@ -771,4 +780,24 @@ context questions together (`MAX_LEN=32768`, `KV_DTYPE=fp8`, `GPU_UTIL=0.65`).
   - vLLM falls back to `UnquantizedFusedMoEMethod`, attempting to allocate ~64.4 GiB in BF16 unquantized weights across 256 experts $\times$ 40 layers, exceeding the 32 GB system capacity and causing process termination (code 137).
   - Checkpoint contains only `.trellis` weights, lacking unquantized `.weight` tensors; no fused MoE or grouped GEMM kernel exists for EXL3 on Intel XPU.
   - Formally documented as architecturally unsupported on Arc 140V under current stack. Restored production daily driver (`Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4` on port 8080).
+
+---
+
+## Phase E11 — Benchmark Evaluation: Qwen3.6-35B-A3B-MXFP4 (2026-10-09)
+
+- [x] **E11.1 — Safe Serving Configuration:**
+  - Deployed `models/Qwen3.6-35B-A3B-MXFP4` on `127.0.0.1:8000` via `scripts/launch_vllm.sh qwen36-bench`.
+  - Enforced eager mode (`SPEC=""`) and pinned KV cache (`--kv-cache-memory-bytes 2500000000`) to guarantee stability within 21.96 GiB VRAM limit, circumventing the 1.57 GiB BF16 MTP overhead.
+  - Resident weights: 19.24 GiB across 26 shards. Health check verified HTTP 200.
+- [x] **E11.2 — 16-Prompt Quality Benchmark:**
+  - Executed `scripts/bench_quality_16p.py` producing `results_qwen36_mxfp4_16p.json`.
+  - Total score: **14 / 16 (87.5%)** (Math 4/4, Code 4/4, Instruction 2/4, Fact/Trap 4/4) in 1993.5s (~33.2 min).
+  - High latency driven by unbudgeted thinking traces in final answers (~5,000–7,800 characters) + eager ~9.7 tok/s decode throughput.
+- [x] **E11.3 — 10-Task Hard Suite Benchmark (16K Context):**
+  - Executed `scripts/bench_hard_suite.py` producing `results_hard_qwen36_mxfp4.json`.
+  - Total score: **6 / 10 (60.0%)** (Long Context 2/2 [100%], Math 1/2 [50%], Code 1/3 [33.3%], Logic/Constraints 2/3 [66.7%]) in 1435.1s (~23.9 min).
+- [x] **E11.4 — Teardown & Clean GPU Reclamation:**
+  - Test server shut down cleanly.
+  - Per user instruction, production Tiel-Coder daily driver server was **not relaunched**.
+  - Ran `scripts/reclaim_gpu_cache.py`, restoring `MemAvailable` from 15.26 GiB to **27.03 GiB** (`GPUReclaim: 0.00 GiB`).
 

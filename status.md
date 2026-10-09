@@ -1051,3 +1051,61 @@ Tiel MTP-K2 @0.74 relaunched on :8080 afterwards.
 4. **Conclusion:**
    - `KAT-EXL3-4bpw` is fundamentally unsupported on Intel Arc 140V under vLLM XPU without authoring a dedicated EXL3 fused MoE kernel and extending `exl3xpu` to subclass `FusedMoEMethodBase`.
    - System memory was fully reclaimed (`GPUReclaim: 0.07 GiB`, `MemAvailable > 25.8 GiB`) and the primary daily driver (`Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4` with MTP $K=2$ on port 8080) was successfully restored and verified healthy.
+
+## Comprehensive Benchmark: Qwen3.6-35B-A3B-MXFP4 (2026-10-09)
+
+**Objective:** Evaluate **`models/Qwen3.6-35B-A3B-MXFP4`** (19.24 GiB weights, 26 shards, eager execution, 2.5 GB pinned KV cache) across both standardized benchmark suites on Intel Arc 140V (Lunar Lake Xe2-LPG) under vLLM 0.31.0:
+1. Curated 16-Prompt Quality Benchmark (`scripts/bench_quality_16p.py`)
+2. Challenging 10-Task Hard Benchmark Suite at 16K context (`scripts/bench_hard_suite.py`)
+
+### 1. Serving & Architecture Profile
+- **Eager vs. MTP Execution:** Unlike Tiel and KAT (whose draft blocks were quantized to MXFP4 ~0.5 GiB), `Qwen3.6-35B-A3B-MXFP4` ships unquantized BF16 MTP weights (1.57 GiB, 785 tensors). Serving with BF16 MTP at 16K context requires >22.3 GiB VRAM, exceeding the 21.96 GiB available headroom on the 32 GB package. To guarantee 0 OOM and stable 16K KV allocation, the model was served in pure eager mode (`SPEC=""`, decode speed ~9.7 tok/s).
+- **Output Verbosity:** The model generated extensive chain-of-thought and thinking derivations directly in output tokens (often 5,000–7,800 characters per prompt), producing high wall-clock latency (~160–180s per test).
+
+### 2. 16-Prompt Quality Suite: 14 / 16 (87.5%) in 1993.5s (~33.2 min)
+- **Result:** **14 / 16 (87.5%)** matching uncalibrated KAT-Coder and Bonsai PQ2.
+  - **Math (4/4, 100%):** `math_bridge` (167.3s), `math_lcm` (183.8s), `math_speed` (166.1s), `math_probability` (122.6s).
+  - **Code (4/4, 100%):** `code_palindrome` (158.0s), `code_merge_intervals` (159.1s), `code_two_sum` (96.8s), `code_flatten_dict` (166.5s). All 4 implementations passed 100% of unit test assertions.
+  - **Instruction Following (2/4, 50%):** `format_json_only` (66.7s, exact JSON schema compliance), `format_reverse_capitals` (163.3s, exact reverse alphabetical capitals). Failed `format_no_letter_e` (166.6s, contained 372 'e' letters in output) and `format_word_count` (167.3s, generated a 947-word essay exceeding the 15–25 word window).
+  - **Factuality & Premise Traps (4/4, 100%):** `fact_capital_australia` (13.6s), `trap_us_president_1650` (47.6s), `trap_steel_vs_feathers` (69.3s), `reasoning_shortest_person` (38.9s).
+- **Artifact:** `results_qwen36_mxfp4_16p.json`.
+
+### 3. 10-Task Hard Suite Benchmark (16K Context): 6 / 10 (60.0%) in 1435.1s (~23.9 min)
+- **Result:** **6 / 10 (60.0%)** with flawless long-context retrieval and Olympiad CRT math:
+  - **Long Context Retrieval (~12.5K context, 2/2, 100%):**
+    - `long_ctx_multihop_needle`: Correct cryptographic key-hash `9f8a-c4e1-22b0` retrieved in **88.1s**.
+    - `long_ctx_distractor_amendment`: Correct post-amendment executive budget `$3,180,000` retrieved in **107.0s**.
+  - **Olympiad Math (1/2, 50%):**
+    - `math_chinese_remainder`: Solved system mod 17, 19, 23 yielding exact unique solution $x = 3386$ in **166.1s**.
+    - `math_bounded_combinatorics`: Began extensive algebraic case derivation via Principle of Inclusion-Exclusion, but exhausted the 2,048 token budget right before concluding $N = 301$ (166.0s).
+  - **LeetCode Hard Algorithms (1/3, 33.3%):**
+    - `code_min_window_substring`: Linear sliding-window algorithm passed all duplicate character unit assertions in **165.9s**.
+    - `code_trapping_rain_water`: Failed due to syntax error in function declaration in 166.2s.
+    - `code_lru_cache`: Failed due to indentation error at line 8 in 166.8s.
+  - **Logic & Constraints (2/3, 66.7%):**
+    - `logic_five_floors`: Exact floor assignment (Alice=5, Bob=3, Carol=2, David=4, Elena=1) in **165.9s**.
+    - `trap_sheep_all_but_nine`: Deduced exact surviving sheep count (9) in **76.9s**.
+    - `format_multi_constraint_4rules`: Failed Rule 3 (contained letter 'z' inside explanation) in 166.2s.
+- **Artifact:** `results_hard_qwen36_mxfp4.json`.
+
+### 4. Comprehensive 11-Way Architectural Benchmark Matrix
+
+| Model & Quantization | Size on Disk / VRAM | WT2 PPL | 16-Prompt Quality | 10-Task Hard Score | Hard Suite Latency | Serving Engine & Decode Throughput |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **KAT-Coder-V2.5-Dev MXFP4** | 19.60 GB / 19.7 GiB | — | **15/16 (93.8%)** *(cal.)* | **8/10 (80.0%)** | **271.9s (4.5 min)** ⚡ *(record)* | vLLM XPU (MTP K=2, **24.8 tok/s**) |
+| **Tiel-Coder-35B-A3B MXFP4** | 20.47 GB / 19.7 GiB | — | **15/16 (93.8%)** | **9/10 (90.0%)** | **564.8s (9.4 min)** | vLLM XPU (MTP K=2, **27.7 tok/s**) |
+| **Qwen3.8-27B EXL3 3.00bpw** | 12.87 GB / 13.1 GiB | **6.46** | **16/16 (100.0%)** | **10/10 (100.0%)** | 1062.6s (17.7 min) | vLLM XPU (MTP K=1, ~6.5 tok/s) |
+| **Bonsai PQ2_0 MTP (Ablit-v2)** | 7.20 GB / 7.6 GiB | ~6.73 | **16/16 (100.0%)** *(cal.)* | **9/10 (90.0%)** *(cal.)* | **1147.5s (19.1 min)** | llama.cpp SYCL (**12.1 tok/s**) |
+| **Ternary Bonsai PQ2_0** | 7.21 GB / 7.6 GiB | ~6.73 | **16/16 (100.0%)** *(cal.)* | **10/10 (100.0%)** *(cal.)* | 1827.4s (30.5 min) | llama.cpp SYCL (**12.1 tok/s**) |
+| **Ternary Bonsai PTQ1_0** | **5.95 GB / 5.6 GiB** | 6.73 | **16/16 (100.0%)** *(cal.)* | 8/10 (80.0%) *(cal.)* | 1749.6s (29.2 min) | llama.cpp SYCL (**13.1 tok/s**) |
+| **Qwen3.8-27B EXL3 2.50bpw** | 11.45 GB / 11.7 GiB | 6.57 | 15/16 (93.8%) | 7/10 (70.0%) | 1317.8s (22.0 min) | vLLM XPU (MTP K=1, ~6.6 tok/s) |
+| **Qwen3.8-27B EXL3 2.20bpw** | 9.60 GB / 7.4 GiB | 6.78 | 15/16 (93.8%) | 7/10 (70.0%) | 1014.8s (16.9 min) | vLLM XPU (MTP K=1, ~8.8 tok/s) |
+| **Qwen3.6-35B-A3B MXFP4** | 19.24 GB / 19.2 GiB | — | **14/16 (87.5%)** | **6/10 (60.0%)** | 1435.1s (23.9 min) | vLLM XPU (Eager, ~9.7 tok/s) |
+| **KAT-EXL3-4bpw (MoE)** | 18.85 GB / — | — | *Unsupported* | *Unsupported* | — | Incompatible (MoE kernel missing; fallback OOM) |
+
+### 5. Post-Benchmark Teardown & Memory Reclamation
+- **Test Server:** Qwen3.6-35B test server cleanly shut down.
+- **Production Server:** Per explicit user instruction, the Tiel-Coder daily driver server was **not relaunched**.
+- **GPU Memory State:** Executed `scripts/reclaim_gpu_cache.py`:
+  - `GPUReclaim`: **0.00 GiB**.
+  - Host `MemAvailable`: Restored from 15.26 GiB to **27.03 GiB** (clean slate for quantization and offline workloads).

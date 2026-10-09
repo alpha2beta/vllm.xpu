@@ -1,4 +1,4 @@
-# [Benchmark & In-Depth Analysis] 27B Dense vs. 35B MoE on a 32GB iGPU: 10 Models Benchmarked on Intel Lunar Lake (Arc 140V) — Throughput, Reasoning Cliffs, and Architectural Tradeoffs
+# [Benchmark & In-Depth Analysis] 27B Dense vs. 35B MoE on a 32GB iGPU: 11 Models Benchmarked on Intel Lunar Lake (Arc 140V) — Throughput, Reasoning Cliffs, and Architectural Tradeoffs
 
 **Target Community:** r/LocalLLaMA  
 **Hardware Tested:** Intel Core Ultra 7 258V (Lunar Lake) — Arc 140V Xe2 iGPU (8 Xe cores), 32 GB shared LPDDR5X-8533 (~103 GB/s unified memory bandwidth).  
@@ -24,7 +24,7 @@ Can modern consumer integrated graphics run 27B dense and 35B MoE models locally
 
 ---
 
-## The 10-Way Comprehensive Benchmark Matrix
+## The 11-Way Comprehensive Benchmark Matrix
 
 All models were evaluated under identical, standardized conditions on the same Intel Arc 140V hardware across two rigorous test batteries:
 1. **16-Prompt Curated Quality Suite:** Math word problems, multi-step algorithms, strict instruction formats (raw JSON, reverse alphabet lists, negative lexical constraints), and premise/factuality traps.
@@ -40,6 +40,7 @@ All models were evaluated under identical, standardized conditions on the same I
 | **Ternary Bonsai PTQ1_0** (27B Ternary) | GGUF PTQ1_0 | **5.95 GB / 5.6 GiB** | 6.73 | **16/16 (100.0%)** *(cal.)* | **8/10 (80.0%)** *(cal.)* | 1749.6s (29.2 min) | llama.cpp SYCL (**13.1 tok/s**) |
 | **Qwen3.8-27B** (Dense 27B) | EXL3 (2.50bpw) | 11.45 GB / 11.7 GiB | 6.57 | 15/16 (93.8%) | 7/10 (70.0%) | 1317.8s (22.0 min) | vLLM XPU (MTP K=1, ~6.6 tok/s) |
 | **Qwen3.8-27B** (Dense 27B) | EXL3 (2.20bpw) | 9.60 GB / 7.4 GiB | 6.78 | 15/16 (93.8%) | 7/10 (70.0%) | 1014.8s (16.9 min) | vLLM XPU (MTP K=1, ~8.8 tok/s) |
+| **Qwen3.6-35B-A3B** (35B A3B MoE) | MXFP4 (E2M1) | 19.24 GB / 19.2 GiB | — | **14/16 (87.5%)** | **6/10 (60.0%)** | 1435.1s (23.9 min) | vLLM XPU (Eager, ~9.7 tok/s) |
 | **KAT-EXL3-4bpw** (35B A3B MoE) | EXL3 (4.00bpw) | 18.85 GB / — | — | *Unsupported* | *Unsupported* | — | Incompatible (MoE kernel missing; fallback OOM) |
 
 ---
