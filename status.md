@@ -967,7 +967,7 @@ comparisons are like-for-like. 6 `results.csv` rows added.
     - `math_bounded_combinatorics`: Began manual case-by-case tabulation of $b', c', d'$ instead of algebraic generating functions, hitting the 2048 token ceiling at 82.0s.
 - **Artifact:** `results_hard_kat_mxfp4.json`.
 
-### 3. Comprehensive 9-Way Architectural Benchmark Matrix
+### 3. Comprehensive 10-Way Architectural Benchmark Matrix
 
 | Model & Quantization | Size on Disk / VRAM | WT2 PPL | 16-Prompt Quality | 10-Task Hard Score | Hard Suite Latency | Serving Engine & Decode Throughput |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -979,6 +979,7 @@ comparisons are like-for-like. 6 `results.csv` rows added.
 | **Ternary Bonsai PTQ1_0** | **5.95 GB / 5.6 GiB** | 6.73 | **16/16 (100.0%)** *(cal.)* | 8/10 (80.0%) *(cal.)* | 1749.6s (29.2 min) | llama.cpp SYCL (**13.1 tok/s**) |
 | **Qwen3.8-27B EXL3 2.50bpw** | 11.45 GB / 11.7 GiB | 6.57 | 15/16 (93.8%) | 7/10 (70.0%) | 1317.8s (22.0 min) | vLLM XPU (MTP K=1, ~6.6 tok/s) |
 | **Qwen3.8-27B EXL3 2.20bpw** | 9.60 GB / 7.4 GiB | 6.78 | 15/16 (93.8%) | 7/10 (70.0%) | 1014.8s (16.9 min) | vLLM XPU (MTP K=1, ~8.8 tok/s) |
+| **KAT-EXL3-4bpw (MoE)** | 18.85 GB / — | — | *Unsupported* | *Unsupported* | — | Incompatible (MoE kernel missing; fallback OOM) |
 
 ### 4. Key Takeaways: KAT-Coder vs Tiel-Coder
 1. **Unmatched Coding Speed & Zero Syntax Flaws:** KAT-Coder solved all 3 LeetCode Hard coding problems (100%) in an average of only 17.5s per task without syntax or typing errors.
@@ -986,3 +987,53 @@ comparisons are like-for-like. 6 `results.csv` rows added.
 3. **MoE Specialization Tradeoff:** While coding, long-context retrieval, and multi-constraint logic were near-perfect (8/8, 100%), KAT-Coder struggled with complex Olympiad-level arithmetic proofs (0/2 on CRT and combinatorics), whereas Tiel-Coder solved both Olympiad math problems (2/2).
 4. **Environment Cleanliness:** Post-benchmark, test server was terminated, GPU memory was drained to 26.33 GiB free, and the production server (`server-prod-031-k2-74`) was restored on port 8080.
 
+
+## EXL3 plugin check on vLLM 0.31.0 (2026-10-09)
+
+**Verdict: working.** Three layers verified:
+1. **Compiled ops:** `test_exl3_ops.py` ALL PASS under torch 2.14.0
+   (`/tmp/opencode/exl3-ops-post031.json`) — `_C.so` built against torch
+   2.13 loads and runs correctly, no rebuild needed.
+2. **Plugin registration:** `quantization=exl3` accepted by the 0.31
+   loader (no `register_quantization_config` breakage); monkey-patches
+   stay off per baseline (`EXL3_VLLM_PATCHES=0`).
+3. **Live load + generation:** offline smoke `logs/smoke-exl3-post031.log`
+   **RESULT: OK** (2.2bpw text-only, MAX_LEN 4096, util 0.50): weights
+   10.11 GiB in 31 s, KV 2.09 GiB, Paris/Berlin/Rome/Madrid probe correct,
+   clean shutdown, exit 0.
+
+**Two harness notes (not regressions):** smoke without
+`--language-model-only` fails in the vision tower (`k_proj` vs fused
+`qkv` — same as 0.30, vision is always excluded); a retry was needed
+after draining GPUReclaim left by the first failed attempt. Production
+Tiel MTP-K2 @0.74 relaunched on :8080 afterwards.
+
+## Checkpoint Audit & Compatibility Assessment: KAT-EXL3-4bpw (2026-10-09)
+
+**Objective:** Inspect, audit, and benchmark `./models/KAT-EXL3-4bpw` (18.85 GB payload, 3 safetensors shards) under vLLM XPU / `exl3xpu` on Intel Arc 140V Xe2-LPG.
+
+### 1. Checkpoint Audit Results
+- **Script:** `scripts/audit_exl3_checkpoint.py` → `models/KAT-EXL3-4bpw/checkpoint-audit.json` (exit code 0).
+- **Format & Metadata:**
+  - Quantization: `exl3` v1.3.0, 4.0 bits/weight, `mul1` codebook, `head_bits: 6`.
+  - Checkpoint size: 18,846,941,452 bytes (17.55 GiB payload, 18.85 GB uncompressed).
+  - Shards: 3 files (`model-00001-of-00003.safetensors`, `model-00002-of-00003.safetensors`, `model-00003-of-00003.safetensors`).
+  - Tensors: 127,359 tensors indexed (0 missing, 0 extra).
+  - Trellis counts: 31,746 $K=4$ tensors, 1 $K=6$ tensor (`lm_head`).
+  - Architecture: `Qwen3_5MoeForConditionalGeneration` / `qwen3_5_moe` (40 layers, 256 routed experts + 1 shared expert, top-8 active, MTP layers: 1).
+
+### 2. Execution Findings & Architectural Incompatibility
+1. **Dense vs MoE Layer Support in `exl3xpu`:**
+   - The out-of-tree plugin `0xSero/exl3xpu` (v0.1.0) was developed exclusively for dense models (`Qwen3.8-27B-exl3`, which inherits from `Qwen3_5ForConditionalGeneration`).
+   - In `exl3xpu/vllm_plugin.py`, `Exl3Config.get_quant_method()` only handles `LinearBase` and `ParallelLMHead`.
+   - In contrast, `Qwen3_5Moe` builds MoE blocks via `FusedMoEFactory`, instantiating `RoutedExperts` (subclass of `PluggableLayer`, not `LinearBase`).
+2. **Fallback to Unquantized MoE & Memory Allocation Exceeded:**
+   - Because `Exl3Config.get_quant_method(RoutedExperts)` returns `None`, vLLM falls back to `UnquantizedFusedMoEMethod(moe_config)`.
+   - Under `UnquantizedFusedMoEMethod`, vLLM attempts to allocate unquantized BF16 weights for all 256 experts across 40 layers ($40 \times 256 \times [1024 \times 2048 + 2048 \times 512] \approx 64.4\text{ GiB}$ in BF16).
+   - On the unified 32 GB LPDDR5X package of the Core Ultra 7 258V, this exceeds available RAM/VRAM, triggering heavy swap activity and leading to process termination (exit code 137 / EngineCore init watchdog timeout).
+3. **Missing Weights & Kernel Gap:**
+   - Even if memory were unconstrained, `UnquantizedFusedMoEMethod` expects dense `.weight` tensors, whereas `KAT-EXL3-4bpw` only provides `.trellis`, `.suh`, and `.svh` tensors.
+   - `exl3xpu` contains single-linear GEMV and dequant-GEMM kernels (`exl3_gemm_small`, `exl3_reconstruct`, `exl3_gemm_raw`), but **no fused MoE or grouped GEMM kernel** implemented for Intel SYCL/ESIMD.
+4. **Conclusion:**
+   - `KAT-EXL3-4bpw` is fundamentally unsupported on Intel Arc 140V under vLLM XPU without authoring a dedicated EXL3 fused MoE kernel and extending `exl3xpu` to subclass `FusedMoEMethodBase`.
+   - System memory was fully reclaimed (`GPUReclaim: 0.07 GiB`, `MemAvailable > 25.8 GiB`) and the primary daily driver (`Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4` with MTP $K=2$ on port 8080) was successfully restored and verified healthy.

@@ -750,3 +750,16 @@ context questions together (`MAX_LEN=32768`, `KV_DTYPE=fp8`, `GPU_UTIL=0.65`).
   plugin's disabled `fp8kv_prefill` patch exists for). Verdict: fp8 buys
   **capacity** (3.2× tokens), not speed — decode −15%, prefill −65%.
   1 `results.csv` row. Server shut down, memory reclaimed.
+
+---
+
+## Phase E10 — Checkpoint Audit & Compatibility Assessment: KAT-EXL3-4bpw (2026-10-09)
+
+- [x] **E10.1 — Checkpoint Audit:** `scripts/audit_exl3_checkpoint.py --model models/KAT-EXL3-4bpw` passed (`checkpoint-audit.json`). Verified 18.85 GB payload, 3 shards, 127,359 tensors indexed, 31,746 $K=4$ Trellis tensors, 1 $K=6$ tensor (`lm_head`). Identified architecture as `Qwen3_5MoeForConditionalGeneration` (40 layers, 256 routed experts + 1 shared expert).
+- [x] **E10.2 — Execution Compatibility Verification:**
+  - Tested offline engine load under vLLM XPU 0.31.0 + `exl3xpu`.
+  - Identified architectural blocker: `exl3xpu` (v0.1.0) only supports dense `LinearBase` layers. vLLM MoE routing builds `RoutedExperts`, returning `None` from `Exl3Config.get_quant_method()`.
+  - vLLM falls back to `UnquantizedFusedMoEMethod`, attempting to allocate ~64.4 GiB in BF16 unquantized weights across 256 experts $\times$ 40 layers, exceeding the 32 GB system capacity and causing process termination (code 137).
+  - Checkpoint contains only `.trellis` weights, lacking unquantized `.weight` tensors; no fused MoE or grouped GEMM kernel exists for EXL3 on Intel XPU.
+  - Formally documented as architecturally unsupported on Arc 140V under current stack. Restored production daily driver (`Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4` on port 8080).
+
