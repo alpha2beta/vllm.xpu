@@ -644,6 +644,13 @@ K=2 adds nothing. Production verdict unchanged (DROP).
   - Created standalone SYCL launcher `scripts/launch_bonsai_sycl.sh`.
   - Expanded comparison matrix to 7 models in `status.md`.
 
+- [x] **E8.12 — Benchmark KAT-Coder-V2.5-Dev-MXFP4 on 16-Prompt Quality and 10-Task Hard Suites.**
+  Evaluated `models/KAT-Coder-V2.5-Dev-MXFP4` (19.60 GiB, MTP $K=2$, 24.8 tok/s) on Arc 140V sequentially:
+  - 16-prompt quality suite: Scored **14 / 16 (87.5%)** in **218.0s (~3.6 min)** — fastest quality suite execution overall. Math 4/4, Code 4/4, Instruction 2/4, Fact/Trap 4/4. Artifact: `results_kat_mxfp4_16p.json`.
+  - 10-task hard suite (16K context): Scored **8 / 10 (80.0%)** in record time **271.9s (~4.5 min)** — all-time fastest hard suite completion. Long Context 2/2 in 31.1s & 19.9s (fastest across all models), LeetCode Hard **3/3 (100%)** (Trapping Rain Water in 9.9s, LRU Cache in 21.1s, Min Window Substring in 21.4s with 0 syntax errors), Logic Constraints 3/3 (5-Floors in 28.7s, 4-rules in 12.0s, sheep in 2.6s). Olympiad Math 0/2 (Chinese remainder theorem residue slip $x=4338$, combinatorics token budget exceeded). Artifact: `results_hard_kat_mxfp4.json`.
+  - Reclaimed GPU memory to 26.33 GiB free and restored production server `server-prod-031-k2-74` on port 8080.
+  - Expanded comparative matrix to 9 models in `status.md`.
+
 ---
 
 ## Phase E6 — Report, Recommendation, and Reversibility

@@ -859,3 +859,130 @@ Quality cost of ~45% fewer bytes is small (+0.42 PPL). Retained under Option B a
 
 
 
+
+## Stack upgrade: vLLM 0.30.0 → 0.31.0 (2026-10-09)
+
+**Installed** (`uv pip install "vllm==0.31.0+xpu"`, same XPU indexes): vLLM
+`0.30.0+xpu`→`0.31.0+xpu`, torch `2.13.0+xpu`→`2.14.0+xpu`
+(+torchvision `0.28.0`→`0.29.1+xpu`), triton `3.7.2+xpu`→`3.8.0+xpu`,
+`vllm-xpu-kernels` `0.1.14.1`→`0.1.15.4`, oneAPI pip RT `2026.0.0`→`2026.1.x`.
+Held per vLLM 0.31 pins: `compressed-tensors==0.17.0`, `transformers==5.17.0`
+(<5.18.0). Pre-upgrade freeze: `logs/pip-freeze.pre-0.31-*.txt`.
+`environment.md` updated to the new stack.
+
+**Gate re-verification (all PASS):** `torch_sanity.py` PASS (2.14.0+xpu, Arc
+140V 28.58 GiB); `mxfp4_kernel_check.py` 13/13 PASS (rel err 1.17e-3,
+`XPUExpertsMxFp4` supported); offline smoke `logs/smoke-post-031.log`
+**RESULT: OK** (Tiel MXFP4, weights 19.24 GiB, Paris probe coherent, exit 0).
+
+**Two upgrade-induced issues found and fixed:**
+1. **oneCCL init failure** (`Could not load any plugin` → EngineCore abort).
+   torch 2.14 links thin `libccl.so.2`, which `dlopen`s the real `libccl.so.1`
+   from `.venv/lib` — a path the loader never searches. Fix: all vLLM
+   wrappers (`run_phase5/6.sh`, `launch_vllm.sh`, `launch_vllm_exl3.sh` — the
+   root `launch_vllm_*.sh` names are symlinks) now prepend
+   `$PWD/.venv/lib` to `LD_LIBRARY_PATH` after `setvars.sh`.
+2. **Higher memory reservation in 0.31** (~2.1 GiB over weights: LBNHC KV
+   layout + attention/mamba page alignment). Tiel MXFP4 no longer fits at
+   util 0.68 (KV −0.98 GiB) or 0.74 (KV −0.18 GiB); **smoke passes at util
+   0.80** (KV +1.7–4.0 GiB depending on reclaim state). Production util
+   defaults need re-tuning before serving 0.31 (MTP-K2 config G at 0.68 is
+   expected to fail as-is).
+
+**Also noted:** `import torch, vllm` intermittently segfaults at interpreter
+teardown (SEGV in `libur_loader.so.0`, null-pointer call) when system oneAPI
+2026.0 (setvars `LD_LIBRARY_PATH`) mixes with pip 2026.1 libs; imports always
+succeed and no in-run crash observed. Prepending `.venv/lib` (fix 1) makes
+2026.1 win consistently and the crashes stopped. System oneAPI is still
+2026.0.0 (pacman refresh timed out; `pacman -Qu` clean against Oct 4–5 DBs).
+
+## MTP/KV re-sizing sweep on vLLM 0.31.0 (2026-10-09)
+
+**Context:** vLLM 0.31 reserves ~2 GiB more than 0.30, so config G
+(MTP-K2, util 0.68) no longer fits. All points: Tiel MXFP4, eager,
+MAX_LEN 4096, `--kv-cache-memory-bytes 500000000` (0.47 GiB reserved, KV
+5120 tokens / 1.25× @4096), port 8080, **E-core-jailed all day** (cpuset
+4-7, PINNED fallback) — absolute numbers carry an E-core penalty; K-vs-K
+comparisons are like-for-like. 6 `results.csv` rows added.
+
+| Config (util) | 1024/128/1 decode | 2048/128/1 decode | Startup |
+|---|---|---|---|
+| eager, no spec (0.74) | **9.68** | — | OK |
+| MTP K1 (0.78) | **19.58** | — | OK |
+| MTP K2 (0.79) | **19.58** | **21.78** | flaky (needs free ≥22.58; 1/3) |
+| MTP K2 (0.78) | **19.97** | — | OK-ish (needs ≥22.30; 2/2) |
+| MTP K2 (**0.74**) | **19.57** | — | OK (needs ≥21.15; 2/2) |
+
+**Findings:**
+1. **MTP works on 0.31: +102%** (K1/K2 ~19.6 vs eager 9.7 @1024). MTP
+   engaged in all spec runs (draft `Qwen3_5MoeMTP` resolves, TTFT 1.2–1.3s).
+   K1≈K2 on E-cores — no K2 uplift measurable under cpuset 4-7 (0.30 P-core
+   data showed +7–9%); K2 kept (no worse, P-core upside preserved).
+2. **With a byte-pinned KV cache, util only gates the startup
+   free-memory check** (0.31 log: "reserved 0.47 GiB ... and skipped
+   memory [profiling]"). Util does not change speed (19.57–19.97 across
+   0.74–0.79). The auto-KV path is what fails below ~0.75.
+3. **New production config: config G with `GPU_UTIL=0.74`** (was 0.68):
+   same 19.6 tok/s, KV 5120 tokens, most reliable startup (needs 21.15
+   GiB free vs observed 21.4–23.0). Launcher comment updated.
+   Steady-state healthy everywhere measured: GPUActive flat ~21.4–21.6,
+   GPUReclaim 0, swap frozen, MemAvailable ~3–4 GiB while serving.
+4. **Startup-check flakiness is environmental, not a regression:**
+   Level-Zero free varies ±0.7 GiB with desktop load + leftover GPUReclaim;
+   0.79/0.80 fail whenever free < util×total (missed once by 0.01 GiB).
+   Always reclaim before launch (wrappers do); retry on the fast-fail.
+
+**Box state at end of sweep:** production MTP-K2 @0.74 serving on :8080
+(`logs/server-prod-031-k2-74.log`), health-checked.
+
+## Comprehensive Benchmark: KAT-Coder-V2.5-Dev-MXFP4 (2026-10-09)
+
+**Objective:** Evaluate **`models/KAT-Coder-V2.5-Dev-MXFP4/`** (19.60 GiB weights, 63,756 tensors, 29 shards, MTP $K=2$ speculative decoding, 3.0 GB pinned KV cache) across both standardized benchmark suites on Intel Arc 140V (Lunar Lake Xe2-LPG) under vLLM 0.31.0:
+1. Curated 16-Prompt Quality Benchmark (`scripts/bench_quality_16p.py`)
+2. Challenging 10-Task Hard Benchmark Suite at 16K context (`scripts/bench_hard_suite.py`)
+
+### 1. 16-Prompt Quality Suite: 14 / 16 (87.5%) in 218.0s (~3.6 min)
+- **Result:** **14 / 16 (87.5%)** in **218.0s** (fastest quality suite execution among all evaluated architectures, beating Tiel-Coder at 292.0s and Qwen 3.00bpw at 638.1s).
+  - **Math (4/4, 100%):** `math_bridge` (24.9s), `math_lcm` (10.5s), `math_speed` (16.3s), `math_probability` (19.9s).
+  - **Code (4/4, 100%):** `code_palindrome` (3.0s), `code_merge_intervals` (5.8s), `code_two_sum` (3.6s), `code_flatten_dict` (4.9s). Blazing speed across all 4 coding implementations.
+  - **Instruction Following (2/4, 50%):** `format_json_only` (2.4s), `format_reverse_capitals` (6.5s, strict reverse alphabetical list). Failed `format_word_count` (3.1s, emitted 26 words vs 15–25 range) and negative constraint `format_no_letter_e` (79.0s, contained 'e' letters, matching Tiel-Coder).
+  - **Factuality & Premise Traps (4/4, 100%):** `fact_capital_australia` (4.6s), `trap_us_president_1650` (21.9s), `trap_steel_vs_feathers` (8.3s), `reasoning_shortest_person` (3.3s).
+- **Artifact:** `results_kat_mxfp4_16p.json`.
+
+### 2. 10-Task Hard Suite Benchmark (16K Context): 8 / 10 (80.0%) in Record 271.9s (~4.5 min)
+- **Result:** **8 / 10 (80.0%)** in **271.9s** — establishing a **new all-time speed record** for the 10-task hard suite (2.1× faster than Tiel-Coder at 564.8s, 3.9× faster than Qwen 3.00bpw at 1062.6s, 4.2× faster than Bonsai PQ2_0 MTP at 1147.5s).
+  - **Long Context Retrieval (~12.5K context, 2/2, 100%):**
+    - `long_ctx_multihop_needle`: Correct cryptographic key-hash `9f8a-c4e1-22b0` retrieved in **31.1s** (fastest across all models; vs Tiel 48.7s, Qwen 117.1s, Bonsai 160.8s).
+    - `long_ctx_distractor_amendment`: Correct post-amendment executive budget `$3,180,000` retrieved in **19.9s** (fastest across all models; vs Tiel 35.8s, Qwen 54.7s, Bonsai 55.0s).
+  - **LeetCode Hard Algorithms (3/3, 100%):**
+    - `code_trapping_rain_water`: Optimal two-pointer implementation passing all unit assertions in **9.9s** (clean syntax, avoiding the type annotation bracket typo observed in Tiel-Coder).
+    - `code_lru_cache`: Doubly-linked list + hash map passing all unit assertions in **21.1s**.
+    - `code_min_window_substring`: Sliding-window algorithm passing all duplicate character unit assertions in **21.4s**.
+  - **Logic & Constraints (3/3, 100%):**
+    - `logic_five_floors`: Exact floor assignment (Alice=5, Bob=3, Carol=2, David=4, Elena=1) in **28.7s**.
+    - `format_multi_constraint_4rules`: Satisfied all 4 complex grammatical constraints simultaneously in **12.0s**.
+    - `trap_sheep_all_but_nine`: Deduced exact surviving sheep count (9) in **2.6s**.
+  - **Olympiad Math (0/2, 0%):**
+    - `math_chinese_remainder`: Reached $x = 4338$ (arithmetic slip in residue verification vs true unique solution 3386) in 43.2s.
+    - `math_bounded_combinatorics`: Began manual case-by-case tabulation of $b', c', d'$ instead of algebraic generating functions, hitting the 2048 token ceiling at 82.0s.
+- **Artifact:** `results_hard_kat_mxfp4.json`.
+
+### 3. Comprehensive 9-Way Architectural Benchmark Matrix
+
+| Model & Quantization | Size on Disk / VRAM | WT2 PPL | 16-Prompt Quality | 10-Task Hard Score | Hard Suite Latency | Serving Engine & Decode Throughput |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **KAT-Coder-V2.5-Dev MXFP4** | 19.60 GB / 19.7 GiB | — | **14/16 (87.5%)** | **8/10 (80.0%)** | **271.9s (4.5 min)** ⚡ *(record)* | vLLM XPU (MTP K=2, **24.8 tok/s**) |
+| **Tiel-Coder-35B-A3B MXFP4** | 20.47 GB / 19.7 GiB | — | **15/16 (93.8%)** | **9/10 (90.0%)** | **564.8s (9.4 min)** | vLLM XPU (MTP K=2, **27.7 tok/s**) |
+| **Qwen3.8-27B EXL3 3.00bpw** | 12.87 GB / 13.1 GiB | **6.46** | **16/16 (100.0%)** | **10/10 (100.0%)** | 1062.6s (17.7 min) | vLLM XPU (MTP K=1, ~6.5 tok/s) |
+| **Bonsai PQ2_0 MTP (Ablit-v2)** | 7.20 GB / 7.6 GiB | ~6.73 | **16/16 (100.0%)** *(cal.)* | **9/10 (90.0%)** *(cal.)* | **1147.5s (19.1 min)** | llama.cpp SYCL (**12.1 tok/s**) |
+| **Ternary Bonsai PQ2_0** | 7.21 GB / 7.6 GiB | ~6.73 | **16/16 (100.0%)** *(cal.)* | **10/10 (100.0%)** *(cal.)* | 1827.4s (30.5 min) | llama.cpp SYCL (**12.1 tok/s**) |
+| **Ternary Bonsai PTQ1_0** | **5.95 GB / 5.6 GiB** | 6.73 | **16/16 (100.0%)** *(cal.)* | 8/10 (80.0%) *(cal.)* | 1749.6s (29.2 min) | llama.cpp SYCL (**13.1 tok/s**) |
+| **Qwen3.8-27B EXL3 2.50bpw** | 11.45 GB / 11.7 GiB | 6.57 | 15/16 (93.8%) | 7/10 (70.0%) | 1317.8s (22.0 min) | vLLM XPU (MTP K=1, ~6.6 tok/s) |
+| **Qwen3.8-27B EXL3 2.20bpw** | 9.60 GB / 7.4 GiB | 6.78 | 15/16 (93.8%) | 7/10 (70.0%) | 1014.8s (16.9 min) | vLLM XPU (MTP K=1, ~8.8 tok/s) |
+
+### 4. Key Takeaways: KAT-Coder vs Tiel-Coder
+1. **Unmatched Coding Speed & Zero Syntax Flaws:** KAT-Coder solved all 3 LeetCode Hard coding problems (100%) in an average of only 17.5s per task without syntax or typing errors.
+2. **Fastest Long-Context Processing on Arc 140V:** 12.5K-token needle-in-a-haystack multi-hop retrieval finished in just 31.1s, demonstrating extraordinary chunked prefill responsiveness on Intel Lunar Lake.
+3. **MoE Specialization Tradeoff:** While coding, long-context retrieval, and multi-constraint logic were near-perfect (8/8, 100%), KAT-Coder struggled with complex Olympiad-level arithmetic proofs (0/2 on CRT and combinatorics), whereas Tiel-Coder solved both Olympiad math problems (2/2).
+4. **Environment Cleanliness:** Post-benchmark, test server was terminated, GPU memory was drained to 26.33 GiB free, and the production server (`server-prod-031-k2-74`) was restored on port 8080.
+

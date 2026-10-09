@@ -21,7 +21,7 @@ the install phase completes.
 | Item | Value |
 |---|---|
 | Distro | CachyOS (Arch-based, rolling) — `BUILD_ID=rolling` |
-| Kernel | `7.2.3-3-cachyos-deckify #1 SMP PREEMPT_DYNAMIC Fri, 11 Sep 2026` |
+| Kernel | `7.2.9-1-cachyos-deckify` (verified 2026-10-09; was `7.2.3-3` at setup) |
 | Python (system) | 3.14.7 (not used); **3.12.14** at `~/.local/bin/python3.12` (used for `.venv`) |
 | Tooling | `uv 0.12.12`, `hf` / `huggingface-cli` available |
 
@@ -68,19 +68,19 @@ user, no permission errors.
 
 ## Software stack (installed in `.venv`, Python 3.12.14)
 
-Captured from `logs/pip-freeze.txt` (190 packages) after Phase 3/4.
+Captured from `logs/pip-freeze.txt` (192 packages) after the 0.31.0 upgrade (2026-10-09).
 
 | Component | Installed version | Source / note |
 |---|---|---|
 | Python | 3.12.14 | `~/.local/bin/python3.12 -m venv .venv` |
-| vLLM | **`0.30.0+xpu`** (commit `ced6857a`, 2026-09-22) | `https://wheels.vllm.ai/0.30.0/xpu` (32.6 MB wheel) |
-| `vllm-xpu-kernels` | **0.1.14.1** (2026-08-28) | pulled as a dependency of `vllm==0.30.0+xpu` (0.1.15.4 exists but requires torch 2.14 — vLLM pins 0.1.14.1) |
-| PyTorch | **`2.13.0+xpu`** | `https://download.pytorch.org/whl/xpu` (vLLM 0.30.0 pins `torch==2.13.0`) |
-| torchvision / torchaudio | `0.28.0+xpu` / `2.11.0+xpu` | same index |
-| Triton | `3.7.2+xpu` shim + `triton-xpu 3.7.2` | `https://wheels.vllm.ai/xpu` (shim resolves to the real Intel implementation) |
+| vLLM | **`0.31.0+xpu`** | `https://wheels.vllm.ai/0.31.0/xpu` (33.2 MB wheel) |
+| `vllm-xpu-kernels` | **0.1.15.4** | pinned by `vllm==0.31.0+xpu` (`vllm_xpu_kernels==0.1.15.4`) |
+| PyTorch | **`2.14.0+xpu`** | `https://download.pytorch.org/whl/xpu` (vLLM 0.31.0 pins `torch==2.14.0`) |
+| torchvision / torchaudio | `0.29.1+xpu` / `2.11.0+xpu` | same index (torchvision follows torch; torchaudio has no newer +xpu build) |
+| Triton | `3.8.0+xpu` shim + `triton-xpu 3.8.0` | `https://wheels.vllm.ai/xpu` (pinned by vLLM 0.31.0: `triton==3.8.0+xpu`) |
 | compressed-tensors | 0.17.0 | pinned by vLLM 0.30.0 — the version that registers `mxfp4-pack-quantized` |
 | transformers | 5.17.0 | ≥ 5.10.4 required for Qwen3.5/3.6 architectures |
-| oneAPI (pip runtime) | `intel-sycl-rt`, `intel-cmplr-lib-rt`, `dpcpp-cpp-rt`, `intel-opencl-rt`, `oneccl`, `onemkl-sycl-*`, `mkl`, `intel-openmp` — all `2026.x` | pulled by the torch XPU build |
+| oneAPI (pip runtime) | `intel-sycl-rt`, `intel-cmplr-lib-rt`, `dpcpp-cpp-rt`, `intel-opencl-rt`, `oneccl`, `onemkl-sycl-*`, `mkl`, `intel-openmp` — `2026.1.x` (were `2026.0.0` under vLLM 0.30.0) | pulled by the torch 2.14.0 XPU build |
 | oneAPI (system) | 2026.0.0 at `/opt/intel/oneapi` (`setvars.sh` sourced for runs) | pacman |
 | Level Zero driver | `1.17.39758` (as reported by `torch.xpu` properties) | via compute-runtime 26.35 |
 | Device | `Intel(R) Arc(TM) Graphics`, `device_id=0x64A0`, **total_memory 29270 MB (28.58 GiB)**, `gpu_eu_count=64`, `gpu_subslice_count=8`, `is_integrated_gpu=1` | `scripts/torch_sanity.py` → `logs/torch-sanity.txt` |
@@ -101,12 +101,12 @@ Install command (reproducible):
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip setuptools wheel
-uv pip install "vllm==0.30.0+xpu" \
-  --extra-index-url https://wheels.vllm.ai/0.30.0/xpu \
+uv pip install "vllm==0.31.0+xpu" \
+  --extra-index-url https://wheels.vllm.ai/0.31.0/xpu \
   --extra-index-url https://wheels.vllm.ai/xpu \
   --extra-index-url https://download.pytorch.org/whl/xpu \
   --index-strategy unsafe-best-match
 ```
 
-> The explicit `+xpu` local-version pin is **required**: with plain `vllm==0.30.0`, uv/pip
-> resolve the 315 MB CUDA wheel from PyPI instead of the 32.6 MB XPU wheel.
+> The explicit `+xpu` local-version pin is **required**: with plain `vllm==0.31.0`, uv/pip
+> resolve the CUDA wheel from PyPI instead of the 33.2 MB XPU wheel.

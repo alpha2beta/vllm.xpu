@@ -55,6 +55,9 @@ set +u
 # shellcheck disable=SC1091
 source /opt/intel/oneapi/setvars.sh >logs/oneapi-setvars.log 2>&1
 set -u
+# oneCCL 2022.1 (torch 2.14) dlopens its plugin (libccl.so.1) via the loader
+# search path — prepend the venv lib dir holding the pip oneAPI runtime.
+export LD_LIBRARY_PATH="$PWD/.venv/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 source .venv/bin/activate || { echo "failed to activate .venv"; exit 1; }
 unset PYTHONHOME
 
@@ -76,9 +79,11 @@ EAGER_FLAG=(--enforce-eager)
 # Task 15.1.3: production MTP preset (env-gated, reversible).
 # SPEC=mtp-k1|mtp-k2 appends the qualified speculative config (Phase 11:
 # MXFP4 draft, 19.71 GiB resident). Empty (default) = no speculation.
-# Production invocation (Phase 15.1 selected config G):
+# Production invocation (Phase 15.1 selected config G, retuned for vLLM 0.31.0
+# on 2026-10-09: GPU_UTIL 0.68 -> 0.74 — 0.31 reserves ~2 GiB more, and with a
+# byte-pinned KV cache util only gates the startup free-memory check):
 #   MODEL=models/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4 MAX_LEN=4096 \
-#   MAX_SEQS=1 GPU_UTIL=0.68 SPEC=mtp-k2 scripts/launch_vllm.sh <label> \
+#   MAX_SEQS=1 GPU_UTIL=0.74 SPEC=mtp-k2 scripts/launch_vllm.sh <label> \
 #   --kv-cache-memory-bytes 500000000
 # Fallback (K=1, larger KV 6301 vs 5120): SPEC=mtp-k1.
 SPEC=${SPEC:-}

@@ -47,6 +47,9 @@ set +u
 # shellcheck disable=SC1091
 source /opt/intel/oneapi/setvars.sh >logs/oneapi-setvars-exl3.log 2>&1
 set -u
+# oneCCL 2022.1 (torch 2.14) dlopens its plugin (libccl.so.1) via the loader
+# search path — prepend the venv lib dir holding the pip oneAPI runtime.
+export LD_LIBRARY_PATH="$PWD/.venv/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 source .venv/bin/activate || { echo "failed to activate .venv"; exit 1; }
 unset PYTHONHOME
 

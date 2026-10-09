@@ -32,6 +32,9 @@ source /opt/intel/oneapi/setvars.sh >logs/oneapi-setvars.log 2>&1
 SETVARS_RC=$?
 set -u
 [ "$SETVARS_RC" -ne 0 ] && echo "warning: setvars.sh rc=$SETVARS_RC (see logs/oneapi-setvars.log)"
+# oneCCL 2022.1 (torch 2.14) dlopens its plugin (libccl.so.1) via the loader
+# search path — prepend the venv lib dir holding the pip oneAPI runtime.
+export LD_LIBRARY_PATH="$PWD/.venv/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 source .venv/bin/activate || { echo "failed to activate .venv"; exit 1; }
 unset PYTHONHOME  # a stale PYTHONHOME breaks the venv interpreter
 echo "python: $(command -v python) ($(python -V 2>&1))"
