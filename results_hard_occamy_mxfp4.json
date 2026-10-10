@@ -1,0 +1,114 @@
+{
+  "model": "Qwen3.6-35B-A3B-occamy-1.0-MXFP4",
+  "base_url": "http://127.0.0.1:8000/v1",
+  "total_score": "8/10",
+  "pass_rate_pct": 80.0,
+  "category_stats": {
+    "long_ctx": "2/2",
+    "math": "1/2",
+    "code": "2/3",
+    "logic_constraint": "3/3"
+  },
+  "results": [
+    {
+      "id": "long_ctx_multihop_needle",
+      "category": "long_ctx",
+      "latency_s": 45.22,
+      "think_chars": 1003,
+      "answer_chars": 250,
+      "passed": true,
+      "reason": "Found target: 9f8a-c4e1-22b0",
+      "answer_preview": "The migration event for server phoenix-7 (Event-ID: EVT-94821) identifies the operator as code-name **OSPREY**. Tracing to the keyring record (Event-ID: EVT-39912), Operator OSPREY's cryptographic key-hash is 9f8a-c4e1-22b0.\n\nKey-hash: 9f8a-c4e1-22b0"
+    },
+    {
+      "id": "long_ctx_distractor_amendment",
+      "category": "long_ctx",
+      "latency_s": 22.34,
+      "think_chars": 1101,
+      "answer_chars": 185,
+      "passed": true,
+      "reason": "Found target: 3,180,000",
+      "answer_preview": "Based on the provided logs, the initial budget of $4,500,000 was amended and capped by executive order. The final approved budget for Project Chimera-Alpha is:\n\nFinal budget: $3,180,000"
+    },
+    {
+      "id": "math_chinese_remainder",
+      "category": "math",
+      "latency_s": 92.51,
+      "think_chars": 0,
+      "answer_chars": 4538,
+      "passed": true,
+      "reason": "Matched expected pattern in answer: 3386",
+      "answer_preview": "Here's a thinking process that leads to the solution:\n\n1.  **Understand the Goal:** The objective is to find the smallest positive integer $x$ that satisfies a system of three congruences:\n    *   $x \\equiv 3 \\pmod{17}$\n    *   $x \\equiv 4 \\pmod{19}$\n    *   $x \\equiv 5 \\pmod{23}$\n\n2.  **Analyze the"
+    },
+    {
+      "id": "math_bounded_combinatorics",
+      "category": "math",
+      "latency_s": 93.07,
+      "think_chars": 0,
+      "answer_chars": 4963,
+      "passed": false,
+      "reason": "Did not find pattern for 301 in: '0$.\\n\\n    Pairs:\\n    1.  $P_a P_b$: Thresh $6+7=13$. New sum = 5.\\n        Count = $\\\\binom{5+3}{3} = \\\\binom{8}{3} = \\\\frac{8 \\\\times 7 \\\\times 6}{6} = 56$.\\n    2.  $P_a P_c$: Thresh $6+11=17$. New sum = 1.'",
+      "answer_preview": "Here's a thinking process that leads to the solution:\n\n1.  **Understand the Goal:** The objective is to find the number of integer solutions $(a, b, c, d)$ to the equation $a + b + c + d = 24$ subject to specific bounds for each variable.\n\n2.  **Analyze the Constraints:**\n    *   $1 \\le a \\le 6$\n   "
+    },
+    {
+      "id": "code_trapping_rain_water",
+      "category": "code",
+      "latency_s": 93.15,
+      "think_chars": 0,
+      "answer_chars": 5637,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "The user wants a Python function `trap(height: list[int]) -> int` that computes the amount of trapped rainwater.\nThe constraints are:\n- O(N) time complexity\n- O(1) auxiliary space complexity\n- Use the two-pointer approach\n\nLet me recall the two-pointer approach for the \"Trapping Rain Water\" problem."
+    },
+    {
+      "id": "code_lru_cache",
+      "category": "code",
+      "latency_s": 92.88,
+      "think_chars": 6720,
+      "answer_chars": 1175,
+      "passed": false,
+      "reason": "Execution error: SyntaxError: invalid syntax (<string>, line 1)",
+      "answer_preview": "```python\nclass Node:\n    def __init__(self, key=0, value=0):\n        self.key = key\n        self.value = value\n        self.prev = None\n        self.next = None\n\n\nclass LRUCache:\n    def __init__(self, capacity: int):\n        self.capacity = capacity\n        self.cache = {}\n        # Dummy head and"
+    },
+    {
+      "id": "code_min_window_substring",
+      "category": "code",
+      "latency_s": 99.19,
+      "think_chars": 0,
+      "answer_chars": 6877,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "The user wants a Python function `min_window(s: str, t: str) -> str` that finds the minimum window substring of `s` containing all characters of `t` (with duplicates).\nThe time complexity should be O(|s| + |t|).\n\nThis is a classic sliding window problem.\n\nLet me think about the algorithm:\n1. If `t` "
+    },
+    {
+      "id": "logic_five_floors",
+      "category": "logic_constraint",
+      "latency_s": 48.49,
+      "think_chars": 1929,
+      "answer_chars": 862,
+      "passed": true,
+      "reason": "Matched expected pattern: Alice=5, Bob=3, Carol=2, David=4, Elena=1",
+      "answer_preview": "Here's the step-by-step logical deduction:\n\n1. **Bob** works on floor 3 (Rule 5).\n2. **Alice** works on a higher floor than Bob (Rule 1), so Alice must be on floor 4 or 5.\n3. **Carol** cannot be on floor 1 or 5 (Rule 2), and floor 3 is already taken by Bob, so Carol must be on floor 2 or 4.\n4. **Dav"
+    },
+    {
+      "id": "format_multi_constraint_4rules",
+      "category": "logic_constraint",
+      "latency_s": 95.75,
+      "think_chars": 7261,
+      "answer_chars": 206,
+      "passed": true,
+      "reason": "Passed all 4 rules simultaneously",
+      "answer_preview": "Because the morning fog clung to the hills, we decided to stay indoors. Because the deep blue ocean stretched beyond the coast, we felt completely at peace. Although the wind grew cold, we remained content."
+    },
+    {
+      "id": "trap_sheep_all_but_nine",
+      "category": "logic_constraint",
+      "latency_s": 18.22,
+      "think_chars": 1069,
+      "answer_chars": 110,
+      "passed": true,
+      "reason": "Matched expected pattern: 9 (all but 9 die means 9 remain alive)",
+      "answer_preview": "The phrase \"all but 9 die\" means that everyone except 9 sheep died. Therefore, 9 sheep remain alive.\n\nAlive: 9"
+    }
+  ]
+}

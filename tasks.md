@@ -801,3 +801,30 @@ context questions together (`MAX_LEN=32768`, `KV_DTYPE=fp8`, `GPU_UTIL=0.65`).
   - Per user instruction, production Tiel-Coder daily driver server was **not relaunched**.
   - Ran `scripts/reclaim_gpu_cache.py`, restoring `MemAvailable` from 15.26 GiB to **27.03 GiB** (`GPUReclaim: 0.00 GiB`).
 
+---
+
+## Phase E12 — Quantization, Repair & Benchmark Evaluation: Qwen3.6-35B-A3B-occamy-1.0-MXFP4 (2026-10-10)
+
+- [x] **E12.1 — End-to-End MXFP4 Quantization & Repair Pipeline:**
+  - Quantized `AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP` via `scripts/quantize_occamy_mxfp4.py` and `scripts/repair_occamy_mxfp4.py`.
+  - Converted all 40 layers $\times$ 256 routed experts (30,720 projections), 30 layers linear attention projections (150 projections), and critically **all 256 MTP draft block routed experts (768 projections)** to MXFP4 (`compressed-tensors` `mxfp4-pack-quantized`, E2M1 group-32, E8M0 scale).
+  - Saved checkpoint to `models/Qwen3.6-35B-A3B-occamy-1.0-MXFP4/`: 21 shards, 20.42 GiB weights, 64,089 tensors indexed.
+  - Comprehensive integrity audit via `scripts/audit_occamy_mxfp4.py` passed 100% (31,638 packed tensors matched, CPU dequantization finite, 813 BF16 modules intact).
+- [x] **E12.2 — vLLM Serving with Active MTP $K=2$ Speculation:**
+  - Deployed `models/Qwen3.6-35B-A3B-occamy-1.0-MXFP4` on port 8000 via `scripts/launch_vllm.sh occamy-bench` with `SPEC=mtp-k2`, `max_model_len=16384`, `gpu_memory_utilization=0.74`, `kv_cache_memory_bytes=2500000000`.
+  - Resident memory: 19.71 GiB loaded in 71.1s. KV cache: 59,099 tokens (3.61× concurrency @ 16K context).
+  - Measured live decode throughput: **21.0–23.0 tokens/s** with MTP draft acceptance rate of **74.7%–90.2%** (Mean acceptance length: 2.44–2.80).
+- [x] **E12.3 — 16-Prompt Quality Benchmark:**
+  - Executed `scripts/bench_quality_16p.py` producing `results_occamy_mxfp4_16p.json`.
+  - Total score: **13 / 16 (81.2%)** (Math 4/4 [100%], Code 3/4 [75%], Instruction 2/4 [50%], Fact/Trap 4/4 [100%]) in **792.9s (~13.2 min)**.
+  - 2.51× faster than baseline Qwen3.6 eager (1993.5s).
+- [x] **E12.4 — 10-Task Hard Suite Benchmark (16K Context):**
+  - Executed `scripts/bench_hard_suite.py` producing `results_hard_occamy_mxfp4.json`.
+  - Total score: **8 / 10 (80.0%)** (Long Context 2/2 [100%], Math 1/2 [50%], Code 2/3 [66.7%], Logic/Constraints 3/3 [100%]) in **700.7s (~11.7 min)**.
+  - 2.05× faster and +20% higher score than baseline Qwen3.6 eager (6/10, 1435.1s).
+- [x] **E12.5 — Teardown & Clean GPU Reclamation:**
+  - Terminated test server process.
+  - Per explicit user constraint, production server was not relaunched; GPU left idle.
+  - Reclaimed GPU memory via `scripts/reclaim_gpu_cache.py`: `GPUReclaim: 0.00 GiB`, `GPUActive: 0.05 GiB`, host `MemAvailable: 25.98 GiB`.
+  - Cleaned up staging directory `models/_staging_occamy/` freeing 1.6 GB disk space (78 GB free).
+

@@ -1088,12 +1088,13 @@ Tiel MTP-K2 @0.74 relaunched on :8080 afterwards.
     - `format_multi_constraint_4rules`: Failed Rule 3 (contained letter 'z' inside explanation) in 166.2s.
 - **Artifact:** `results_hard_qwen36_mxfp4.json`.
 
-### 4. Comprehensive 11-Way Architectural Benchmark Matrix
+### 4. Comprehensive 12-Way Architectural Benchmark Matrix
 
 | Model & Quantization | Size on Disk / VRAM | WT2 PPL | 16-Prompt Quality | 10-Task Hard Score | Hard Suite Latency | Serving Engine & Decode Throughput |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | **KAT-Coder-V2.5-Dev MXFP4** | 19.60 GB / 19.7 GiB | — | **15/16 (93.8%)** *(cal.)* | **8/10 (80.0%)** | **271.9s (4.5 min)** ⚡ *(record)* | vLLM XPU (MTP K=2, **24.8 tok/s**) |
 | **Tiel-Coder-35B-A3B MXFP4** | 20.47 GB / 19.7 GiB | — | **15/16 (93.8%)** | **9/10 (90.0%)** | **564.8s (9.4 min)** | vLLM XPU (MTP K=2, **27.7 tok/s**) |
+| **Qwen3.6-35B-occamy-1.0 MXFP4** | 20.42 GB / 19.7 GiB | — | **13/16 (81.2%)** | **8/10 (80.0%)** | **700.7s (11.7 min)** | vLLM XPU (MTP K=2, **21.5 tok/s**) |
 | **Qwen3.8-27B EXL3 3.00bpw** | 12.87 GB / 13.1 GiB | **6.46** | **16/16 (100.0%)** | **10/10 (100.0%)** | 1062.6s (17.7 min) | vLLM XPU (MTP K=1, ~6.5 tok/s) |
 | **Bonsai PQ2_0 MTP (Ablit-v2)** | 7.20 GB / 7.6 GiB | ~6.73 | **16/16 (100.0%)** *(cal.)* | **9/10 (90.0%)** *(cal.)* | **1147.5s (19.1 min)** | llama.cpp SYCL (**12.1 tok/s**) |
 | **Ternary Bonsai PQ2_0** | 7.21 GB / 7.6 GiB | ~6.73 | **16/16 (100.0%)** *(cal.)* | **10/10 (100.0%)** *(cal.)* | 1827.4s (30.5 min) | llama.cpp SYCL (**12.1 tok/s**) |
@@ -1103,9 +1104,73 @@ Tiel MTP-K2 @0.74 relaunched on :8080 afterwards.
 | **Qwen3.6-35B-A3B MXFP4** | 19.24 GB / 19.2 GiB | — | **14/16 (87.5%)** | **6/10 (60.0%)** | 1435.1s (23.9 min) | vLLM XPU (Eager, ~9.7 tok/s) |
 | **KAT-EXL3-4bpw (MoE)** | 18.85 GB / — | — | *Unsupported* | *Unsupported* | — | Incompatible (MoE kernel missing; fallback OOM) |
 
-### 5. Post-Benchmark Teardown & Memory Reclamation
-- **Test Server:** Qwen3.6-35B test server cleanly shut down.
-- **Production Server:** Per explicit user instruction, the Tiel-Coder daily driver server was **not relaunched**.
-- **GPU Memory State:** Executed `scripts/reclaim_gpu_cache.py`:
+---
+
+## Quantization, Audit & Benchmark: Qwen3.6-35B-A3B-occamy-1.0-MXFP4 (2026-10-10)
+
+**Objective:** Complete streaming MXFP4 quantization of `AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP` (including full quantization of the MTP draft block), audit 100% tensor integrity, and evaluate across both standardized benchmark suites on Intel Arc 140V under vLLM 0.31.0:
+1. Curated 16-Prompt Quality Benchmark (`scripts/bench_quality_16p.py`)
+2. Challenging 10-Task Hard Benchmark Suite at 16K context (`scripts/bench_hard_suite.py`)
+
+### 1. Quantization Pipeline & MTP Draft Block Quantization Breakthrough
+- **The BF16 MTP Bottleneck in Baseline Qwen3.6:** Standard `pahajokiconsulting/Qwen3.6-35B-A3B-MXFP4` retained unquantized BF16 weights for its MTP draft block (1.57 GiB, 785 tensors). On a 32 GB shared memory system (Arc 140V with a 21.96 GiB maximum VRAM ceiling), loading BF16 MTP forced eager mode (`SPEC=""`, ~9.7 tok/s) to prevent OOM when allocating a 16K KV cache.
+- **Full MXFP4 Pipeline (`scripts/quantize_occamy_mxfp4.py` & `repair_occamy_mxfp4.py`):**
+  - Quantized all 40 decoder layers $\times$ 256 routed experts (30,720 projections).
+  - Quantized 30 layers $\times$ 5 linear attention projections (150 projections).
+  - Quantized **all 256 routed experts of the MTP draft block (768 projections)** to MXFP4 (`compressed-tensors` `mxfp4-pack-quantized`, E2M1 group-32 symmetric, E8M0 scale).
+  - Reduced MTP draft block payload from 1.57 GiB down to ~0.50 GiB.
+- **Checkpoint & Tensor Integrity Audit:**
+  - Checkpoint saved to `models/Qwen3.6-35B-A3B-occamy-1.0-MXFP4/`: 21 shards, 20.42 GiB weights, 64,089 tensors indexed.
+  - Comprehensive audit via `scripts/audit_occamy_mxfp4.py`: Passed 100% (31,638 packed tensors matched, scale tensors verified, CPU dequantization finite, 813 BF16 modules intact).
+
+### 2. Serving Configuration with MTP $K=2$ Speculative Decoding
+- **Launch Command:**
+  ```bash
+  MODEL=models/Qwen3.6-35B-A3B-occamy-1.0-MXFP4 \
+  SERVED=Qwen3.6-35B-A3B-occamy-1.0-MXFP4 \
+  PORT=8000 MAX_LEN=16384 MAX_SEQS=1 GPU_UTIL=0.74 SPEC=mtp-k2 \
+  bash scripts/launch_vllm.sh occamy-bench --kv-cache-memory-bytes 2500000000 \
+    --enable-auto-tool-choice --tool-call-parser qwen3_xml
+  ```
+- **Operational Metrics:**
+  - Weights resident: **19.71 GiB** (comfortably under the 21.96 GiB limit).
+  - KV Cache allocated: **59,099 tokens** (3.61× concurrency @ 16K context).
+  - Decode Throughput: **21.0 – 23.0 tokens/s** (vs ~9.7 tok/s eager on baseline Qwen3.6, a **+2.3× speedup**).
+  - MTP Speculative Decoding Efficiency: Mean acceptance length **2.44 – 2.80**, average draft acceptance rate **74.7% – 90.2%**.
+
+### 3. 16-Prompt Quality Benchmark: 13 / 16 (81.2%) in 792.9s (~13.2 min)
+- **Execution:** `scripts/bench_quality_16p.py` producing `results_occamy_mxfp4_16p.json`.
+- **Latency Advantage:** Completed in **792.9s (~13.2 min)** vs baseline Qwen3.6 eager at **1993.5s (~33.2 min)** (**2.51× faster**).
+- **Category Breakdown:**
+  - **Math (4/4, 100%):** `math_bridge` (102.9s, passed 17 min riddle), `math_lcm` (51.0s), `math_speed` (56.3s), `math_probability` (49.7s).
+  - **Code (3/4, 75%):** `code_merge_intervals` (30.4s), `code_two_sum` (24.1s), `code_flatten_dict` (49.6s). Failed `code_palindrome` (syntax error due to unparsed thinking trace in answer).
+  - **Instruction Following (2/4, 50%):** `format_json_only` (9.9s, strict JSON schema compliance), `format_word_count` (59.0s). Failed `format_reverse_capitals` (leaked thinking trace) and `format_no_letter_e` (contained 'e' letters).
+  - **Factuality & Premise Traps (4/4, 100%):** `fact_capital_australia` (7.8s), `trap_us_president_1650` (22.0s), `trap_steel_vs_feathers` (15.1s), `reasoning_shortest_person` (10.6s).
+
+### 4. 10-Task Hard Suite Benchmark (16K Context): 8 / 10 (80.0%) in 700.7s (~11.7 min)
+- **Execution:** `scripts/bench_hard_suite.py` producing `results_hard_occamy_mxfp4.json`.
+- **Latency & Accuracy Advantage:** Completed in **700.7s (~11.7 min)** vs baseline Qwen3.6 eager at **1435.1s (~23.9 min)** (**2.05× faster**, improving accuracy from **60.0% to 80.0%**).
+- **Category Breakdown:**
+  - **Long Context Retrieval (~12.5K context, 2/2, 100%):**
+    - `long_ctx_multihop_needle`: Exact cryptographic key-hash `9f8a-c4e1-22b0` retrieved in **45.2s**.
+    - `long_ctx_distractor_amendment`: Exact post-amendment executive budget `$3,180,000` retrieved in **22.3s**.
+  - **Olympiad Math (1/2, 50%):**
+    - `math_chinese_remainder`: Solved system mod 17, 19, 23 yielding exact unique solution $x = 3386$ in **92.5s**.
+    - `math_bounded_combinatorics`: Exceeded 2048 token limit before concluding $N=301$ (93.1s).
+  - **LeetCode Hard Algorithms (2/3, 66.7%):**
+    - `code_trapping_rain_water`: Two-pointer O(N)/O(1) implementation passed 100% unit tests in **93.1s**.
+    - `code_min_window_substring`: Linear sliding window algorithm passed 100% unit tests in **99.2s**.
+    - `code_lru_cache`: Execution error in test suite in 92.9s.
+  - **Logic & Constraints (3/3, 100%):**
+    - `logic_five_floors`: Exact floor assignment (Alice=5, Bob=3, Carol=2, David=4, Elena=1) in **48.5s**.
+    - `format_multi_constraint_4rules`: Flawlessly satisfied all 4 rules simultaneously in **95.7s**.
+    - `trap_sheep_all_but_nine`: Deduced exact surviving sheep count (9) in **18.2s**.
+
+### 5. Post-Benchmark Teardown, Clean GPU State & Staging Discipline
+- **Test Server:** Shut down cleanly (PID 196405).
+- **Production Server:** Per explicit user instruction, the Tiel-Coder daily driver server was **not relaunched**; GPU released and left idle.
+- **GPU Memory Reclaimed:** Executed `scripts/reclaim_gpu_cache.py`:
   - `GPUReclaim`: **0.00 GiB**.
-  - Host `MemAvailable`: Restored from 15.26 GiB to **27.03 GiB** (clean slate for quantization and offline workloads).
+  - `GPUActive`: **0.05 GiB**.
+  - Host `MemAvailable`: Fully restored to **25.98 GiB** (idle clean slate).
+- **Disk Space Discipline:** Cleaned up temporary staging artifacts (`models/_staging_occamy/` and `quantize_state.json`), releasing 1.6 GB. Available disk space: **78 GB**.

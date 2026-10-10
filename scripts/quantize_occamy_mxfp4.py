@@ -35,7 +35,13 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STAGING = os.path.join(REPO_ROOT, "models", "_staging_occamy")
 OUTDIR = os.path.join(REPO_ROOT, "models", "Qwen3.6-35B-A3B-occamy-1.0-MXFP4")
 SRC_REPO = "AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP"
-REF_CFG = os.path.join(REPO_ROOT, "models", "Qwen3.6-35B-A3B-MXFP4", "config.json")
+REF_CFG_CANDIDATES = [
+    os.path.join(REPO_ROOT, "logs", "model", "pahajokiconsulting-Qwen3.6-35B-A3B-MXFP4-config.json"),
+    os.path.join(REPO_ROOT, "models", "Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4", "config.json"),
+    os.path.join(REPO_ROOT, "models", "KAT-Coder-V2.5-Dev-MXFP4", "config.json"),
+    os.path.join(REPO_ROOT, "models", "Qwen3.6-35B-A3B-MXFP4", "config.json"),
+]
+REF_CFG = next((p for p in REF_CFG_CANDIDATES if os.path.exists(p)), None)
 
 N_BASE_SHARDS = 13  # model-00000-of-00013 .. model-00012-of-00013
 SHARD_TARGET_BYTES = 1 << 30  # ~1 GiB output shards
@@ -318,7 +324,8 @@ def main():
     # 7. Finalize config.json with quantization_config & MTP settings
     print("Generating config.json and downloading sidecars...", flush=True)
     cfg_path = os.path.join(OUTDIR, "config.json")
-    hf_hub_download(SRC_REPO, "config.json", local_dir=OUTDIR)
+    if not os.path.exists(cfg_path):
+        download_with_retry(SRC_REPO, "config.json", local_dir=OUTDIR)
     with open(cfg_path) as f:
         cfg = json.load(f)
 
@@ -330,6 +337,7 @@ def main():
             plain_modules.add(mod)
 
     # Reference quantization_config format
+    assert REF_CFG is not None, "No reference quantization config found!"
     ref_q = json.load(open(REF_CFG))["quantization_config"]
     cfg["quantization_config"] = {
         "quant_method": ref_q["quant_method"],
@@ -352,7 +360,7 @@ def main():
         target = os.path.join(OUTDIR, sidecar)
         if not os.path.exists(target):
             try:
-                hf_hub_download(SRC_REPO, sidecar, local_dir=OUTDIR)
+                download_with_retry(SRC_REPO, sidecar, local_dir=OUTDIR)
                 print(f"  Downloaded {sidecar}", flush=True)
             except Exception as e:
                 print(f"  Skip optional sidecar {sidecar}: {e}", flush=True)

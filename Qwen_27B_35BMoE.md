@@ -1,4 +1,4 @@
-# [Benchmark & In-Depth Analysis] 27B Dense vs. 35B MoE on a 32GB iGPU: 11 Models Benchmarked on Intel Lunar Lake (Arc 140V) — Throughput, Reasoning Cliffs, and Architectural Tradeoffs
+# [Benchmark & In-Depth Analysis] 27B Dense vs. 35B MoE on a 32GB iGPU: 12 Models Benchmarked on Intel Lunar Lake (Arc 140V) — Throughput, Reasoning Cliffs, and Architectural Tradeoffs
 
 **Target Community:** r/LocalLLaMA  
 **Hardware Tested:** Intel Core Ultra 7 258V (Lunar Lake) — Arc 140V Xe2 iGPU (8 Xe cores), 32 GB shared LPDDR5X-8533 (~103 GB/s unified memory bandwidth).  
@@ -11,7 +11,7 @@
 Can modern consumer integrated graphics run 27B dense and 35B MoE models locally with high reasoning fidelity and usable interactive speeds? **Yes, but the architectural and quantization choices make or break the experience.**
 
 1. **35B MoE (MXFP4, Active 3.5B/tok) is the undisputed daily driver champion:**  
-   Because only ~3.5B parameters are activated per token, MoE models slash memory bandwidth demand from ~13 GB/tok down to ~1.2 GB/tok. Paired with MTP (Multi-Token Prediction) $K=2$, **Tiel-Coder-35B** and **KAT-Coder-V2.5** reach **24.8 – 27.7 tok/s** decode. KAT-Coder completed the entire 16K-context 10-task Hard Suite in an all-time record **4.5 minutes** (solving LeetCode Hard problems in ~17 seconds each with 0 syntax flaws).
+   Because only ~3.5B parameters are activated per token, MoE models slash memory bandwidth demand from ~13 GB/tok down to ~1.2 GB/tok. Paired with MTP (Multi-Token Prediction) $K=2$, **Tiel-Coder-35B**, **KAT-Coder-V2.5**, and **Occamy-1.0** reach **21.5 – 27.7 tok/s** decode. KAT-Coder completed the entire 16K-context 10-task Hard Suite in an all-time record **4.5 minutes** (solving LeetCode Hard problems in ~17 seconds each with 0 syntax flaws).
 2. **Dense 27B (Qwen 3.8 EXL3 3.00bpw) is the peak reasoning champion:**  
    Dense 27B eliminates MoE routing artifacts. At 3.00bpw, Qwen achieved a **flawless 100% (10/10) Hard Suite and 100% (16/16) Quality Suite score out-of-the-box**, solving Olympiad-level Chinese Remainder Theorem and bounded combinatorics proofs without a single hint or calibration. The tradeoff is decode throughput: bandwidth-bound at **~6.5 tok/s**.
 3. **The "Sub-2.5bpw Quantization Cliff" is very real for post-training quantization:**  
@@ -24,7 +24,7 @@ Can modern consumer integrated graphics run 27B dense and 35B MoE models locally
 
 ---
 
-## The 11-Way Comprehensive Benchmark Matrix
+## The 12-Way Comprehensive Benchmark Matrix
 
 All models were evaluated under identical, standardized conditions on the same Intel Arc 140V hardware across two rigorous test batteries:
 1. **16-Prompt Curated Quality Suite:** Math word problems, multi-step algorithms, strict instruction formats (raw JSON, reverse alphabet lists, negative lexical constraints), and premise/factuality traps.
@@ -34,6 +34,7 @@ All models were evaluated under identical, standardized conditions on the same I
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **KAT-Coder-V2.5-Dev** (35B A3B MoE) | MXFP4 (E2M1) | 19.60 GB / 19.7 GiB | — | **15/16 (93.8%)** *(cal.)* | **8/10 (80.0%)** | **271.9s (4.5 min)** ⚡ *(Record)* | vLLM XPU (MTP K=2, **24.8 tok/s**) |
 | **Tiel-Coder-35B-A3B** (35B A3B MoE) | MXFP4 (E2M1) | 20.47 GB / 19.7 GiB | — | **15/16 (93.8%)** | **9/10 (90.0%)** | **564.8s (9.4 min)** | vLLM XPU (MTP K=2, **27.7 tok/s**) |
+| **Qwen3.6-35B-occamy-1.0** (35B A3B MoE) | MXFP4 (E2M1) | 20.42 GB / 19.7 GiB | — | **13/16 (81.2%)** | **8/10 (80.0%)** | **700.7s (11.7 min)** | vLLM XPU (MTP K=2, **21.5 tok/s**) |
 | **Qwen3.8-27B** (Dense 27B) | EXL3 (3.00bpw) | 12.87 GB / 13.1 GiB | **6.46** | **16/16 (100.0%)** | **10/10 (100.0%)** | 1062.6s (17.7 min) | vLLM XPU (MTP K=1, ~6.5 tok/s) |
 | **Bonsai PQ2_0 MTP** (27B Ternary) | GGUF PQ2_0 | 7.20 GB / 7.6 GiB | ~6.73 | **16/16 (100.0%)** *(cal.)* | **9/10 (90.0%)** *(cal. 10/10)* | **1147.5s (19.1 min)** | llama.cpp SYCL (**12.1 tok/s**) |
 | **Ternary Bonsai PQ2_0** (27B Ternary) | GGUF PQ2_0 | 7.21 GB / 7.6 GiB | ~6.73 | **16/16 (100.0%)** *(cal.)* | **10/10 (100.0%)** *(cal.)* | 1827.4s (30.5 min) | llama.cpp SYCL (**12.1 tok/s**) |
@@ -73,6 +74,12 @@ A frequent question: *"If upstream ExLlamaV3 supports Qwen 3.5 MoE, why can't we
 * The Intel Arc plugin (`0xSero/exl3xpu`) only implemented standard `LinearBase` and `ParallelLMHead` layers for dense models.
 * In vLLM, MoE blocks are constructed via `FusedMoEFactory` (`RoutedExperts`). Because the plugin does not implement `FusedMoEMethodBase` or an ESIMD grouped-GEMM kernel, vLLM defaults to `UnquantizedFusedMoEMethod`, attempting to allocate unquantized BF16 weights for all 256 experts across 40 layers (~64.4 GiB), immediately OOMing on a 32GB system.
 * For MoE on Intel Arc, **MXFP4** (`models/KAT-Coder-V2.5-Dev-MXFP4`) is currently the only optimized path, utilizing Intel's native `XPUExpertsMxFp4` grouped-GEMM kernel.
+
+### 5. Quantizing the MTP Draft Block: How Occamy-1.0 Unlocks 2.5× Acceleration Over Baseline Qwen3.6 MoE
+When deploying large MoE architectures with speculative decoding (MTP) on unified memory packages, draft block handling is critical:
+* **The BF16 Bottleneck:** Baseline `pahajokiconsulting/Qwen3.6-35B-A3B-MXFP4` quantized the 40 backbone MoE layers to MXFP4 but left all 256 MTP draft block routed experts in unquantized BF16 (1.57 GiB). On a 32 GB shared memory platform where vLLM allocates a 16K KV cache, loading BF16 MTP forced an OOM ceiling, requiring the server to run in unspeculated eager mode (`SPEC=""`, ~9.7 tok/s, 1435s Hard Suite latency).
+* **Occamy-1.0's All-MXFP4 Draft Block:** By authoring a dedicated streaming quantization pipeline (`scripts/quantize_occamy_mxfp4.py`), we successfully quantized all 256 MTP draft block routed experts to MXFP4 (slashing MTP weight payload from 1.57 GiB to ~0.50 GiB).
+* **The Performance Leap:** Occamy-1.0 runs native MTP $K=2$ speculation within a 19.71 GiB memory footprint. It delivers **21.0–23.0 tok/s decode**, with an average **75%–90% draft acceptance rate**. It completed the 16-prompt quality benchmark **2.51× faster** (792.9s vs 1993.5s) and the 10-task Hard Suite **2.05× faster** (700.7s vs 1435.1s) while boosting Hard Suite accuracy from **60% to 80%** (passing LeetCode Hard algorithms and multi-constraint logic puzzles).
 
 ---
 
