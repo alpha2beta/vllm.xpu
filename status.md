@@ -1182,3 +1182,7 @@ Tiel MTP-K2 @0.74 relaunched on :8080 afterwards.
 - Output `/run/media/yanchun/CCCOMA_X64FRE_EN-GB_DV9/models/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-MXFP4/`: 1,695 tensors / 16 shards / 18.44 GiB + SHA256SUMS + README. Index verified (496 packed pairs, counts match reference modulo visual tower).
 - Smoke test (vLLM 0.31.0+xpu, eager, MAX_LEN 4096, KV pin 1 GiB — dense full-attn needs 0.56 GiB, 0.5 GiB pin OOMs): loads, `XPUMxFp4LinearKernel` engaged, coherent factorial codegen, 256 tok / 98 s = 2.6 tok/s (dense wall, as predicted). USB-NTFS3 load ~12.5 min for 18 GB.
 - Staging (`models/_staging_huihui_qwen38/`, 55 GB) cleaned after pass; 29 GB remains in `~/.cache/huggingface` blobs.
+
+## Huihui-Qwen3.8 MXFP4 published (2026-10-15)
+- Verified no MXFP4 coder390 on HF (closest: NVFP4/FP8/GGUF/W4A16) → published.
+- `alpha2beta/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-MXFP4`: 16/16 shards + index + card + SHA256SUMS, single commit `830a58c`, remote LFS OIDs match local SHA256SUMS (spot-checked shard 1).
