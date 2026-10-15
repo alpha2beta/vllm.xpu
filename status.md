@@ -1174,3 +1174,11 @@ Tiel MTP-K2 @0.74 relaunched on :8080 afterwards.
   - `GPUActive`: **0.05 GiB**.
   - Host `MemAvailable`: Fully restored to **25.98 GiB** (idle clean slate).
 - **Disk Space Discipline:** Cleaned up temporary staging artifacts (`models/_staging_occamy/` and `quantize_state.json`), releasing 1.6 GB. Available disk space: **78 GB**.
+
+## Huihui-Qwen3.8-27B-Coder390 MXFP4 (external disk, 2026-10-15)
+- Source `huihui-ai/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated` (BF16 dense qwen3_5, 64 layers, 55.6 GB + separate `mtp-bf16.safetensors`).
+- New `scripts/quantize_huihui_qwen38_mxfp4.py`: dense recipe (no experts) against proven-dense reference `Solstice-AI/...-NM-DAU-MXFP4` (schema: pack dense mlp + self_attn q/k/v/o + 5 linear_attn projs; MTP merged BF16 at root `mtp.*`).
+- On-the-fly pipeline (`scripts/run_huihui_pipeline.sh`): shard 1 quantized while shard 2 downloaded. Shard-1 spot checks: max mean-rel-err 0.127, mean 0.120 (on gate).
+- Output `/run/media/yanchun/CCCOMA_X64FRE_EN-GB_DV9/models/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-MXFP4/`: 1,695 tensors / 16 shards / 18.44 GiB + SHA256SUMS + README. Index verified (496 packed pairs, counts match reference modulo visual tower).
+- Smoke test (vLLM 0.31.0+xpu, eager, MAX_LEN 4096, KV pin 1 GiB — dense full-attn needs 0.56 GiB, 0.5 GiB pin OOMs): loads, `XPUMxFp4LinearKernel` engaged, coherent factorial codegen, 256 tok / 98 s = 2.6 tok/s (dense wall, as predicted). USB-NTFS3 load ~12.5 min for 18 GB.
+- Staging (`models/_staging_huihui_qwen38/`, 55 GB) cleaned after pass; 29 GB remains in `~/.cache/huggingface` blobs.
