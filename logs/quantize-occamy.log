@@ -1,0 +1,202 @@
+W1009 17:49:23.152000 184809 torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1009 17:49:23.153000 184809 torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1009 17:49:23.153000 184809 torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+Fetching source index from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[1/14] Downloading model-00000-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[1/14] Quantizing model-00000-of-00013.safetensors (2016 tensors)...
+  [val] model.language_model.layers.0.mlp.experts.115.gate_proj.weight: mean-rel-err=0.11449 (max=0.11449)
+  [flush] wrote model-00001-of-XXXXX.safetensors: 155 tensors, 1.00 GiB (total: 1.00 GiB)
+  [val] model.language_model.layers.0.mlp.experts.134.up_proj.weight: mean-rel-err=0.11499 (max=0.11499)
+  [val] model.language_model.layers.0.mlp.experts.154.down_proj.weight: mean-rel-err=0.10864 (max=0.11499)
+  [flush] wrote model-00002-of-XXXXX.safetensors: 3716 tensors, 1.00 GiB (total: 2.00 GiB)
+  Completed model-00000-of-00013.safetensors (2233s elapsed)
+  Cleaned up source shard model-00000-of-00013.safetensors
+[2/14] Downloading model-00001-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+W1009 20:09:54.794000 187252 torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1009 20:09:54.794000 187252 torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1009 20:09:54.795000 187252 torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+Resuming: 1 source shards done, out_shard_no #3, mtp_done=False
+[1/14] model-00000-of-00013.safetensors: SKIP (already done)
+[2/14] Downloading model-00001-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[2/14] Quantizing model-00001-of-00013.safetensors (2504 tensors)...
+  [val] model.language_model.layers.2.mlp.experts.155.down_proj.weight: mean-rel-err=0.11713 (max=0.11713)
+  [val] model.language_model.layers.2.mlp.experts.212.down_proj.weight: mean-rel-err=0.11669 (max=0.11713)
+  [val] model.language_model.layers.2.mlp.experts.236.gate_proj.weight: mean-rel-err=0.11732 (max=0.11732)
+  [flush] wrote model-00003-of-XXXXX.safetensors: 3577 tensors, 1.00 GiB (total: 3.00 GiB)
+  Completed model-00001-of-00013.safetensors (1240s elapsed)
+  Cleaned up source shard model-00001-of-00013.safetensors
+[3/14] Downloading model-00002-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[3/14] Quantizing model-00002-of-00013.safetensors (2504 tensors)...
+  [flush] wrote model-00004-of-XXXXX.safetensors: 3697 tensors, 1.00 GiB (total: 4.00 GiB)
+  Completed model-00002-of-00013.safetensors (2413s elapsed)
+  Cleaned up source shard model-00002-of-00013.safetensors
+[4/14] Downloading model-00003-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[4/14] Quantizing model-00003-of-00013.safetensors (2484 tensors)...
+  [flush] wrote model-00005-of-XXXXX.safetensors: 3546 tensors, 1.00 GiB (total: 5.00 GiB)
+  [flush] wrote model-00006-of-XXXXX.safetensors: 3507 tensors, 1.00 GiB (total: 6.00 GiB)
+  Completed model-00003-of-00013.safetensors (3673s elapsed)
+  Cleaned up source shard model-00003-of-00013.safetensors
+[5/14] Downloading model-00004-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[5/14] Quantizing model-00004-of-00013.safetensors (2504 tensors)...
+  [flush] wrote model-00007-of-XXXXX.safetensors: 3698 tensors, 1.00 GiB (total: 7.00 GiB)
+  Completed model-00004-of-00013.safetensors (4904s elapsed)
+  Cleaned up source shard model-00004-of-00013.safetensors
+[6/14] Downloading model-00005-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+Traceback (most recent call last):
+  File "/home/yanchun/Projects/vllm.xpu/scripts/quantize_occamy_mxfp4.py", line 369, in <module>
+    main()
+  File "/home/yanchun/Projects/vllm.xpu/scripts/quantize_occamy_mxfp4.py", line 172, in main
+    dl_path = hf_hub_download(SRC_REPO, src, local_dir=STAGING)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 266, in _inner
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 1026, in hf_hub_download
+    return _hf_hub_download_to_local_dir(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 1505, in _hf_hub_download_to_local_dir
+    _download_to_tmp_and_move(
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 2016, in _download_to_tmp_and_move
+    xet_get(
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 589, in xet_get
+    with session.new_file_download_group(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Task error: File reconstruction error: CAS Client Error: Format error: I/O error: error decoding response body
+W1009 22:14:17.221000 190524 torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1009 22:14:17.222000 190524 torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1009 22:14:17.222000 190524 torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+Resuming: 5 source shards done, out_shard_no #8, mtp_done=False
+[1/14] model-00000-of-00013.safetensors: SKIP (already done)
+[2/14] model-00001-of-00013.safetensors: SKIP (already done)
+[3/14] model-00002-of-00013.safetensors: SKIP (already done)
+[4/14] model-00003-of-00013.safetensors: SKIP (already done)
+[5/14] model-00004-of-00013.safetensors: SKIP (already done)
+[6/14] Downloading model-00005-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[6/14] Quantizing model-00005-of-00013.safetensors (2501 tensors)...
+  [val] model.language_model.layers.15.mlp.experts.136.down_proj.weight: mean-rel-err=0.11600 (max=0.11600)
+  [val] model.language_model.layers.15.mlp.experts.156.up_proj.weight: mean-rel-err=0.11728 (max=0.11728)
+  [val] model.language_model.layers.15.mlp.experts.177.gate_proj.weight: mean-rel-err=0.11830 (max=0.11830)
+  [flush] wrote model-00008-of-XXXXX.safetensors: 3717 tensors, 1.00 GiB (total: 8.00 GiB)
+  Completed model-00005-of-00013.safetensors (1461s elapsed)
+  Cleaned up source shard model-00005-of-00013.safetensors
+[7/14] Downloading model-00006-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[7/14] Quantizing model-00006-of-00013.safetensors (2504 tensors)...
+  [flush] wrote model-00009-of-XXXXX.safetensors: 3550 tensors, 1.00 GiB (total: 9.01 GiB)
+  Completed model-00006-of-00013.safetensors (2770s elapsed)
+  Cleaned up source shard model-00006-of-00013.safetensors
+[8/14] Downloading model-00007-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[8/14] Quantizing model-00007-of-00013.safetensors (2504 tensors)...
+  [flush] wrote model-00010-of-XXXXX.safetensors: 3687 tensors, 1.00 GiB (total: 10.01 GiB)
+  [flush] wrote model-00011-of-XXXXX.safetensors: 3577 tensors, 1.00 GiB (total: 11.01 GiB)
+  Completed model-00007-of-00013.safetensors (4086s elapsed)
+  Cleaned up source shard model-00007-of-00013.safetensors
+[9/14] Downloading model-00008-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[9/14] Quantizing model-00008-of-00013.safetensors (2484 tensors)...
+  [flush] wrote model-00012-of-XXXXX.safetensors: 3696 tensors, 1.00 GiB (total: 12.01 GiB)
+  Completed model-00008-of-00013.safetensors (5206s elapsed)
+  Cleaned up source shard model-00008-of-00013.safetensors
+[10/14] Downloading model-00009-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[10/14] Quantizing model-00009-of-00013.safetensors (2504 tensors)...
+  [flush] wrote model-00013-of-XXXXX.safetensors: 3526 tensors, 1.00 GiB (total: 13.01 GiB)
+  Completed model-00009-of-00013.safetensors (6294s elapsed)
+  Cleaned up source shard model-00009-of-00013.safetensors
+[11/14] Downloading model-00010-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[11/14] Quantizing model-00010-of-00013.safetensors (2501 tensors)...
+  [flush] wrote model-00014-of-XXXXX.safetensors: 3576 tensors, 1.00 GiB (total: 14.01 GiB)
+  [val] model.language_model.layers.31.mlp.experts.4.down_proj.weight: mean-rel-err=0.11756 (max=0.12211)
+  [flush] wrote model-00015-of-XXXXX.safetensors: 3701 tensors, 1.00 GiB (total: 15.01 GiB)
+  Completed model-00010-of-00013.safetensors (7310s elapsed)
+  Cleaned up source shard model-00010-of-00013.safetensors
+[12/14] Downloading model-00011-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[12/14] Quantizing model-00011-of-00013.safetensors (2504 tensors)...
+  [flush] wrote model-00016-of-XXXXX.safetensors: 3528 tensors, 1.00 GiB (total: 16.01 GiB)
+  Completed model-00011-of-00013.safetensors (8366s elapsed)
+  Cleaned up source shard model-00011-of-00013.safetensors
+[13/14] Downloading model-00012-of-00013.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[13/14] Quantizing model-00012-of-00013.safetensors (1819 tensors)...
+  [flush] wrote model-00017-of-XXXXX.safetensors: 2195 tensors, 1.53 GiB (total: 17.54 GiB)
+  [flush] wrote model-00018-of-XXXXX.safetensors: 3605 tensors, 1.01 GiB (total: 18.55 GiB)
+  Completed model-00012-of-00013.safetensors (9317s elapsed)
+  Cleaned up source shard model-00012-of-00013.safetensors
+[14/14] Downloading model-visual.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+[14/14] Quantizing model-visual.safetensors (333 tensors)...
+  Completed model-visual.safetensors (9479s elapsed)
+  Cleaned up source shard model-visual.safetensors
+
+--- Processing MTP Draft Block ---
+Downloading MTP/mtp-trained.safetensors from AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP...
+MTP fused experts: torch.Size([256, 1024, 2048]), torch.Size([256, 2048, 512]); non-expert tensors: 17
+  [flush] wrote model-00019-of-XXXXX.safetensors: 711 tensors, 1.00 GiB (total: 19.55 GiB)
+  ... 64/256 MTP experts quantized
+  ... 128/256 MTP experts quantized
+  ... 192/256 MTP experts quantized
+  ... 256/256 MTP experts quantized
+  Cleaned up MTP source shard /home/yanchun/Projects/vllm.xpu/models/_staging_occamy/mtp-trained.safetensors
+  [flush] wrote model-00020-of-XXXXX.safetensors: 1177 tensors, 0.31 GiB (total: 19.86 GiB)
+
+Finalizing 20 output shards...
+Wrote model.safetensors.index.json with 62142 tensors (19.86 GiB)
+Generating config.json and downloading sidecars...
+Traceback (most recent call last):
+  File "/home/yanchun/Projects/vllm.xpu/scripts/quantize_occamy_mxfp4.py", line 383, in <module>
+    main()
+  File "/home/yanchun/Projects/vllm.xpu/scripts/quantize_occamy_mxfp4.py", line 333, in main
+    ref_q = json.load(open(REF_CFG))["quantization_config"]
+                      ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/yanchun/Projects/vllm.xpu/models/Qwen3.6-35B-A3B-MXFP4/config.json'
+W1010 06:55:01.047000 195125 torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1010 06:55:01.048000 195125 torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1010 06:55:01.048000 195125 torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+Resuming: 14 source shards done, out_shard_no #21, mtp_done=True
+[1/14] model-00000-of-00013.safetensors: SKIP (already done)
+[2/14] model-00001-of-00013.safetensors: SKIP (already done)
+[3/14] model-00002-of-00013.safetensors: SKIP (already done)
+[4/14] model-00003-of-00013.safetensors: SKIP (already done)
+[5/14] model-00004-of-00013.safetensors: SKIP (already done)
+[6/14] model-00005-of-00013.safetensors: SKIP (already done)
+[7/14] model-00006-of-00013.safetensors: SKIP (already done)
+[8/14] model-00007-of-00013.safetensors: SKIP (already done)
+[9/14] model-00008-of-00013.safetensors: SKIP (already done)
+[10/14] model-00009-of-00013.safetensors: SKIP (already done)
+[11/14] model-00010-of-00013.safetensors: SKIP (already done)
+[12/14] model-00011-of-00013.safetensors: SKIP (already done)
+[13/14] model-00012-of-00013.safetensors: SKIP (already done)
+[14/14] model-visual.safetensors: SKIP (already done)
+
+Finalizing 20 output shards...
+Wrote model.safetensors.index.json with 62142 tensors (19.86 GiB)
+Generating config.json and downloading sidecars...
+config.json updated: 796 ignored BF16 modules, MTP enabled
+  Downloaded tokenizer.json
+  Downloaded tokenizer_config.json
+  Downloaded chat_template.jinja
+  Downloaded preprocessor_config.json
+  Downloaded processor_config.json
+  Transient download error (404 Client Error. (Request ID: Root=1-6ac9c52e-5e25d14a31394535263c5b8d;9dadfb76-4e75-4f90-a522-fe6ced13bfc7)
+
+Entry Not Found for url: https://huggingface.co/AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP/resolve/main/generation_config.json.); retrying in 15s (attempt 1/5)...
+  Transient download error (404 Client Error. (Request ID: Root=1-6ac9c53e-7ac628d328a1302b5ad2ce2c;d33ffc73-20df-450f-a483-bd0e0ea4bb5f)
+
+Entry Not Found for url: https://huggingface.co/AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP/resolve/main/generation_config.json.); retrying in 30s (attempt 2/5)...
+  Transient download error (404 Client Error. (Request ID: Root=1-6ac9c55c-6c26b3951f993d835851632b;55698fce-3933-42f7-8dc8-5b27ea43d6e3)
+
+Entry Not Found for url: https://huggingface.co/AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP/resolve/main/generation_config.json.); retrying in 45s (attempt 3/5)...
+  Transient download error (404 Client Error. (Request ID: Root=1-6ac9c589-0699da1d7048da1726ec25ab;83d0b76b-48a7-4a4e-9acd-55c969b3d213)
+
+Entry Not Found for url: https://huggingface.co/AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP/resolve/main/generation_config.json.); retrying in 60s (attempt 4/5)...
+  Download failed after 5 attempts: 404 Client Error. (Request ID: Root=1-6ac9c5c5-7da289694ea4f35c4d2849e4;fcfcbdcf-f9fb-4e7e-99f0-f09c022088ed)
+
+Entry Not Found for url: https://huggingface.co/AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP/resolve/main/generation_config.json.
+  Skip optional sidecar generation_config.json: 404 Client Error. (Request ID: Root=1-6ac9c5c5-7da289694ea4f35c4d2849e4;fcfcbdcf-f9fb-4e7e-99f0-f09c022088ed)
+
+Entry Not Found for url: https://huggingface.co/AMAImedia/Qwen3.6-35B-A3B-occamy-1.0-BF16-GGUF-MTP/resolve/main/generation_config.json.
+
+==========================================
+ALL DONE in 156.9s!
+Total tensors: 62142, Shards: 20
+Quantized projs: 0, Spot-checks: 0, Max rel-err: 0.00000
+Output directory: /home/yanchun/Projects/vllm.xpu/models/Qwen3.6-35B-A3B-occamy-1.0-MXFP4
+==========================================

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Launch the OpenAI-compatible vLLM server for Qwen3.8-27B EXL3 2.20bpw.
+# Launch the OpenAI-compatible vLLM server for Qwen3.8-27B EXL3 3.00bpw.
 #
 # Defaults (override via env): MTP k=1 speculation, fp8 KV cache, 128k context.
 # Isolated from the production Tiel launcher (scripts/launch_vllm.sh):
@@ -9,7 +9,7 @@
 #     patches, SMALL_M_MAX=8, no INT8 prefill, 1024-col recon slices, no DNNL
 #
 # Usage:
-#   ./launch_vllm_qwen38_exl3.sh [label] [extra vllm serve args...]
+#   scripts/launch_vllm_exl3.sh [label] [extra vllm serve args...]
 # Env overrides:
 #   MODEL, SERVED, MAX_LEN, MAX_SEQS, BATCHED_TOKENS, GPU_UTIL, PORT, HOST,
 #   EAGER=1/0, KV_DTYPE (default fp8), EXL3_BACKEND (default auto),
@@ -17,17 +17,19 @@
 #   PINNED=1/0, WARMUP=1/0
 set -uo pipefail
 
-LABEL=${1:-exl3-2bpw-mtp-fp8-128k}
+LABEL=${1:-exl3-3.0bpw-96k}
 shift || true
 
-MODEL=${MODEL:-models/turboderp-Qwen3.8-27B-exl3-2.20bpw}
-SERVED=${SERVED:-qwen3.8-27b-2bpw}
-HOST=${HOST:-127.0.0.1}
+MODEL=${MODEL:-models/turboderp-Qwen3.8-27B-exl3-3.00bpw}
+SERVED=${SERVED:-qwen3.8-27b-3.0bpw}
+HOST=${HOST:-0.0.0.0}
 PORT=${PORT:-8001}
-MAX_LEN=${MAX_LEN:-131072}
+MAX_LEN=${MAX_LEN:-98304}
 MAX_SEQS=${MAX_SEQS:-1}
 BATCHED_TOKENS=${BATCHED_TOKENS:-1024}
-GPU_UTIL=${GPU_UTIL:-0.65}
+GPU_UTIL=${GPU_UTIL:-0.68}
+KV_CACHE_BYTES=${KV_CACHE_BYTES:-4831838208}
+OVERRIDE_GEN_CONFIG=${OVERRIDE_GEN_CONFIG:-'{"temperature":0.6,"repetition_penalty":1.08,"presence_penalty":0.2,"top_p":0.95}'}
 EAGER=${EAGER:-1}
 KV_DTYPE=${KV_DTYPE:-fp8}
 PINNED=${PINNED:-1}
@@ -68,7 +70,7 @@ export ONEAPI_DEVICE_SELECTOR="${ONEAPI_DEVICE_SELECTOR:-level_zero:gpu}"
 echo "ONEAPI_DEVICE_SELECTOR=$ONEAPI_DEVICE_SELECTOR"
 echo "EXL3 env: PATCHES=$EXL3_VLLM_PATCHES SMALL_M_MAX=$EXL3_SMALL_M_MAX BACKEND=$EXL3_BACKEND RECON_SLICE_N=$EXL3_RECON_SLICE_N"
 
-if [ "${WARMUP:-0}" = "1" ]; then
+if [ "${WARMUP:-1}" = "1" ]; then
   echo "--- pre-flight: draining Xe GPUReclaim pool ---"
   python scripts/reclaim_gpu_cache.py || echo "warning: reclaim incomplete (see above)"
 fi
@@ -91,6 +93,12 @@ case "$SPEC" in
     ;;
 esac
 
+KV_CACHE_FLAG=()
+[ -n "${KV_CACHE_BYTES:-}" ] && KV_CACHE_FLAG=(--kv-cache-memory-bytes "$KV_CACHE_BYTES")
+
+GEN_CONFIG_FLAG=()
+[ -n "${OVERRIDE_GEN_CONFIG:-}" ] && GEN_CONFIG_FLAG=(--override-generation-config "$OVERRIDE_GEN_CONFIG")
+
 ARGS=(
   --model "$MODEL"
   --served-model-name "$SERVED"
@@ -100,6 +108,8 @@ ARGS=(
   --max-num-seqs "$MAX_SEQS"
   --max-num-batched-tokens "$BATCHED_TOKENS"
   --gpu-memory-utilization "$GPU_UTIL"
+  "${KV_CACHE_FLAG[@]}"
+  "${GEN_CONFIG_FLAG[@]}"
   --kv-cache-dtype "$KV_DTYPE"
   --language-model-only
   --seed 0

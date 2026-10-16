@@ -1,7 +1,7 @@
  
 :: initializing oneAPI environment ...
    launch_vllm.sh: BASH_VERSION = 5.3.20(1)-release
-   args: Using "$@" for setvars.sh arguments: --kv-cache-memory-bytes 2500000000 --enable-auto-tool-choice --tool-call-parser qwen3_xml
+   args: Using "$@" for setvars.sh arguments: --kv-cache-memory-bytes 2500000000 --kv-cache-dtype fp8 --override-generation-config {"temperature":0.6,"repetition_penalty":1.08,"presence_penalty":0.2,"top_p":0.95} --enable-auto-tool-choice --tool-call-parser qwen3_xml
 :: compiler -- latest
 :: debugger -- latest
 :: mkl -- latest

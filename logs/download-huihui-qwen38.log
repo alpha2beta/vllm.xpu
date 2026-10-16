@@ -1,0 +1,59 @@
+GET: model.safetensors.index.json
+/home/yanchun/Projects/vllm.xpu/models/_staging_huihui_qwen38/model.safetensors.index.json
+GET: model-00001-of-00002.safetensors
+/home/yanchun/Projects/vllm.xpu/models/_staging_huihui_qwen38/model-00001-of-00002.safetensors
+GET: model-00002-of-00002.safetensors
+/home/yanchun/Projects/vllm.xpu/models/_staging_huihui_qwen38/model-00002-of-00002.safetensors
+GET: mtp-bf16.safetensors
+/home/yanchun/Projects/vllm.xpu/models/_staging_huihui_qwen38/mtp-bf16.safetensors
+scripts/download_huihui_qwen38_bf16.sh: line 16: syntax error near unexpected token `done'
+scripts/download_huihui_qwen38_bf16.sh: line 16: ` (done): $f"; continue; fi'
+SKIP (done): model.safetensors.index.json
+SKIP (done): config.json
+SKIP (done): generation_config.json
+SKIP (done): chat_template.jinja
+SKIP (done): tokenizer.json
+SKIP (done): tokenizer_config.json
+SKIP (done): preprocessor_config.json
+GET: processor_config.json
+Traceback (most recent call last):
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 836, in hf_raise_for_status
+    response.raise_for_status()
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '404 Not Found' for url 'https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated/resolve/main/processor_config.json'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 266, in _inner
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 1026, in hf_hub_download
+    return _hf_hub_download_to_local_dir(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 1366, in _hf_hub_download_to_local_dir
+    (url_to_download, etag, commit_hash, expected_size, xet_file_data, head_call_error) = _get_metadata_or_catch_error(
+                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 1762, in _get_metadata_or_catch_error
+    metadata = get_hf_file_metadata(
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 1669, in get_hf_file_metadata
+    response = _httpx_follow_hub_redirects_with_backoff(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 761, in _httpx_follow_hub_redirects_with_backoff
+    hf_raise_for_status(response)
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 856, in hf_raise_for_status
+    raise _format(RemoteEntryNotFoundError, message, response, repo_type=repo_type, repo_id=repo_id) from e
+huggingface_hub.errors.RemoteEntryNotFoundError: 404 Client Error. (Request ID: Root=1-6ad0e308-55ad3fdc37a1475d059ffc2f;d64233f9-144f-44f9-8bcf-36adab168669)
+
+Entry Not Found for url: https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated/resolve/main/processor_config.json.
+FAILED: processor_config.json

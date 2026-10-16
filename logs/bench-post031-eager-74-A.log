@@ -1,0 +1,12 @@
+prompt ~1026 tokens (target 1024), max_tokens=128, concurrency=1, runs=3
+  req: ttft=1.20s total=5.30s out_tok=39 decode=9.51 tok/s
+  req: ttft=1.15s total=5.17s out_tok=39 decode=9.68 tok/s
+  req: ttft=1.17s total=5.13s out_tok=39 decode=9.85 tok/s
+
+TTFT median=1.17s (min 1.15 / max 1.20)  | prefill ~878.5 tok/s
+decode: median=9.68 tok/s per request; aggregate=7.50 tok/s over 15.6s wall
+end-to-end: median=5.17s
+GPUActive 21.08 -> 21.08 GiB | GPUReclaim 0.03 -> 0.03 GiB
+MemAvailable 3.34 -> 3.36 GiB | swap used 2.89 -> 2.99 GiB
+
+appended row to /home/yanchun/Projects/vllm.xpu/results.csv

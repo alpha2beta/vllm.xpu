@@ -62,7 +62,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--max-reclaim-mib", type=int, default=256,
                     help="stop once GPUReclaim is at or below this")
-    ap.add_argument("--max-hold-gib", type=int, default=16,
+    ap.add_argument("--max-hold-gib", type=int, default=20,
                     help="safety cap on host memory we hold")
     ap.add_argument("--min-available-mib", type=int, default=6144,
                     help="safety floor on MemAvailable (NOT MemFree: page cache "

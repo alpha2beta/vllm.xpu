@@ -1,0 +1,48 @@
+=== pipeline start 2026-10-15T13:31:07+02:00 ===
+=== pipeline start 2026-10-15T14:53:20+02:00 ===
+shard 1 landed (49825162944B), starting early --shards 1-1 2026-10-15T16:05:23+02:00
+=== Rusticl warning: Patched Mesa libclc not detected. Upstream libclc may contain known bugs or breaking changes and isn't guaranteed to work reliably. Please visit https://gitlab.freedesktop.org/karolherbst/mesa-libclc for more information. ===
+W1015 16:05:25.902000 24339 torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1015 16:05:25.902000 24339 torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1015 16:05:25.902000 24339 torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+[1/2] model-00001-of-00002.safetensors: 784 tensors
+  wrote model-00001-of-XXXXX.safetensors: 1 tensors, 2.37 GiB
+  wrote model-00002-of-XXXXX.safetensors: 1 tensors, 2.37 GiB
+  wrote model-00003-of-XXXXX.safetensors: 121 tensors, 1.00 GiB
+  [val] model.language_model.layers.16.linear_attn.in_proj_b.weight: mean-rel-err=0.12394
+  wrote model-00004-of-XXXXX.safetensors: 109 tensors, 1.03 GiB
+  wrote model-00005-of-XXXXX.safetensors: 112 tensors, 1.03 GiB
+  [val] model.language_model.layers.23.mlp.up_proj.weight: mean-rel-err=0.11844
+  wrote model-00006-of-XXXXX.safetensors: 118 tensors, 1.04 GiB
+  [val] model.language_model.layers.30.mlp.down_proj.weight: mean-rel-err=0.11817
+  wrote model-00007-of-XXXXX.safetensors: 115 tensors, 1.01 GiB
+  wrote model-00008-of-XXXXX.safetensors: 113 tensors, 1.02 GiB
+  wrote model-00009-of-XXXXX.safetensors: 110 tensors, 1.03 GiB
+  wrote model-00010-of-XXXXX.safetensors: 120 tensors, 1.04 GiB
+  wrote model-00011-of-XXXXX.safetensors: 110 tensors, 1.03 GiB
+  wrote model-00012-of-XXXXX.safetensors: 122 tensors, 1.00 GiB
+  shard done (517s elapsed)
+[mtp] SKIP (file not present yet — partial run)
+  wrote model-00013-of-XXXXX.safetensors: 89 tensors, 0.84 GiB
+config written: 576 ignored modules, 457 packed modules
+DONE: 1241 tensors, 13 shards, 15.81 GiB in 547s
+quantized projs: 457, validated: 7, max mean-rel-err=0.12685, mean=0.11987
+download proc gone, relaunching (resumable) 2026-10-15T16:28:24+02:00
+ABORT: download reported failure 2026-10-15T16:28:54+02:00
+=== Rusticl warning: Patched Mesa libclc not detected. Upstream libclc may contain known bugs or breaking changes and isn't guaranteed to work reliably. Please visit https://gitlab.freedesktop.org/karolherbst/mesa-libclc for more information. ===
+W1015 16:50:15.586000 26704 torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1015 16:50:15.586000 26704 torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1015 16:50:15.586000 26704 torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+resume: 1 source shards done, mtp=pending, next output shard #14
+[1/2] model-00001-of-00002.safetensors: SKIP (done)
+[2/2] model-00002-of-00002.safetensors: 400 tensors
+  wrote model-00014-of-XXXXX.safetensors: 112 tensors, 1.00 GiB
+  shard done (30s elapsed)
+[mtp] 15 tensors: ['mtp.fc.weight', 'mtp.layers.0.input_layernorm.weight', 'mtp.layers.0.mlp.down_proj.weight', 'mtp.layers.0.mlp.gate_proj.weight'] ...
+  wrote model-00015-of-XXXXX.safetensors: 330 tensors, 1.10 GiB
+  mtp merged (72s elapsed)
+  wrote model-00016-of-XXXXX.safetensors: 12 tensors, 0.53 GiB
+config written: 537 ignored modules, 496 packed modules
+DONE: 1695 tensors, 16 shards, 18.44 GiB in 92s
+quantized projs: 496, validated: 0, max mean-rel-err=0.00000, mean=0.00000
+FINAL-EXIT:0
