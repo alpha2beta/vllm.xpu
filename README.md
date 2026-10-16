@@ -2,12 +2,14 @@
 
 Experiments running large language models under [vLLM](https://github.com/vllm-project/vllm)
 with the Intel XPU backend on a Core Ultra 7 258V (Arc 140V iGPU, 32 GB unified
-memory). Two tracks: production MoE serving and EXL3 quantization bring-up.
+memory). Two tracks: production MoE serving and EXL3 quantization bring-up —
+plus a family of MXFP4 checkpoints quantized in-repo and published on the Hub.
 
 ## Hardware / software baseline
 
 - Intel Core Ultra 7 258V, Arc 140V (Xe2-LPG, no XMX), ~103 GB/s measured bandwidth
 - vLLM 0.30.0+xpu, PyTorch 2.13.0+xpu, Triton 3.7.2, oneAPI 2026.0.0
+  (0.31.0+xpu for the Oct-15 Huihui smoke test)
 - See `environment.md` (setup) and `compatibility.md` (version audit)
 
 ## Track 1 — Production: Tiel-Coder-35B MoE (MXFP4)
@@ -17,7 +19,30 @@ Dense MoE serving with multi-token prediction. Best measured: **27.7 tok/s**
 
 - Plan: `tasks-tiel-optimization.md` (Phases 11–15 roadmap)
 - Launch: `scripts/launch_vllm.sh` (default) / `scripts/launch_vllm_tiel_coder.sh`
+  / `scripts/launch_vllm_kat_coder.sh` (KAT, 128k default, `KV_DTYPE` env for
+  opt-in fp8 KV)
 - Status: `status.md`, results: `results.csv`, fallback comparison: `fallback-comparison.md`
+
+## Published MXFP4 checkpoints (Hugging Face `alpha2beta/`)
+
+`compressed-tensors` `mxfp4-pack-quantized` builds for the vLLM XPU backend
+(`CompressedTensorsW4A4Mxfp4` + `XPUExpertsMxFp4`), quantized with the inference
+kernel's own quantizer. All load-verified on this box.
+
+| Checkpoint | Arch | Size | Measured |
+|---|---|---|---|
+| [Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4](https://huggingface.co/alpha2beta/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4) | 35B-A3B MoE + MXFP4 MTP draft | 20.5 GiB / 32 shards | 27.69 tok/s MTP K=2 |
+| [KAT-Coder-V2.5-Dev-MXFP4](https://huggingface.co/alpha2beta/KAT-Coder-V2.5-Dev-MXFP4) | 35B-A3B MoE + MXFP4 MTP draft | 19.6 GiB / 29 shards | 24.82 tok/s MTP K=2 |
+| [Qwen3.6-35B-A3B-occamy-1.0-MXFP4](https://huggingface.co/alpha2beta/Qwen3.6-35B-A3B-occamy-1.0-MXFP4) | 35B-A3B MoE + MXFP4 MTP draft | ~20.4 GiB / 21 shards | quality 13/16, hard 8/10 |
+| [Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-MXFP4](https://huggingface.co/alpha2beta/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-MXFP4) | dense 27B + BF16 MTP | 18.44 GiB / 16 shards | 2.6 tok/s (dense wall) |
+
+- Quantizers: `scripts/quantize_{tiel,kat,occamy}_mxfp4.py` (+ `*_mtp_mxfp4.py`,
+  `finalize_*`, `audit_*`) for MoE; `scripts/quantize_huihui_qwen38_mxfp4.py`
+  (dense recipe, reference `scripts/ref/`) for Qwen3.8. Local checkpoints live
+  in `models/` (git-ignored); the Huihui build lives on external disk (see its
+  model card for path).
+- No other vLLM-ready MXFP4 builds of these models exist on the Hub (MLX/GGUF/
+  NVFP4/GPTQ variants are not XPU-loadable) — checked per model before publishing.
 
 ## Track 2 — Experimental: EXL3 on Arc 140V (`0xSero/exl3xpu`)
 
