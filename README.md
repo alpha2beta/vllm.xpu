@@ -50,7 +50,9 @@ Port of the EXL3 trellis-quantization vLLM plugin to XMX-less Xe2-LPG, tested on
 Qwen3.8-27B at 4.00bpw and 2.20bpw. Local-only patches (source stays upstream).
 
 Measured (eager, batch 1): 4.00bpw **6.5 tok/s** (PPL 6.36), 2.20bpw **8.8 tok/s**
-(PPL 6.78); MTP K=1 decode +42–52% but loses end-to-end under ~60 output tokens;
+(PPL 6.78); 3.00bpw hits the sweet spot — quality suite **16/16**, hard suite
+**10/10** (incl. antileak variants), PPL **6.46** (+0.10 vs 4.00bpw);
+MTP K=1 decode +42–52% but loses end-to-end under ~60 output tokens;
 fp8 KV pools **230K tokens** at 15% slower decode. Verdict: works, not
 production-competitive with the MoE track on this machine.
 
