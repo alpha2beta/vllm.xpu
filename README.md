@@ -12,10 +12,14 @@ plus a family of MXFP4 checkpoints quantized in-repo and published on the Hub.
   (0.31.0+xpu for the Oct-15 Huihui smoke test)
 - See `environment.md` (setup) and `compatibility.md` (version audit)
 
-## Track 1 — Production: Tiel-Coder-35B MoE (MXFP4)
+## Track 1 — Production: MoE coders (MXFP4)
 
-Dense MoE serving with multi-token prediction. Best measured: **27.7 tok/s**
-(MTP K=2) / 19.15 tok/s eager single-request.
+Dense MoE serving with multi-token prediction (1024/128/1, MAX_LEN 4096):
+
+| Model | Eager | MTP K=2 | Quality / Hard |
+|---|---|---|---|
+| Tiel-Coder-35B MXFP4 | 19.15 tok/s | **27.69 tok/s** | 15/16 / 9/10 |
+| KAT-Coder-V2.5-Dev MXFP4 | ~13–14 tok/s (E-cores) | **24.82 tok/s** | 15/16 / 8/10 |
 
 - Plan: `tasks-tiel-optimization.md` (Phases 11–15 roadmap)
 - Launch: `scripts/launch_vllm.sh` (default) / `scripts/launch_vllm_tiel_coder.sh`
@@ -55,6 +59,11 @@ Measured (eager, batch 1): 4.00bpw **6.5 tok/s** (PPL 6.36), 2.20bpw **8.8 tok/s
 MTP K=1 decode +42–52% but loses end-to-end under ~60 output tokens;
 fp8 KV pools **230K tokens** at 15% slower decode. Verdict: works, not
 production-competitive with the MoE track on this machine.
+
+> **Scope note:** on dense Qwen3.8-27B, EXL3 (6.5–8.8 tok/s) outperforms MXFP4
+> (~2.6–2.9 tok/s) — but the EXL3 plugin only implements the dense-27B path.
+> The MoE coders above (24–28 tok/s) serve exclusively via MXFP4, which remains
+> the only quantized path covering all four published checkpoints.
 
 - Plan + evidence: `tasks.md` (Phases E0–E9), feasibility notes: `vllm_xpu_exl3_140v.md`
 - Launch: `scripts/launch_vllm_exl3.sh` (port 8001, isolated from production)
