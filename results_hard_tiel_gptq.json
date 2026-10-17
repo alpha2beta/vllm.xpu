@@ -1,0 +1,114 @@
+{
+  "model": "Tiel-Coder-35B-A3B-W4A16-GPTQ",
+  "base_url": "http://127.0.0.1:8000/v1",
+  "total_score": "10/10",
+  "pass_rate_pct": 100.0,
+  "category_stats": {
+    "long_ctx": "2/2",
+    "math": "2/2",
+    "code": "3/3",
+    "logic_constraint": "3/3"
+  },
+  "results": [
+    {
+      "id": "long_ctx_multihop_needle",
+      "category": "long_ctx",
+      "latency_s": 18.66,
+      "think_chars": 394,
+      "answer_chars": 194,
+      "passed": true,
+      "reason": "Found target: 9f8a-c4e1-22b0",
+      "answer_preview": "The migration event EVT-94821 shows server phoenix-7 was migrated by operator **OSPREY**. The security-keyring record confirms OSPREY holds key-hash **9f8a-c4e1-22b0**.\n\nKey-hash: 9f8a-c4e1-22b0"
+    },
+    {
+      "id": "long_ctx_distractor_amendment",
+      "category": "long_ctx",
+      "latency_s": 17.36,
+      "think_chars": 819,
+      "answer_chars": 318,
+      "passed": true,
+      "reason": "Found target: 3,180,000",
+      "answer_preview": "The only budget governance event in the logs is EVT-77215, which states the initial budget of $4,500,000 \"was officially amended and capped at $3,180,000\" and instructs that \"all subsequent disbursements must reflect final approved budget of $3,180,000.\" No later entry supersedes this value.\n\nFinal "
+    },
+    {
+      "id": "math_chinese_remainder",
+      "category": "math",
+      "latency_s": 74.7,
+      "think_chars": 1819,
+      "answer_chars": 1018,
+      "passed": true,
+      "reason": "Matched expected pattern: 3386",
+      "answer_preview": "## Setting Up the Problem\n\nThe moduli 17, 19, 23 are pairwise coprime, so the Chinese Remainder Theorem gives a unique solution modulo M = 17\u00b719\u00b723 = **7429**.\n\n**Compute the partial products:**\n- M\u2081 = 7429 / 17 = 437\n- M\u2082 = 7429 / 19 = 391\n- M\u2083 = 7429 / 23 = 323\n\n## Finding Modular Inverses\n\n**Mod "
+    },
+    {
+      "id": "math_bounded_combinatorics",
+      "category": "math",
+      "latency_s": 80.27,
+      "think_chars": 0,
+      "answer_chars": 4214,
+      "passed": true,
+      "reason": "Matched expected pattern in answer: 301",
+      "answer_preview": "We need to count integer solutions to a+b+c+d=24 with:\n- 1 <= a <= 6\n- 2 <= b <= 8\n- 0 <= c <= 10\n- 3 <= d <= 12\n\nUse inclusion-exclusion via generating functions or substitution.\n\nLet me substitute to lower bounds zero.\nLet a' = a - 1, range 0..5\nb' = b - 2, range 0..6\nc' = c - 0, range 0..10\nd' = "
+    },
+    {
+      "id": "code_trapping_rain_water",
+      "category": "code",
+      "latency_s": 14.92,
+      "think_chars": 915,
+      "answer_chars": 611,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\ndef trap(height: list[int]) -> int:\n    if not height:\n        return 0\n\n    left, right = 0, len(height) - 1\n    left_max = right_max = 0\n    water = 0\n\n    while left < right:\n        if height[left] < height[right]:\n            if height[left] >= left_max:\n                left_max = hei"
+    },
+    {
+      "id": "code_lru_cache",
+      "category": "code",
+      "latency_s": 27.29,
+      "think_chars": 641,
+      "answer_chars": 1803,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\nfrom collections import OrderedDict\n\n\nclass LRUCache:\n    \"\"\"\n    LRU Cache backed by an OrderedDict.\n\n    OrderedDict keeps keys in access/insertion order, giving O(1) average-time\n    lookups plus O(1) eviction via move_to_end / popitem.\n\n    Key ordering convention: leftmost = least rec"
+    },
+    {
+      "id": "code_min_window_substring",
+      "category": "code",
+      "latency_s": 32.6,
+      "think_chars": 1443,
+      "answer_chars": 1449,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\nfrom collections import Counter\n\ndef min_window(s: str, t: str) -> str:\n    if not s or not t:\n        return ''\n\n    need = Counter(t)          # required count per character\n    missing = len(need)        # distinct chars still unsatisfied\n\n    left = 0\n    best_left = 0\n    best_len = f"
+    },
+    {
+      "id": "logic_five_floors",
+      "category": "logic_constraint",
+      "latency_s": 22.51,
+      "think_chars": 844,
+      "answer_chars": 523,
+      "passed": true,
+      "reason": "Matched expected pattern: Alice=5, Bob=3, Carol=2, David=4, Elena=1",
+      "answer_preview": "**Reasoning:**\n- Rule 5 fixes **Bob = 3**.\n- Rule 1 requires Alice > Bob (=3), so Alice \u2208 {4, 5}.\n- Rule 2 puts Carol in {2, 3, 4}; since 3 is taken by Bob, Carol \u2208 {2, 4}.\n- Rule 3 gives David = Carol + 2. Carol = 4 \u2192 David = 6 (impossible), so **Carol = 2** and **David = 4**.\n- Remaining floors ar"
+    },
+    {
+      "id": "format_multi_constraint_4rules",
+      "category": "logic_constraint",
+      "latency_s": 24.86,
+      "think_chars": 1856,
+      "answer_chars": 183,
+      "passed": true,
+      "reason": "Passed all 4 rules simultaneously",
+      "answer_preview": "Although the night was dark, she kept walking toward shore. Because she adored the deep blue ocean, she never feared the cold water. Although her arms grew weak, she swam on with joy."
+    },
+    {
+      "id": "trap_sheep_all_but_nine",
+      "category": "logic_constraint",
+      "latency_s": 2.36,
+      "think_chars": 65,
+      "answer_chars": 45,
+      "passed": true,
+      "reason": "Matched expected pattern: 9 (all but 9 die means 9 remain alive)",
+      "answer_preview": "All but 9 died, meaning 9 survived.\n\nAlive: 9"
+    }
+  ]
+}

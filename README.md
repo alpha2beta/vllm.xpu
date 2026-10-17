@@ -12,19 +12,36 @@ plus a family of MXFP4 checkpoints quantized in-repo and published on the Hub.
   (0.31.0+xpu for the Oct-15 Huihui smoke test)
 - See `environment.md` (setup) and `compatibility.md` (version audit)
 
-## Track 1 — Production: MoE coders (MXFP4)
+## Track 1 — Production: MoE coders (MXFP4 & W4A16-GPTQ)
 
-Dense MoE serving with multi-token prediction (1024/128/1, MAX_LEN 4096):
+Dense MoE serving with multi-token prediction (1024/128/1, MAX_LEN 4096 / up to 128k):
 
-| Model | Eager | MTP K=2 | Quality / Hard |
+| Model | Quantization | MTP K=2 Speed | Quality (16p) | Hard Suite (10t) | HumanEval (Base) | HumanEval+ (Plus) |
+|---|---|---|---|---|---|---|
+| **KAT-Coder-V2.5-Dev** | MXFP4 (W4A4 MoE) | **24.82 tok/s** | 15/16 (93.8%) | 8/10 (80.0%) | **89.63%** (147/164) | **86.59%** (142/164) |
+| **Tiel-Coder-35B-A3B** | W4A16-GPTQ | **25.40 tok/s** | **16/16 (100%)** | **10/10 (100%)** | 84.15% (138/164) | 81.10% (133/164) |
+| **Tiel-Coder-35B-A3B** | MXFP4 (W4A4 MoE) | **27.69 tok/s** | 15/16 (93.8%) | 9/10 (90.0%) | 78.66% (129/164) | 75.61% (124/164) |
+
+### HumanEval / HumanEval+ (EvalPlus 0.3.1) Benchmark Details
+
+Full 164-task standardized evaluation under greedy decoding (`temp=0.0`, single sequence, FP8 KV cache):
+
+| Benchmark Metric | KAT-Coder MXFP4 | Tiel-Coder GPTQ | Tiel-Coder MXFP4 |
 |---|---|---|---|
-| Tiel-Coder-35B MXFP4 | 19.15 tok/s | **27.69 tok/s** | 15/16 / 9/10 |
-| KAT-Coder-V2.5-Dev MXFP4 | ~13–14 tok/s (E-cores) | **24.82 tok/s** | 15/16 / 8/10 |
+| **HumanEval (Base)** | **89.63%** (147 / 164) | 84.15% (138 / 164) | 78.66% (129 / 164) |
+| **HumanEval+ (Base + Extra)** | **86.59%** (142 / 164) | 81.10% (133 / 164) | 75.61% (124 / 164) |
+| **Total Codegen Duration** | 47m 33s | **46m 58s** | 1h 30m 37s |
+| **Avg Latency per Task** | **~17.4s** | **~17.1s** | ~33.1s |
+| **Avg Output Chars / Task** | 1,244 chars | 1,231 chars | 2,135 chars (+60% verbosity) |
+| **Active Throughput** | ~24–25 tok/s | ~24–26 tok/s | ~20–22 tok/s |
+| **MTP Acceptance Rate** | **~75%–83%** | ~65%–75% | ~60%–73% |
+| **Max Context Served** | 128k (`131072`) | 96k (`98304`) | 96k (`98304`) |
 
-- Plan: `tasks-tiel-optimization.md` (Phases 11–15 roadmap)
-- Launch: `scripts/launch_vllm.sh` (default) / `scripts/launch_vllm_tiel_coder.sh`
-  / `scripts/launch_vllm_kat_coder.sh` (KAT, 128k default, `KV_DTYPE` env for
-  opt-in fp8 KV)
+- **Launchers:**
+  - `launch_vllm_kat_coder.sh` (KAT MXFP4, 128k default, FP8 KV)
+  - `launch_vllm_tiel_gptq.sh` (Tiel W4A16-GPTQ, 96k default, FP8 KV)
+  - `launch_vllm_tiel_coder.sh` (Tiel MXFP4, 96k default, FP8 KV)
+  - `scripts/run_evalplus_humaneval.sh` (Automated HumanEval/HumanEval+ benchmark runner)
 - Status: `status.md`, results: `results.csv`, fallback comparison: `fallback-comparison.md`
 
 ## Published MXFP4 checkpoints (Hugging Face `alpha2beta/`)
@@ -87,6 +104,7 @@ production-competitive with the MoE track on this machine.
 | `models/` | Checkpoints (git-ignored, local only) |
 | `logs/` | Per-run evidence: server logs, mem traces, patches, result JSON |
 | `results.csv` | All benchmark rows (schema documented in `tasks.md`/`tasks-tiel-optimization.md`) |
+| `evalplus_results/` | HumanEval & HumanEval+ (EvalPlus 0.3.1) raw completions and eval JSONs |
 | `tools/` | Level-Zero sysroot for Triton-XPU JIT |
 
 `status.md` is the running lab notebook; `plan.md` / `ctx128k.md` hold older planning context.

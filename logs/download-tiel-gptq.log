@@ -1,0 +1,4 @@
+=== Downloading arcitech-psp/Tiel-Coder-35B-A3B-W4A16-GPTQ-XPU-MTP to models/Tiel-Coder-35B-A3B-W4A16-GPTQ-XPU-MTP ===
+/home/yanchun/.local/share/uv/tools/huggingface-hub/lib/python3.12/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+path=/home/yanchun/Projects/vllm.xpu/models/Tiel-Coder-35B-A3B-W4A16-GPTQ-XPU-MTP

@@ -1,0 +1,181 @@
+=== HumanEval & HumanEval+ Benchmark for Tiel-Coder-35B-A3B Started: Sat Oct 17 08:24:39 AM CEST 2026 ===
+--- Generating 164 solutions via evalplus.codegen ---
+Initializing a decoder model: Tiel-Coder-35B-A3B ...
+Sanitized code outputs will be saved to evalplus_results/humaneval/Tiel-Coder-35B-A3B_openai_temp_0.0.jsonl
+Raw outputs will be saved to evalplus_results/humaneval/Tiel-Coder-35B-A3B_openai_temp_0.0.raw.jsonl
+Codegen: HumanEval/0 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/1 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/2 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/3 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/4 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/5 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/6 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/7 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/8 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/9 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/10 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/11 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/12 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/13 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/14 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/15 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/16 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/17 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/18 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/19 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/20 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/21 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/22 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/23 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/24 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/25 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/26 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/27 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/28 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/29 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/30 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/31 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/32 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/33 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/34 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/35 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/36 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/37 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/38 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/39 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/40 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/41 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/42 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/43 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/44 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/45 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/46 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/47 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/48 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/49 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/50 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/51 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/52 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/53 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/54 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/55 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/56 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/57 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/58 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/59 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/60 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/61 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/62 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/63 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/64 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/65 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/66 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/67 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/68 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/69 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/70 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/71 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/72 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/73 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/74 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/75 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/76 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/77 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/78 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/79 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/80 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/81 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/82 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/83 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/84 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/85 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/86 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/87 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/88 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/89 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/90 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/91 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/92 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/93 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/94 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/95 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/96 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/97 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/98 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/99 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/100 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/101 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/102 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/103 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/104 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/105 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/106 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/107 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/108 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/109 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/110 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/111 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/112 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/113 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/114 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/115 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/116 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/117 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/118 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/119 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/120 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/121 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/122 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/123 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/124 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/125 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/126 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/127 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/128 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/129 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/130 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/131 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/132 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/133 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/134 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/135 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/136 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/137 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/138 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/139 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/140 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/141 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/142 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/143 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/144 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/145 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/146 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/147 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/148 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/149 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/150 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/151 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/152 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/153 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/154 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/155 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/156 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/157 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/158 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/159 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/160 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/161 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/162 @ Tiel-Coder-35B-A3B
+Codegen: HumanEval/163 @ Tiel-Coder-35B-A3B
+humaneval •100% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 164/164 • 1:30:37
+evalplus_results/humaneval/Tiel-Coder-35B-A3B_openai_temp_0.0.jsonl
+--- Evaluating solutions with EvalPlus (Base + Plus test suites) ---
+Load from ground-truth from /home/yanchun/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+0it [00:00, ?it/s]164it [00:00, 4025.83it/s]
+  0%|          | 0/164 [00:00<?, ?it/s]  3%|▎         | 5/164 [00:00<00:03, 43.15it/s]  7%|▋         | 12/164 [00:00<00:03, 47.29it/s] 10%|█         | 17/164 [00:00<00:04, 31.59it/s] 14%|█▍        | 23/164 [00:00<00:03, 38.26it/s] 17%|█▋        | 28/164 [00:00<00:03, 39.38it/s] 21%|██▏       | 35/164 [00:00<00:02, 46.22it/s] 24%|██▍       | 40/164 [00:00<00:02, 46.57it/s] 27%|██▋       | 45/164 [00:01<00:02, 44.76it/s] 30%|███       | 50/164 [00:01<00:02, 38.25it/s] 34%|███▎      | 55/164 [00:01<00:02, 39.40it/s] 37%|███▋      | 60/164 [00:01<00:02, 39.91it/s] 40%|███▉      | 65/164 [00:01<00:02, 40.19it/s] 43%|████▎     | 70/164 [00:01<00:02, 42.57it/s] 46%|████▌     | 75/164 [00:01<00:02, 40.69it/s] 49%|████▉     | 81/164 [00:01<00:01, 44.15it/s] 53%|█████▎    | 87/164 [00:02<00:01, 46.61it/s] 58%|█████▊    | 95/164 [00:02<00:01, 51.97it/s] 62%|██████▏   | 101/164 [00:02<00:01, 52.29it/s] 65%|██████▌   | 107/164 [00:02<00:01, 52.10it/s] 69%|██████▉   | 113/164 [00:02<00:00, 52.30it/s] 74%|███████▍  | 121/164 [00:02<00:00, 59.14it/s] 77%|███████▋  | 127/164 [00:02<00:01, 36.94it/s] 80%|████████  | 132/164 [00:03<00:00, 33.16it/s] 84%|████████▍ | 138/164 [00:03<00:00, 37.56it/s] 87%|████████▋ | 143/164 [00:03<00:00, 37.85it/s] 90%|█████████ | 148/164 [00:03<00:00, 38.47it/s] 94%|█████████▍| 154/164 [00:03<00:00, 43.22it/s] 97%|█████████▋| 159/164 [00:03<00:00, 43.41it/s]100%|██████████| 164/164 [00:06<00:00,  5.80it/s]100%|██████████| 164/164 [00:06<00:00, 25.25it/s]
+humaneval (base tests)
+pass@1:	0.787
+humaneval+ (base + extra tests)
+pass@1:	0.756
+=== HumanEval & HumanEval+ Benchmark for Tiel-Coder-35B-A3B Completed: Sat Oct 17 09:55:41 AM CEST 2026 ===

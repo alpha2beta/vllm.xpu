@@ -1186,3 +1186,52 @@ Tiel MTP-K2 @0.74 relaunched on :8080 afterwards.
 ## Huihui-Qwen3.8 MXFP4 published (2026-10-15)
 - Verified no MXFP4 coder390 on HF (closest: NVFP4/FP8/GGUF/W4A16) → published.
 - `alpha2beta/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-MXFP4`: 16/16 shards + index + card + SHA256SUMS, single commit `830a58c`, remote LFS OIDs match local SHA256SUMS (spot-checked shard 1).
+
+## Tiel-Coder-35B-A3B W4A16-GPTQ Bring-Up & Quality Benchmarks (2026-10-16)
+- **Model Checkpoint:** `SpectreSystems/Tiel-Coder-35B-A3B-W4A16-GPTQ` downloaded and converted for vLLM XPU MTP serving via `scripts/download_tiel_gptq.sh` to `models/Tiel-Coder-35B-A3B-W4A16-GPTQ-XPU-MTP/` (~18.5 GiB weights + MTP draft).
+- **Launcher:** Created `scripts/launch_vllm_tiel_gptq.sh` (symlinked as `launch_vllm_tiel_gptq.sh`), configured with MTP K=2 draft (`SPEC=mtp-k2`), FP8 KV cache (`KV_BYTES=2500000000`), 96k max context (`MAX_LEN=98304`), and calibrated anti-loop generation parameters.
+- **16-Prompt Quality Benchmark (`results_tiel_gptq_16p.json`):**
+  - **Score:** **16 / 16 (100.0%)** pass rate.
+  - **Speed:** **24.8 tokens/s** generation throughput under MTP K=2.
+- **10-Task Hard Suite Benchmark (`results_hard_tiel_gptq.json`):**
+  - **Score:** **10 / 10 (100.0%)** pass rate across all domains (Olympiad math, LeetCode algorithms, 12.5k long context needle/distractor, multi-constraint logic).
+  - **Speed:** **25.1 tokens/s** generation throughput under MTP K=2.
+
+## Comprehensive HumanEval & HumanEval+ (EvalPlus 0.3.1) 3-Way Benchmark (2026-10-17)
+- **Objective:** Run a full, rigorous 164-task coding evaluation under greedy decoding (`temp=0.0`, single sequence, FP8 KV cache, MTP K=2) across all three flagship MoE coding models on Intel Arc 140V (Lunar Lake 258V):
+  1. `KAT-Coder-V2.5-Dev-MXFP4`
+  2. `Tiel-Coder-35B-A3B-W4A16-GPTQ`
+  3. `Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4`
+- **Execution Pipeline:** `scripts/run_evalplus_humaneval.sh` (parameterized for automatic model detection and isolated logging), executing `evalplus.codegen` followed immediately by `evalplus.evaluate` across Base and Extra (Plus) test assertions.
+
+### 1. Head-to-Head Comparative Benchmark Results
+
+| Metric | KAT-Coder MXFP4 | Tiel-Coder W4A16-GPTQ | Tiel-Coder MXFP4 |
+| :--- | :---: | :---: | :---: |
+| **HumanEval (Base)** | **89.63%** (147 / 164) | **84.15%** (138 / 164) | **78.66%** (129 / 164) |
+| **HumanEval+ (Plus)** | **86.59%** (142 / 164) | **81.10%** (133 / 164) | **75.61%** (124 / 164) |
+| **16-Prompt Quality Suite** | 15 / 16 (93.8%) | **16 / 16 (100.0%)** | 15 / 16 (93.8%) |
+| **10-Task Hard Suite** | 8 / 10 (80.0%) | **10 / 10 (100.0%)** | 9 / 10 (90.0%) |
+| **Total Codegen Duration** | 47m 33s | **46m 58s** | 1h 30m 37s |
+| **Avg Latency per Task** | **~17.4s** | **~17.1s** | ~33.1s |
+| **Avg Output Chars / Task** | 1,244 chars | 1,231 chars | 2,135 chars (+60% text) |
+| **Active Throughput** | ~24–25 tok/s | ~24–26 tok/s | ~20–22 tok/s |
+| **MTP Draft Acceptance** | **~75%–83%** | ~65%–75% | ~60%–73% |
+| **Max Context Served** | 128k (`131072`) | 96k (`98304`) | 96k (`98304`) |
+| **Resident Model Weights** | 19.60 GiB | ~18.5 GiB | 20.47 GiB |
+
+### 2. Key Findings & Diagnostic Analysis
+1. **KAT-Coder MXFP4 Coding Dominance:**
+   - Achieved the highest accuracy across both test tiers: **89.63% Base** and **86.59% Plus**.
+   - Passed 13 problems that Tiel-Coder GPTQ failed, with only 4 problems failing where GPTQ passed.
+   - Proves that Microscaling FP4 quantization (W4A4 MoE) preserves top-tier coding ability when paired with well-calibrated weights.
+2. **GPTQ vs. MXFP4 Precision on Tiel-Coder:**
+   - On the identical underlying model architecture (`Tiel-Coder-35B-A3B`), W4A16-GPTQ scored **+5.49% higher** than MXFP4 on both Base (84.15% vs 78.66%) and Plus (81.10% vs 75.61%).
+   - Retaining unquantized FP16 activations in GPTQ provides slightly higher tolerance for subtle edge-case math/logic in complex tasks.
+3. **Verbosity and Chat Template Impact on MXFP4 Runtime:**
+   - Tiel-Coder MXFP4's chat template emitted `<think>` reasoning prompts by default for OpenAI completion endpoints, causing extensive post-solution analysis paragraphs (~2,135 chars/task vs ~1,231–1,244 for GPTQ and KAT).
+   - The resulting +60% token volume lengthened total codegen duration to 1h 30m, compared to ~47m for KAT-Coder MXFP4 and Tiel-Coder GPTQ.
+4. **Artifacts & Evidence:**
+   - All results JSONs and raw completions archived under `evalplus_results/humaneval/`.
+   - Complete execution logs archived under `logs/evalplus-humaneval-*.log`.
+

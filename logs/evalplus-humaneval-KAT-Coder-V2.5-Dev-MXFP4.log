@@ -1,0 +1,181 @@
+=== HumanEval & HumanEval+ Benchmark for KAT-Coder-V2.5-Dev-MXFP4 Started: Sat Oct 17 10:03:13 AM CEST 2026 ===
+--- Generating 164 solutions via evalplus.codegen ---
+Initializing a decoder model: KAT-Coder-V2.5-Dev-MXFP4 ...
+Sanitized code outputs will be saved to evalplus_results/humaneval/KAT-Coder-V2.5-Dev-MXFP4_openai_temp_0.0.jsonl
+Raw outputs will be saved to evalplus_results/humaneval/KAT-Coder-V2.5-Dev-MXFP4_openai_temp_0.0.raw.jsonl
+Codegen: HumanEval/0 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/1 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/2 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/3 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/4 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/5 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/6 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/7 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/8 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/9 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/10 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/11 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/12 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/13 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/14 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/15 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/16 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/17 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/18 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/19 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/20 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/21 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/22 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/23 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/24 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/25 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/26 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/27 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/28 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/29 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/30 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/31 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/32 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/33 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/34 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/35 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/36 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/37 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/38 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/39 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/40 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/41 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/42 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/43 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/44 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/45 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/46 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/47 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/48 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/49 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/50 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/51 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/52 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/53 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/54 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/55 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/56 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/57 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/58 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/59 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/60 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/61 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/62 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/63 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/64 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/65 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/66 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/67 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/68 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/69 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/70 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/71 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/72 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/73 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/74 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/75 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/76 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/77 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/78 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/79 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/80 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/81 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/82 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/83 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/84 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/85 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/86 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/87 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/88 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/89 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/90 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/91 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/92 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/93 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/94 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/95 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/96 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/97 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/98 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/99 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/100 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/101 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/102 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/103 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/104 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/105 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/106 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/107 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/108 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/109 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/110 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/111 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/112 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/113 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/114 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/115 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/116 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/117 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/118 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/119 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/120 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/121 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/122 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/123 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/124 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/125 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/126 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/127 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/128 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/129 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/130 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/131 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/132 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/133 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/134 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/135 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/136 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/137 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/138 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/139 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/140 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/141 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/142 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/143 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/144 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/145 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/146 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/147 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/148 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/149 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/150 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/151 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/152 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/153 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/154 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/155 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/156 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/157 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/158 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/159 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/160 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/161 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/162 @ KAT-Coder-V2.5-Dev-MXFP4
+Codegen: HumanEval/163 @ KAT-Coder-V2.5-Dev-MXFP4
+humaneval •100% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 164/164 • 0:47:33
+evalplus_results/humaneval/KAT-Coder-V2.5-Dev-MXFP4_openai_temp_0.0.jsonl
+--- Evaluating solutions with EvalPlus (Base + Plus test suites) ---
+Load from ground-truth from /home/yanchun/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+0it [00:00, ?it/s]164it [00:00, 2807.46it/s]
+  0%|          | 0/164 [00:00<?, ?it/s]  4%|▎         | 6/164 [00:00<00:03, 47.64it/s]  8%|▊         | 13/164 [00:00<00:03, 47.86it/s] 11%|█         | 18/164 [00:00<00:04, 31.71it/s] 15%|█▍        | 24/164 [00:00<00:03, 35.88it/s] 17%|█▋        | 28/164 [00:00<00:03, 36.70it/s] 20%|█▉        | 32/164 [00:00<00:04, 32.24it/s] 22%|██▏       | 36/164 [00:01<00:05, 21.73it/s] 24%|██▍       | 39/164 [00:01<00:07, 16.91it/s] 26%|██▌       | 42/164 [00:01<00:07, 17.35it/s] 27%|██▋       | 45/164 [00:01<00:06, 18.24it/s] 30%|███       | 50/164 [00:01<00:04, 23.97it/s] 34%|███▍      | 56/164 [00:02<00:03, 28.96it/s] 38%|███▊      | 62/164 [00:02<00:02, 35.09it/s] 42%|████▏     | 69/164 [00:02<00:02, 42.22it/s] 47%|████▋     | 77/164 [00:02<00:01, 46.89it/s] 51%|█████     | 84/164 [00:02<00:01, 51.85it/s] 55%|█████▍    | 90/164 [00:02<00:01, 53.16it/s] 59%|█████▉    | 97/164 [00:02<00:01, 57.07it/s] 63%|██████▎   | 103/164 [00:02<00:01, 54.98it/s] 67%|██████▋   | 110/164 [00:02<00:00, 58.51it/s] 71%|███████▏  | 117/164 [00:03<00:00, 58.57it/s] 76%|███████▌  | 124/164 [00:03<00:00, 60.23it/s] 80%|███████▉  | 131/164 [00:03<00:01, 24.46it/s] 83%|████████▎ | 136/164 [00:04<00:01, 26.67it/s] 86%|████████▌ | 141/164 [00:04<00:00, 27.87it/s] 90%|████████▉ | 147/164 [00:04<00:00, 31.94it/s] 93%|█████████▎| 153/164 [00:04<00:00, 36.60it/s] 97%|█████████▋| 159/164 [00:04<00:00, 40.69it/s]100%|██████████| 164/164 [00:06<00:00,  6.98it/s]100%|██████████| 164/164 [00:06<00:00, 23.79it/s]
+humaneval (base tests)
+pass@1:	0.896
+humaneval+ (base + extra tests)
+pass@1:	0.866
+=== HumanEval & HumanEval+ Benchmark for KAT-Coder-V2.5-Dev-MXFP4 Completed: Sat Oct 17 10:51:13 AM CEST 2026 ===

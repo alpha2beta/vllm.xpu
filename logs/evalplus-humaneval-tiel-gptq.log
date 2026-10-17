@@ -1,0 +1,181 @@
+=== HumanEval & HumanEval+ Benchmark Started: Sat Oct 17 07:26:35 AM CEST 2026 ===
+--- Generating 164 solutions via evalplus.codegen ---
+Initializing a decoder model: Tiel-Coder-35B-A3B-W4A16-GPTQ ...
+Sanitized code outputs will be saved to evalplus_results/humaneval/Tiel-Coder-35B-A3B-W4A16-GPTQ_openai_temp_0.0.jsonl
+Raw outputs will be saved to evalplus_results/humaneval/Tiel-Coder-35B-A3B-W4A16-GPTQ_openai_temp_0.0.raw.jsonl
+Codegen: HumanEval/0 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/1 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/2 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/3 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/4 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/5 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/6 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/7 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/8 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/9 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/10 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/11 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/12 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/13 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/14 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/15 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/16 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/17 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/18 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/19 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/20 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/21 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/22 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/23 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/24 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/25 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/26 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/27 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/28 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/29 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/30 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/31 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/32 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/33 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/34 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/35 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/36 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/37 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/38 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/39 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/40 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/41 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/42 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/43 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/44 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/45 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/46 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/47 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/48 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/49 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/50 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/51 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/52 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/53 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/54 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/55 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/56 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/57 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/58 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/59 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/60 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/61 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/62 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/63 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/64 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/65 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/66 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/67 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/68 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/69 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/70 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/71 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/72 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/73 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/74 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/75 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/76 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/77 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/78 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/79 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/80 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/81 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/82 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/83 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/84 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/85 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/86 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/87 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/88 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/89 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/90 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/91 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/92 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/93 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/94 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/95 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/96 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/97 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/98 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/99 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/100 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/101 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/102 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/103 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/104 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/105 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/106 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/107 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/108 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/109 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/110 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/111 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/112 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/113 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/114 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/115 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/116 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/117 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/118 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/119 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/120 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/121 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/122 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/123 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/124 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/125 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/126 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/127 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/128 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/129 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/130 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/131 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/132 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/133 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/134 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/135 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/136 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/137 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/138 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/139 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/140 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/141 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/142 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/143 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/144 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/145 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/146 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/147 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/148 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/149 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/150 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/151 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/152 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/153 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/154 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/155 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/156 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/157 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/158 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/159 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/160 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/161 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/162 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+Codegen: HumanEval/163 @ Tiel-Coder-35B-A3B-W4A16-GPTQ
+humaneval •100% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 164/164 • 0:46:58
+evalplus_results/humaneval/Tiel-Coder-35B-A3B-W4A16-GPTQ_openai_temp_0.0.jsonl
+--- Evaluating solutions with EvalPlus (Base + Plus test suites) ---
+Load from ground-truth from /home/yanchun/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+0it [00:00, ?it/s]164it [00:00, 5417.67it/s]
+  0%|          | 0/164 [00:00<?, ?it/s]  5%|▍         | 8/164 [00:00<00:02, 65.57it/s] 10%|▉         | 16/164 [00:00<00:04, 35.67it/s] 15%|█▍        | 24/164 [00:00<00:03, 43.22it/s] 20%|█▉        | 32/164 [00:00<00:02, 50.77it/s] 23%|██▎       | 38/164 [00:00<00:02, 52.94it/s] 27%|██▋       | 44/164 [00:00<00:02, 52.31it/s] 30%|███       | 50/164 [00:01<00:02, 51.80it/s] 34%|███▍      | 56/164 [00:01<00:02, 48.11it/s] 38%|███▊      | 62/164 [00:01<00:02, 48.89it/s] 41%|████▏     | 68/164 [00:01<00:01, 50.51it/s] 45%|████▌     | 74/164 [00:01<00:01, 51.77it/s] 49%|████▉     | 80/164 [00:01<00:01, 51.66it/s] 52%|█████▏    | 86/164 [00:01<00:01, 52.10it/s] 56%|█████▌    | 92/164 [00:01<00:01, 52.92it/s] 60%|█████▉    | 98/164 [00:02<00:01, 40.83it/s] 63%|██████▎   | 103/164 [00:02<00:01, 41.09it/s] 66%|██████▋   | 109/164 [00:02<00:01, 45.34it/s] 70%|███████   | 115/164 [00:02<00:01, 48.29it/s] 74%|███████▍  | 121/164 [00:02<00:00, 50.77it/s] 77%|███████▋  | 127/164 [00:02<00:01, 25.59it/s] 80%|████████  | 132/164 [00:03<00:01, 25.32it/s] 83%|████████▎ | 136/164 [00:03<00:01, 27.10it/s] 86%|████████▌ | 141/164 [00:03<00:00, 29.69it/s] 89%|████████▉ | 146/164 [00:03<00:00, 33.06it/s] 91%|█████████▏| 150/164 [00:03<00:00, 34.49it/s] 95%|█████████▍| 155/164 [00:03<00:00, 37.01it/s] 98%|█████████▊| 161/164 [00:03<00:00, 40.43it/s]100%|██████████| 164/164 [00:06<00:00, 27.08it/s]
+humaneval (base tests)
+pass@1:	0.841
+humaneval+ (base + extra tests)
+pass@1:	0.811
+=== HumanEval & HumanEval+ Benchmark Completed: Sat Oct 17 08:13:57 AM CEST 2026 ===

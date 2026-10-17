@@ -1,0 +1,174 @@
+{
+  "model": "Tiel-Coder-35B-A3B-W4A16-GPTQ",
+  "base_url": "http://127.0.0.1:8000/v1",
+  "total_score": "15/16",
+  "pass_rate_pct": 93.8,
+  "category_stats": {
+    "math": "4/4",
+    "code": "4/4",
+    "instruction": "3/4",
+    "fact_trap": "4/4"
+  },
+  "results": [
+    {
+      "id": "math_bridge",
+      "category": "math",
+      "prompt": "Four hikers reach a bridge at night with one flashlight. Crossing times: 1, 2, 5, and 10 minutes. At most two people can cross together, moving at the slower hiker's pace. The flashlight must be carried back. What is the minimum total time (in minutes) for all four to cross? State the final number clearly on the last line as 'Total time: X minutes'.",
+      "think": "The classic bridge crossing problem. Four hikers with times 1, 2, 5, 10.\n\nStrategy: Send the two slowest together to avoid wasting the fast person's trips.\n\nStandard solution:\n- 1 and 2 cross: 2 min\n- 1 returns: 1 min\n- 5 and 10 cross: 10 min\n- 2 returns: 2 min\n- 1 and 2 cross: 2 min\n\nTotal: 2 + 1 + 10 + 2 + 2 = 17 min.\n\nAlternative strategy (sending fastest each time):\n- 1 and 10 cross: 10\n- 1 returns: 1\n- 1 and 5 cross: 5\n- 1 returns: 1\n- 1 and 2 cross: 2\nTotal: 10+1+5+1+2 = 19.\n\nSo minimum is 17.",
+      "answer": "**Optimal strategy:**\n- 1 and 2 cross \u2192 2 min\n- 1 returns with flashlight \u2192 1 min\n- 5 and 10 cross together \u2192 10 min\n- 2 returns with flashlight \u2192 2 min\n- 1 and 2 cross again \u2192 2 min\n\nThis groups the two slowest hikers on a single trip rather than shuttling them individually.\n\nTotal time: 17 minutes",
+      "latency_s": 12.68,
+      "passed": true,
+      "reason": "Matched expected pattern: 17 minutes"
+    },
+    {
+      "id": "math_lcm",
+      "category": "math",
+      "prompt": "A store sells apples in packs of 6 and oranges in packs of 8. A customer wants to buy the exact same number of apples and oranges. What is the smallest positive total number of fruit (apples + oranges combined) the customer must buy? State the final answer on the last line as 'Total fruit: X'.",
+      "think": "Apples come in packs of 6, oranges in packs of 8. Customer buys equal numbers of apples and oranges.\n\nNumber of apples = 6a, number of oranges = 8b, where a, b are positive integers.\n\nWe need 6a = 8b. LCM(6,8) = 24. So minimum common number is 24 apples and 24 oranges.\n\nTotal fruit = 24 + 24 = 48.",
+      "answer": "The customer needs an equal number of apples and oranges. Apples come in packs of 6, so apple counts are multiples of 6; oranges come in packs of 8, so orange counts are multiples of 8. The smallest number that is both a multiple of 6 and 8 is LCM(6, 8) = 24.\n\nSo the customer buys 24 apples and 24 oranges, for a total of 48 fruit.\n\nTotal fruit: 48",
+      "latency_s": 8.83,
+      "passed": true,
+      "reason": "Matched expected pattern: 48 (24 apples + 24 oranges)"
+    },
+    {
+      "id": "math_speed",
+      "category": "math",
+      "prompt": "Train A leaves a station traveling at 60 mph. Train B leaves the same station 1 hour later traveling in the same direction on a parallel track at 80 mph. How many hours after Train B departs will Train B catch up to Train A? State the final answer on the last line as 'Hours: X'.",
+      "think": "Train A travels at 60 mph. Train B leaves 1 hour later at 80 mph.\n\nWhen Train B departs, Train A has been traveling for 1 hour, so it's 60 miles ahead.\n\nRelative speed = 80 - 60 = 20 mph.\n\nTime to catch up = 60 / 20 = 3 hours.\n\nLet me verify: After t hours (t measured from Train B's departure):\n- Train A distance = 60(t+1) = 60t + 60\n- Train B distance = 80t\n\nSet equal: 60t + 60 = 80t \u2192 60 = 20t \u2192 t = 3.\n\nSo 3 hours after Train B departs.",
+      "answer": "Train A gets a 1-hour head start, covering 60 miles before Train B departs. Train B closes the gap at a relative speed of 80 \u2212 60 = 20 mph.\n\nTime to catch up = 60 miles \u00f7 20 mph = 3 hours.\n\nCheck: After 3 hours, Train B travels 240 miles; Train A travels 60 \u00d7 (3+1) = 240 miles. \u2713\n\nHours: 3",
+      "latency_s": 10.94,
+      "passed": true,
+      "reason": "Matched expected pattern: 3 hours"
+    },
+    {
+      "id": "math_probability",
+      "category": "math",
+      "prompt": "A bag contains 3 red balls and 5 blue balls. If two balls are drawn at random without replacement, what is the exact probability (in fraction form in lowest terms, like P/Q) that both balls are red? State the final fraction on the last line as 'Probability: P/Q'.",
+      "think": "Total balls = 8, red = 3.\n\nP(both red) = (3/8) * (2/7) = 6/56 = 3/28.",
+      "answer": "The probability of drawing two red balls without replacement is (3/8) \u00d7 (2/7) = 6/56 = 3/28.\n\nProbability: 3/28",
+      "latency_s": 3.65,
+      "passed": true,
+      "reason": "Matched expected pattern: 3/28"
+    },
+    {
+      "id": "code_palindrome",
+      "category": "code",
+      "prompt": "Write a Python function `is_palindrome(s: str) -> bool` that returns True if the string is a palindrome, ignoring non-alphanumeric characters and case. Output ONLY the python function implementation. Do not include markdown fences or usage examples.",
+      "think": "The user wants a Python function. Output only the function implementation, no markdown fences or examples.\n\nLet me write it.",
+      "answer": "def is_palindrome(s: str) -> bool:\n    cleaned = [c.lower() for c in s if c.isalnum()]\n    return cleaned == cleaned[::-1]",
+      "latency_s": 3.0,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "code_merge_intervals",
+      "category": "code",
+      "prompt": "Write a Python function `merge_intervals(intervals: list[list[int]]) -> list[list[int]]` that merges all overlapping intervals and returns the merged list sorted by start time. Output ONLY the python function implementation without markdown code fences or explanatory text.",
+      "think": "The user wants a Python function that merges overlapping intervals. Let me write it directly without markdown fences or explanatory text.\n\nThe standard approach: sort by start time, then iterate and merge overlaps.",
+      "answer": "```python\ndef merge_intervals(intervals: list[list[int]]) -> list[list[int]]:\n    if not intervals:\n        return []\n    intervals.sort(key=lambda x: x[0])\n    merged = [intervals[0][:]]\n    for start, end in intervals[1:]:\n        if start <= merged[-1][1]:\n            merged[-1][1] = max(merged[-1][1], end)\n        else:\n            merged.append([start, end])\n    return merged\n```",
+      "latency_s": 5.96,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "code_two_sum",
+      "category": "code",
+      "prompt": "Write a Python function `two_sum(nums: list[int], target: int) -> list[int]` that finds two distinct indices i and j such that nums[i] + nums[j] == target. Output ONLY the python function implementation without markdown code fences or commentary.",
+      "think": "The user wants a Python function `two_sum`. They want ONLY the function implementation without markdown code fences or commentary.\n\nLet me write it using the hash map approach for O(n) efficiency.",
+      "answer": "```python\ndef two_sum(nums: list[int], target: int) -> list[int]:\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n```",
+      "latency_s": 4.61,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "code_flatten_dict",
+      "category": "code",
+      "prompt": "Write a Python function `flatten_dict(d: dict, parent_key: str = '', sep: str = '.') -> dict` that flattens a nested dictionary. Keys should be concatenated with `sep`. Output ONLY the python function implementation without markdown code fences or commentary.",
+      "think": "The user wants a Python function that flattens a nested dictionary. Let me write it directly without markdown code fences or commentary.\n\nThe function signature is given. I need to implement it. Let me think about the algorithm:\n\n- For each key-value pair in the dict:\n  - Construct the new key by joining parent_key and key with sep\n  - If value is a dict, recurse\n  - Otherwise, add to result\n\nLet me write this cleanly.",
+      "answer": "```python\ndef flatten_dict(d: dict, parent_key: str = '', sep: str = '.') -> dict:\n    items = {}\n    for k, v in d.items():\n        new_key = f\"{parent_key}{sep}{k}\" if parent_key else k\n        if isinstance(v, dict):\n            items.update(flatten_dict(v, new_key, sep=sep))\n        else:\n            items[new_key] = v\n    return items\n```",
+      "latency_s": 7.81,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "format_json_only",
+      "category": "instruction",
+      "prompt": "Extract the user information from this sentence: \"Marcus Aurelius was born on April 26, 121 in Rome.\" Output ONLY a raw valid JSON object with keys \"name\", \"birth_date\", and \"birth_place\". Absolutely NO markdown code fences (no ```json), NO introductory words, NO commentary.",
+      "think": "The user wants me to extract information from the sentence. Let me parse it.\n\nSentence: \"Marcus Aurelius was born on April 26, 121 in Rome.\"\n\n- name: Marcus Aurelius\n- birth_date: April 26, 121\n- birth_place: Rome\n\nOutput only raw JSON, no markdown fences, no commentary.",
+      "answer": "{\"name\": \"Marcus Aurelius\", \"birth_date\": \"April 26, 121\", \"birth_place\": \"Rome\"}",
+      "latency_s": 5.09,
+      "passed": true,
+      "reason": "Strict valid raw JSON with all required keys"
+    },
+    {
+      "id": "format_reverse_capitals",
+      "category": "instruction",
+      "prompt": "List exactly 5 distinct European capital cities in strict reverse alphabetical order (Z to A). Format your output strictly as a numbered list (1. to 5.) with only the city names. No other text, no explanations.",
+      "think": "The user wants 5 distinct European capital cities in strict reverse alphabetical order (Z to A), formatted as a numbered list from 1 to 5 with only city names.\n\nLet me pick 5 European capitals and sort them Z to A.\n\nEuropean capitals: Zagreb, Vienna, Rome, Paris, London, Berlin, Madrid, Athens, Oslo, Dublin, etc.\n\nReverse alphabetical (Z to A):\n- Zagreb (Croatia) - Z\n- Vienna (Austria) - V\n- Rome (Italy) - R\n- Paris (France) - P\n- London (UK) - L\n\nThat's 5 distinct European capital cities in reverse alphabetical order.\n\nLet me verify the order:\n1. Zagreb (Z)\n2. Vienna (V)\n3. Rome (R)\n4. Paris (P)\n5. London (L)\n\nYes, this is strictly reverse alphabetical.",
+      "answer": "1. Zagreb\n2. Vienna\n3. Rome\n4. Paris\n5. London",
+      "latency_s": 8.21,
+      "passed": true,
+      "reason": "Passed reverse alphabetical list: ['Zagreb', 'Vienna', 'Rome', 'Paris', 'London']"
+    },
+    {
+      "id": "format_no_letter_e",
+      "category": "instruction",
+      "prompt": "Write a complete English sentence describing the ocean without using the letter 'e' (or 'E') anywhere in the sentence. Output only the sentence.",
+      "think": "",
+      "answer": "The user wants a complete English sentence describing the ocean without using the letter 'e' or 'E'.\n\nLet me think about words related to the ocean that don't use 'e':\n- water (has e) - no\n- waves (has e) - no\n- blue (has e) - no\n- deep (has e) - no\n- vast (no e!) \n- rolling (no e!)\n- salt (no e!)\n- tides (has e) - no\n- currents (has e) - no\n- fish (no e!)\n- life (has e) - no\n- ocean (has e) - can't use \"ocean\" itself\n- sea (has e) - no\n- shore (has e) - no\n- sand (no e!)\n- foam (no e!)\n- spray (no e!)\n- swell (has e) - no\n- tide (has e) - no\n- brine (has e) - no\n- salt (no e!)\n- depths (has e) - no\n- abyss (no e!)\n- waters (has e) - no\n- liquid (no e!)\n- flow (no e!)\n- churns (no e!)\n- crashes (has e) - no\n- roars (no e!)\n- rages (has e) - no\n- surges (has e) - no\n- billows (no e!)\n- swells (has e) - no\n- foam (no e!)\n- bubbles (has e) - no\n- froth (no e!)\n- gulls (no e!)\n- fish (no e!)\n- whales (has e) - no\n- sharks (no e!)\n- coral (no e!)\n- reef (has e) - no\n- kelp (has e) - no\n- algae (has e) - no\n- plankton (no e!)\n- crabs (no e!)\n- octopus (no e!)\n- squid (no e!)\n- jellyfish (has e) - no\n- starfish (no e!)\n- shellfish (has e) - no\n- clam (no e!)\n- oyster (has e) - no\n- mussels (has e) - no\n- crab (no e!)\n- lobster (has e) - no\n- shrimp (no e!)\n- tuna (no e!)\n- salmon (no e!)\n- cod (no e!)\n- trout (no e!)\n- bass (no e!)\n- shark (no e!)\n- ray (no e!)\n- eel (has e) - no\n- whale (has e) - no\n- dolphin (no e!)\n- seal (has e) - no\n- walrus (no e!)\n- otter (has e) - no\n- manatee (has e) - no\n- dugong (no e!)\n- porpoise (has e) - no\n- narwhal (no e!)\n- orca (no e!)\n- pod (no e!)\n- school (no e!)\n- shoal (no e!)\n- flock (no e!)\n- swarm (no e!)\n- migration (no e!)\n- journey (no e!)\n- voyage (has e) - no\n- swim (no e!)\n- dive (has e) - no\n- plunge (has e) - no\n- leap (has e) - no\n- jump (no e!)\n- bound (no e!)\n- spring (no e!)\n- gallop (no e!)\n- run (no e!)\n- race (has e) - no\n- speed (has e) - no\n- fast (no e!)\n- quick (no e!)\n- swift (no e!)\n- rapid (no e!)\n- brisk (no e!)\n- keen (has e) - no\n- sharp (no e!)\n- bright (no e!)\n- shiny (no e!)\n- gleam (has e) - no\n- glint (no e!)\n- sparkle (has e) - no\n- shimmer (no e!)\n- glow (no e!)\n- radiate (has e) - no\n- shine (has e) - no\n- light (no e!)\n- sun (no e!)\n- day (no e!)\n- night (no e!)\n- dawn (no e!)\n- dusk (no e!)\n- noon (no e!)\n- midnight (no e!)\n- morning (no e!)\n- evening (has e) - no\n- twilight (no e!)\n- shadow (no e!)\n- shade (has e) - no\n- dark (no e!)\n- black (no e!)\n- white (has e) - no\n- grey (has e) - no\n- gray (no e!)\n- gold (no e!)\n- silver (has e) - no\n- red (no e!)\n- orange (has e) - no\n- yellow (has e) - no\n- green (has e) - no\n- blue (has e) - no\n- cyan (no e!)\n- indigo (no e!)\n- purple (has e) - no\n- violet (has e) - no\n- pink (no e!)\n- brown (no e!)\n- aqua (no e!)\n- teal (has e) - no\n- navy (no e!)\n- azure (has e) - no\n\nNow let me construct a sentence. I want to describe the ocean.\n\n\"The vast, rolling water churns and roars.\"\n- The = has e! No.\n\nLet me avoid \"the\".\n\n\"Vast, rolling water churns and roars across endless...\" no, endless has e.\n\n\"Vast, rolling water churns and roars onward.\"\n- Vast (no e), rolling (no e), water (has e!). Water has e. Ugh.\n\nI need to avoid \"water\". \n\n\"Vast, rolling billows churn and roar on.\"\n- Vast (ok), rolling (ok), billows (ok), churn (ok), and (ok), roar (ok), on (ok). \n- Check each: V-a-s-t \u2713, r-o-l-l-i-n-s \u2713, b-i-l-l-o-w-s \u2713, c-h-u-r-n \u2713, a-n-d \u2713, r-o-a-r \u2713, o-n \u2713.\n- This works! But is it a complete sentence? \"Vast, rolling billows churn and roar on.\" Yes, subject \"billows\", verb \"churn and roar\". Complete.\n\nBut let me make it more descriptive of the ocean specifically.\n\n\"Aquatic billows churn and roar on.\"\n- Aquatic (A-q-u-a-t-i-c, no e) \u2713, billows \u2713, churn \u2713, and \u2713, roar \u2713, on \u2713. Good.\n\nHmm, but \"aquatic\" is a bit generic. Let me try to capture the ocean feel.\n\n\"Endless\" has e. \"Boundless\" has e.\n\n\"Rolling, foamy billboards\"? No, billboards wrong meaning.\n\n\"Churning, foamy billows crash\"? crash has... c-r-a-s-h, no e! Wait crash = c-r-a-s-h, no e. Yes!\n\nWait, \"crash\" - c-r-a-s-h. No e. Good.\n\n\"Cold, churning billows crash and foam.\"\n- Cold (C-o-l-d, no e) \u2713, churning (c-h-u-r-n-i-n-g, no e) \u2713, billows \u2713, crash \u2713, and \u2713, foam \u2713.\n- Subject \"billows\", verbs \"crash and foam\". Complete sentence. Describes ocean. \n\nLet me verify each word has no 'e':\n- Cold: C,o,l,d \u2713\n- churning: c,h,u,r,n,i,n,g \u2713\n- billows: b,i,l,l,o,w,s \u2713\n- crash: c,r,a,s,h \u2713\n- and: a,n,d \u2713\n- foam: f,o,a,m \u2713\n\nGreat, no 'e' anywhere.\n\nActually, let me reconsider to make it clearly about the ocean. \"Billows\" implies ocean waves. That's good.\n\nAlternatively: \"Salt-laden billows...\" no, \"laden\" has e.\n\n\"Briny billows churn and crash.\"\n- Briny (B-r-i-n-y, no e) \u2713, billows \u2713, churn \u2713, and \u2713, crash \u2713.\n- Nice and concise.\n\nLet me double check \"briny\": B-r-i-n-y. No e. Good.\n\nI'll go with something clear. Let me pick:\n\n\"Cold, churning billows crash and foam.\"\n\nOr simpler: \"Vast, rolling billows churn and crash.\"\n\nLet me verify \"rolling\": r-o-l-l-i-n-s, no e \u2713. \"vast\": v-a-s-t \u2713. \"churn\": c-h-u-r-n \u2713. \"crash\": c-r-a-s-h \u2713.\n\n\"Vast, rolling billows churn and crash.\"\n\nAll words checked. This describes the ocean well.\n\nActually I like the imagery. Let me finalize with one clean sentence.\n\nI'll output: \"Vast, rolling billows churn and crash.\"\n\nCheck every letter",
+      "latency_s": 86.46,
+      "passed": false,
+      "reason": "Failed constraint: contains 392 'e'/'E' letters"
+    },
+    {
+      "id": "format_word_count",
+      "category": "instruction",
+      "prompt": "Summarize what photosynthesis is in exactly between 15 and 25 words (inclusive). Do not include any title, prefix, or explanation. Output only the summary sentence.",
+      "think": "The user wants a summary of photosynthesis in exactly 15-25 words. Let me craft one.\n\n\"Photosynthesis is the process by which green plants convert sunlight, water, and carbon dioxide into glucose and oxygen.\"\n\nLet me count: Photosynthesis(1) is(2) the(3) process(4) by(5) which(6) green(7) plants(8) convert(9) sunlight,(10) water,(11) and(12) carbon(13) dioxide(14) into(15) glucose(16) and(17) oxygen.(18)\n\n18 words. That's within range. Good.",
+      "answer": "Photosynthesis is the process by which green plants convert sunlight, water, and carbon dioxide into glucose and oxygen.",
+      "latency_s": 7.46,
+      "passed": true,
+      "reason": "Word count 18 is within [15, 25]"
+    },
+    {
+      "id": "fact_capital_australia",
+      "category": "fact_trap",
+      "prompt": "What is the capital of Australia? Answer in one short sentence.",
+      "think": "The user is asking about the capital of Australia. This is a simple factual question. The capital of Australia is Canberra, not Sydney (a common misconception). I should answer directly in one short sentence as requested.",
+      "answer": "The capital of Australia is Canberra.",
+      "latency_s": 2.5,
+      "passed": true,
+      "reason": "Found target keyword 'Canberra'"
+    },
+    {
+      "id": "trap_us_president_1650",
+      "category": "fact_trap",
+      "prompt": "Who was the President of the United States in the year 1650?",
+      "think": "The question asks who was the President of the United States in the year 1650.\n\nThe United States did not exist in 1650. The U.S. was founded in 1776/1789. George Washington became the first president in 1789. So there was no President of the United States in 1650.\n\nIn 1650, England's monarch situation: Charles II would have become king later, but in 1650 England had no monarch during the Interregnum after the English Civil War. Oliver Cromwell was Lord Protector starting 1653. In 1650, England was under the Commonwealth, governed by Parliament.\n\nBut the specific question about \"President of the United States\" - there was none.",
+      "answer": "There was no President of the United States in 1650. The United States did not yet exist\u2014George Washington took office as the first president in 1789, nearly 140 years later.\n\n(In 1650, the land that would become the U.S. was inhabited by Native peoples and colonized by the British, Spanish, and others; in the English colonies, authority traced back to the English Crown.)",
+      "latency_s": 11.65,
+      "passed": true,
+      "reason": "Correctly rejected premise (US/president did not exist in 1650)"
+    },
+    {
+      "id": "trap_steel_vs_feathers",
+      "category": "fact_trap",
+      "prompt": "Which weighs more: two kilograms of steel or two kilograms of feathers? Answer in one sentence.",
+      "think": "The question asks which weighs more: two kilograms of steel or two kilograms of feathers. This is a classic trick question. Both are two kilograms, so they weigh the same.\n\nI should answer in one sentence as requested.",
+      "answer": "They weigh exactly the same, since both are defined as two kilograms.",
+      "latency_s": 3.12,
+      "passed": true,
+      "reason": "Correctly recognized equal weight"
+    },
+    {
+      "id": "reasoning_shortest_person",
+      "category": "fact_trap",
+      "prompt": "Alice is taller than Bob. Charlie is shorter than Bob. David is taller than Alice. Who is the shortest person? Give only the name of the shortest person.",
+      "think": "Let me work through this.\n\n- Alice is taller than Bob: Alice > Bob\n- Charlie is shorter than Bob: Bob > Charlie\n- David is taller than Alice: David > Alice\n\nSo we have:\n- Alice > Bob\n- Bob > Charlie\n- David > Alice\n\nCombining: David > Alice > Bob > Charlie\n\nSo the order from tallest to shortest: David, Alice, Bob, Charlie.\n\nThe shortest is Charlie.",
+      "answer": "Charlie",
+      "latency_s": 4.13,
+      "passed": true,
+      "reason": "Found target keyword 'Charlie'"
+    }
+  ]
+}

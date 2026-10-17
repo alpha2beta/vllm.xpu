@@ -90,6 +90,7 @@ SPEC=${SPEC:-}
 SPEC_FLAG=()
 [ "$SPEC" = "mtp-k1" ] && SPEC_FLAG=(--speculative-config '{"method":"mtp","num_speculative_tokens":1}')
 [ "$SPEC" = "mtp-k2" ] && SPEC_FLAG=(--speculative-config '{"method":"mtp","num_speculative_tokens":2}')
+[ "$SPEC" = "mtp-k3" ] && SPEC_FLAG=(--speculative-config '{"method":"mtp","num_speculative_tokens":3}')
 
 ARGS=(
   --model "$MODEL"
