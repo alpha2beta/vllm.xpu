@@ -1,0 +1,3 @@
+# Python bytecode caches (build junk, not part of the record)
+__pycache__/
+*.pyc

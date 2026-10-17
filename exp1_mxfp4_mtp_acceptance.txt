@@ -1,0 +1,5 @@
+Mean acceptance length: 2.50, Accepted throughput: 6.00 tokens/s, Drafted throughput: 16.00 tokens/s, Accepted: 12 tokens, Drafted: 32 tokens, Per-position acceptance rate: 1.000, 0.500, 0.000, 0.000, 
+Mean acceptance length: 2.78, Accepted throughput: 8.00 tokens/s, Drafted throughput: 18.00 tokens/s, Accepted: 16 tokens, Drafted: 36 tokens, Per-position acceptance rate: 1.000, 0.778, 0.000, 0.000, 
+Mean acceptance length: 2.58, Accepted throughput: 9.50 tokens/s, Drafted throughput: 24.00 tokens/s, Accepted: 19 tokens, Drafted: 48 tokens, Per-position acceptance rate: 1.000, 0.583, 0.000, 0.000, 
+Mean acceptance length: 2.62, Accepted throughput: 10.50 tokens/s, Drafted throughput: 26.00 tokens/s, Accepted: 21 tokens, Drafted: 52 tokens, Per-position acceptance rate: 1.000, 0.615, 0.000, 0.000, 
+Mean acceptance length: 2.83, Accepted throughput: 11.00 tokens/s, Drafted throughput: 24.01 tokens/s, Accepted: 22 tokens, Drafted: 48 tokens, Per-position acceptance rate: 1.000, 0.833, 0.000, 0.000, 

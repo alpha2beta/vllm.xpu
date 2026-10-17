@@ -1,0 +1,40 @@
+=== Starting 16-Prompt Quality Benchmark ===
+Target: coder390-gptq @ http://127.0.0.1:8003/v1
+Sampling: greedy (temperature=0.0), max_tokens=2048
+
+[01/16] (MATH) math_bridge... PASS (5.1s, think_chars=0, ans_chars=677)
+[02/16] (MATH) math_lcm... PASS (6.7s, think_chars=0, ans_chars=1090)
+[03/16] (MATH) math_speed... PASS (3.6s, think_chars=0, ans_chars=514)
+[04/16] (MATH) math_probability... PASS (2.3s, think_chars=0, ans_chars=303)
+[05/16] (CODE) code_palindrome... FAIL (2.9s, think_chars=0, ans_chars=557)
+       Reason: Execution error: SyntaxError: unterminated string literal (detected at line 1) (<string>, line 1)
+[06/16] (CODE) code_merge_intervals... FAIL (6.1s, think_chars=0, ans_chars=1103)
+       Reason: Execution error: SyntaxError: unterminated string literal (detected at line 1) (<string>, line 1)
+[07/16] (CODE) code_two_sum... FAIL (7.5s, think_chars=0, ans_chars=1475)
+       Reason: Execution error: SyntaxError: unterminated string literal (detected at line 1) (<string>, line 1)
+[08/16] (CODE) code_flatten_dict... FAIL (6.1s, think_chars=0, ans_chars=1301)
+       Reason: Execution error: SyntaxError: unterminated string literal (detected at line 1) (<string>, line 1)
+[09/16] (INSTRUCTION) format_json_only... FAIL (3.8s, think_chars=0, ans_chars=633)
+       Reason: JSON parse error: Expecting value: line 1 column 1 (char 0)
+[10/16] (INSTRUCTION) format_reverse_capitals... FAIL (8.6s, think_chars=0, ans_chars=1271)
+       Reason: Expected 5 cities, got 6: ["We need answer user's request. Need produce final: numbered list 1. to 5. exactly 5 distinct European capital cities in strict reverse alphabetical order Z to A. Only city names. Need choose 5 European capitals. Reverse alphabetical: e.g. Vienna, Warsaw, Vatican City? Is Vatican City a capital city? It's a capital city (of Vatican City). But maybe European capital cities: Vienna, Warsaw, Valletta, Vilnius, Vatican City? Need strict reverse alphabetical. Let's pick unambiguous: Vienna, Warsaw, Valletta, Vilnius, Vienna? distinct. Need 5. Alphabetical order of city names: Valletta, Vienna, Vilnius, Warsaw, ... Reverse: Warsaw, Vilnius, Vienna, Valletta, ... Need 5. Could use Warsaw, Vilnius, Vienna, Valletta, Vaduz? Vaduz is capital of Liechtenstein, European. Reverse alphabetical: Warsaw (W), Vilnius (V i l), Vienna (V i e), Valletta (V a), Vaduz (V a d). Check order: Warsaw starts W. Then V: Vilnius (V i l) vs Vienna (V i e): 'i' same, l > e, so Vilnius before Vienna. Valletta (V a l) vs Vaduz (V a d): l > d, so Valletta before Vaduz. So list: 1. Warsaw 2. Vilnius 3. Vienna 4. Valletta 5. Vaduz. All distinct European capitals. Strict reverse alphabetical. Output only numbered list. Ensure no extra.", 'Warsaw', 'Vilnius', 'Vienna', 'Valletta', 'Vaduz']
+[11/16] (INSTRUCTION) format_no_letter_e... FAIL (17.2s, think_chars=0, ans_chars=2574)
+       Reason: Failed constraint: contains 249 'e'/'E' letters
+[12/16] (INSTRUCTION) format_word_count... FAIL (5.2s, think_chars=0, ans_chars=990)
+       Reason: Word count 144 outside [15, 25]
+[13/16] (FACT_TRAP) fact_capital_australia... PASS (2.6s, think_chars=0, ans_chars=464)
+[14/16] (FACT_TRAP) trap_us_president_1650... PASS (2.8s, think_chars=0, ans_chars=518)
+[15/16] (FACT_TRAP) trap_steel_vs_feathers... PASS (1.5s, think_chars=0, ans_chars=259)
+[16/16] (FACT_TRAP) reasoning_shortest_person... PASS (1.2s, think_chars=0, ans_chars=204)
+
+==================================================
+BENCHMARK SUMMARY FOR coder390-gptq
+==================================================
+  Math           : 4/4 (100.0%)
+  Code           : 0/4 (0.0%)
+  Instruction    : 0/4 (0.0%)
+  Fact_trap      : 4/4 (100.0%)
+  Total Score    : 8/16 (50.0%)
+==================================================
+Detailed output written to: quality_coder390_gptq_16p_asis.json
+

@@ -1,0 +1,90 @@
+{
+  "rows": [
+    {
+      "length": 256,
+      "ttft_s": 0.30877062099898467,
+      "ttft_all_s": [
+        0.31093346800116706,
+        0.30877062099898467,
+        0.30598543000087375
+      ],
+      "server_prefill_s": 0.9148204259981867,
+      "server_tokens": 768.0,
+      "server_tok_s": 839.5090207589246
+    },
+    {
+      "length": 512,
+      "ttft_s": 0.4754738689989608,
+      "ttft_all_s": [
+        0.4754738689989608,
+        0.474747768999805,
+        0.4756653440017544
+      ],
+      "server_prefill_s": 1.4151844149964745,
+      "server_tokens": 1536.0,
+      "server_tok_s": 1085.3709125985722
+    },
+    {
+      "length": 1024,
+      "ttft_s": 0.8262664009998844,
+      "ttft_all_s": [
+        0.8303464350028662,
+        0.8248463590025494,
+        0.8262664009998844
+      ],
+      "server_prefill_s": 2.46764303099917,
+      "server_tokens": 3072.0,
+      "server_tok_s": 1244.9126398789215
+    },
+    {
+      "length": 2048,
+      "ttft_s": 1.5708159829991928,
+      "ttft_all_s": [
+        1.6022416679988964,
+        1.5708159829991928,
+        1.5691042549988197
+      ],
+      "server_prefill_s": 4.722144859995751,
+      "server_tokens": 6144.0,
+      "server_tok_s": 1301.1036683879977
+    },
+    {
+      "length": 4096,
+      "ttft_s": 3.1057220900001994,
+      "ttft_all_s": [
+        3.105248677999043,
+        3.1057220900001994,
+        3.1100655010013725
+      ],
+      "server_prefill_s": 9.287764675998915,
+      "server_tokens": 12288.0,
+      "server_tok_s": 1323.0309367930238
+    },
+    {
+      "length": 6144,
+      "ttft_s": 4.732769654998265,
+      "ttft_all_s": [
+        4.736914317996707,
+        4.7270334370005,
+        4.732769654998265
+      ],
+      "server_prefill_s": 14.14893908999511,
+      "server_tokens": 18432.0,
+      "server_tok_s": 1302.7125131264079
+    }
+  ],
+  "marginal_server_tok_s": 1335.1386084910516,
+  "ttft_intercept_s": 0.07374248661143601,
+  "ttft_r2": 0.9994740648659662,
+  "reps": 3,
+  "max_tokens": 8,
+  "note": "server rates are deltas of vllm:request_prefill_* counters; prefix caching is OFF so every prompt token is computed",
+  "marginal_server_intercept_s": 0.21988863975814077,
+  "server_fit_r2": 0.9995405801903849,
+  "plateau_tok_s": 1323.0309367930238,
+  "tokens_to_90pct_plateau": 1024,
+  "aggregate_server_tok_s": 1281.6896359898083,
+  "marginal_server_ms_per_token": 0.7489859057631335,
+  "marginal_client_tok_s": 1331.144546055085,
+  "marginal_client_ms_per_token": 0.751233217281738
+}

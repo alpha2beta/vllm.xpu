@@ -1,0 +1,32 @@
+{
+  "same_session": true,
+  "harness": "bench_p512_g128.py p512/g128, 1 warmup + 5 runs",
+  "prompt_tokens": 512,
+  "max_tokens": 128,
+  "leg_a_config": "ctx 81920, MTP off, eager, max-num-batched-tokens 4096",
+  "leg_b_config": "MTP k=4, ctx 40960 (forced: the draft's BF16 weights leave only 2.49 GiB for KV at util 0.95, and 81920 needs 3.67 GiB; the engine's own estimate of the max is 46592). ctx does not affect the p512 decode rate.",
+  "leg_a_mtp_off": {
+    "decode_median_tok_s": 7.986933100235777,
+    "ttft_median_s": 1.3098918600007892,
+    "runs": [
+      7.985003080765589,
+      7.987119576012366,
+      7.985413175788965,
+      7.987151444563448,
+      7.986933100235777
+    ]
+  },
+  "leg_b_mtp_on": {
+    "decode_median_tok_s": 16.62015693509795,
+    "ttft_median_s": 1.4115150879952125,
+    "runs": [
+      16.62015693509795,
+      16.61746656143772,
+      16.279342172034703,
+      16.62493043769726,
+      16.622829882109436
+    ]
+  },
+  "speedup": 2.080918511087481,
+  "recorded_cross_session_2026_10_16": 7.96245735913954
+}

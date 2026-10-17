@@ -1,0 +1,21 @@
+[Unit]
+Description=Apply the measured 180 W power cap to the Intel Arc Pro B60
+Documentation=file:///mnt/usb/vllm.xpu/REPRODUCIBILITY.md
+# power1_cap is volatile: without this the card reverts to the 220 W firmware default
+# on every boot, and the Phase 9 configuration (180 W) would silently not apply.
+After=sysinit.target
+# NOTE: ConditionPathExistsGlob used to sit here and was WRONG. systemd
+# evaluates conditions *before* ExecStart, and on the 2026-09-27 boot it
+# raced the xe driver by 1.3 s (unit 10:55:33, hwmon 10:55:34.328): the unit
+# reported "skipped, unmet condition check" and the card silently ran at the
+# 220 W firmware default for the whole session. phase10_setcap.sh now polls
+# for the file instead, and fails loudly if it never appears.
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/mnt/usb/vllm.xpu/phase10_setcap.sh 180
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,51 @@
+{
+  "note": "tg (decode) vs context depth, coder390-gptq, 180 W, MTP k=4, prefix caching off",
+  "harness": "bench_p512_g128.py --prompt-tokens D --max-tokens 128",
+  "rows": [
+    {
+      "ctx_tokens": 512,
+      "decode_median_tok_s": 40.2,
+      "decode_min": 40.199,
+      "decode_max": 40.208,
+      "ttft_median_s": 0.463,
+      "max_tokens": 128,
+      "runs": 5
+    },
+    {
+      "ctx_tokens": 2048,
+      "decode_median_tok_s": 39.531,
+      "decode_min": 39.528,
+      "decode_max": 39.539,
+      "ttft_median_s": 1.535,
+      "max_tokens": 128,
+      "runs": 5
+    },
+    {
+      "ctx_tokens": 4096,
+      "decode_median_tok_s": 38.994,
+      "decode_min": 38.991,
+      "decode_max": 38.999,
+      "ttft_median_s": 3.029,
+      "max_tokens": 128,
+      "runs": 5
+    },
+    {
+      "ctx_tokens": 8192,
+      "decode_median_tok_s": 38.06,
+      "decode_min": 38.051,
+      "decode_max": 38.067,
+      "ttft_median_s": 6.24,
+      "max_tokens": 128,
+      "runs": 5
+    },
+    {
+      "ctx_tokens": 12000,
+      "decode_median_tok_s": 37.315,
+      "decode_min": 37.296,
+      "decode_max": 37.325,
+      "ttft_median_s": 9.539,
+      "max_tokens": 128,
+      "runs": 5
+    }
+  ]
+}

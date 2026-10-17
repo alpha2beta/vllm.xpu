@@ -1,0 +1,70 @@
+{
+  "meta": {
+    "base_url": "http://127.0.0.1:8003",
+    "model": "coder390-gptq",
+    "prompt_tokens": 512,
+    "max_tokens": 128,
+    "temperature": 0,
+    "ignore_eos": true,
+    "stream": true,
+    "warmup": 1,
+    "measured_runs": 3,
+    "rate_formula": "(completion_tokens - 1) / (t_end - t_first_token)",
+    "clock": "time.monotonic() client-side",
+    "timestamp": "2026-10-17T17:54:40+0200"
+  },
+  "runs": [
+    {
+      "t_request": 141621.777743324,
+      "t_first": 141622.240291749,
+      "t_end": 141625.398885975,
+      "ttft_s": 0.4625484250136651,
+      "decode_s": 3.158594225998968,
+      "decode_tok_s": 40.20776045072195,
+      "completion_tokens": 128,
+      "prompt_tokens": 512,
+      "text_chars": 1536,
+      "run": 1
+    },
+    {
+      "t_request": 141625.398944669,
+      "t_first": 141625.861314773,
+      "t_end": 141629.019895098,
+      "ttft_s": 0.4623701040109154,
+      "decode_s": 3.1585803249909077,
+      "decode_tok_s": 40.20793740629838,
+      "completion_tokens": 128,
+      "prompt_tokens": 512,
+      "text_chars": 1536,
+      "run": 2
+    },
+    {
+      "t_request": 141629.019939883,
+      "t_first": 141629.481947137,
+      "t_end": 141632.640313079,
+      "ttft_s": 0.46200725401286036,
+      "decode_s": 3.158365941984812,
+      "decode_tok_s": 40.21066663357869,
+      "completion_tokens": 128,
+      "prompt_tokens": 512,
+      "text_chars": 1536,
+      "run": 3
+    }
+  ],
+  "decode_tok_s": {
+    "median": 40.20793740629838,
+    "mean": 40.20878816353301,
+    "min": 40.20776045072195,
+    "max": 40.21066663357869,
+    "stdev": 0.0013302419838528857,
+    "n": 3
+  },
+  "ttft_s": {
+    "median": 0.4623701040109154,
+    "mean": 0.4623085943458136,
+    "min": 0.46200725401286036,
+    "max": 0.4625484250136651,
+    "n": 3
+  },
+  "prompt_tokens_actual": 512
+}

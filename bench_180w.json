@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "base_url": "http://127.0.0.1:8000",
+    "model": "qwen38",
+    "prompt_tokens": 512,
+    "max_tokens": 128,
+    "temperature": 0,
+    "ignore_eos": true,
+    "stream": true,
+    "warmup": 1,
+    "measured_runs": 5,
+    "rate_formula": "(completion_tokens - 1) / (t_end - t_first_token)",
+    "clock": "time.monotonic() client-side",
+    "timestamp": "2026-09-26T17:31:58+0200"
+  },
+  "runs": [
+    {
+      "t_request": 14480.73960607,
+      "t_first": 14481.221205589,
+      "t_end": 14483.871267774,
+      "ttft_s": 0.48159951900015585,
+      "decode_s": 2.650062185000934,
+      "decode_tok_s": 47.923403729469555,
+      "completion_tokens": 128,
+      "prompt_tokens": 512,
+      "text_chars": 722,
+      "run": 1
+    },
+    {
+      "t_request": 14483.871327967,
+      "t_first": 14484.342521473,
+      "t_end": 14486.986407069,
+      "ttft_s": 0.471193506000418,
+      "decode_s": 2.643885596000473,
+      "decode_tok_s": 48.03536136061209,
+      "completion_tokens": 128,
+      "prompt_tokens": 512,
+      "text_chars": 722,
+      "run": 2
+    },
+    {
+      "t_request": 14486.986477417,
+      "t_first": 14487.457656805,
+      "t_end": 14490.081782581,
+      "ttft_s": 0.47117938799965486,
+      "decode_s": 2.624125776001165,
+      "decode_tok_s": 48.39707043064525,
+      "completion_tokens": 128,
+      "prompt_tokens": 512,
+      "text_chars": 722,
+      "run": 3
+    },
+    {
+      "t_request": 14490.081839087,
+      "t_first": 14490.554825571,
+      "t_end": 14493.207310022,
+      "ttft_s": 0.4729864839991933,
+      "decode_s": 2.6524844510004186,
+      "decode_tok_s": 47.87963976644625,
+      "completion_tokens": 128,
+      "prompt_tokens": 512,
+      "text_chars": 722,
+      "run": 4
+    },
+    {
+      "t_request": 14493.207355841,
+      "t_first": 14493.689939889,
+      "t_end": 14496.3476689,
+      "ttft_s": 0.4825840480007173,
+      "decode_s": 2.657729010999901,
+      "decode_tok_s": 47.78515773217209,
+      "completion_tokens": 128,
+      "prompt_tokens": 512,
+      "text_chars": 722,
+      "run": 5
+    }
+  ],
+  "decode_tok_s": {
+    "median": 47.923403729469555,
+    "mean": 48.00412660386905,
+    "min": 47.78515773217209,
+    "max": 48.39707043064525,
+    "stdev": 0.21229271440414935,
+    "n": 5
+  },
+  "ttft_s": {
+    "median": 0.4729864839991933,
+    "mean": 0.47590858900002786,
+    "min": 0.47117938799965486,
+    "max": 0.4825840480007173,
+    "n": 5
+  },
+  "prompt_tokens_actual": 512
+}

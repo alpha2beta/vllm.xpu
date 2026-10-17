@@ -1,0 +1,45 @@
+# B60+B580 TP2 attempt — failure evidence (EXCERPT, not a full log)
+#
+# Captured 2026-09-27 ~12:25 CEST from `docker logs vllm-xpu-b60` after
+# `./compare_tp2.sh --step tp2` (ZE_AFFINITY_MASK=0,1, --tensor-parallel-size 2,
+# VLLM_XPU_ENABLE_XPU_GRAPH=0, affinity patch + 4 CCL vars + --ipc=host
+# --cap-add SYS_PTRACE, gpu-memory-utilization 0.93, cap 180 W).
+# Log timestamps are UTC (10:21 UTC = 12:21 CEST). Line numbers are from
+# `docker logs | grep -n`. The full log was lost on `--step restore`
+# (docker rm -f); what matters — the engine's root cause — is verbatim below.
+#
+# ATTEMPT 1 (patches applied cleanly, engine started, both ranks died):
+#
+# (Worker pid=214) ERROR 09-27 10:21:45 [multiproc_executor.py:944] Traceback (most recent call last):
+#   [... traceback ...]
+# (Worker pid=214) ERROR 09-27 10:21:45 [multiproc_executor.py:944] RuntimeError: oneCCL: ze_call.cpp:28 do_call: EXCEPTION: ze error at zeMemOpenIpcHandle, code: ZE_RESULT_ERROR_INVALID_ARGUMENT
+# (Worker pid=215) ERROR 09-27 10:21:45 [multiproc_executor.py:944] Traceback (most recent call last):
+#   [... traceback ...]
+# (Worker pid=215) ERROR 09-27 10:21:45 [multiproc_executor.py:944] RuntimeError: oneCCL: ze_call.cpp:28 do_call: EXCEPTION: ze error at zeMemOpenIpcHandle, code: ZE_RESULT_ERROR_INVALID_ARGUMENT
+# (EngineCore pid=166) ERROR 09-27 10:21:46 [core.py:1344] Traceback (most recent call last):
+#   [... traceback ...]
+# (EngineCore pid=166) Traceback (most recent call last):
+#   [... traceback ...]
+# (APIServer pid=1) Traceback (most recent call last):
+#   [... traceback ...]
+# (APIServer pid=1)     raise RuntimeError(
+# (APIServer pid=1) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+#
+# STEADY STATE (every restart after attempt 1 — the real error masked, see §8.9):
+#
+# [B70_WORKER_AFFINITY_INSTALL] already installed: multiproc_executor.py
+# [B70_WORKER_AFFINITY_INSTALL] FATAL: anchor count 0 != 1 in /opt/venv/lib/python3.12/site-packages/vllm/v1/worker/xpu_worker.py
+# [B70_WORKER_AFFINITY_INSTALL] already installed: xpu_worker.py
+# [B70_WORKER_AFFINITY_INSTALL] already installed: mamba_utils.py
+# [B70_WORKER_AFFINITY_INSTALL] already installed: mamba_utils.py
+# [B70_WORKER_AFFINITY_INSTALL] already installed: mamba_utils.py
+# already patched
+# already patched /opt/venv/lib/python3.12/site-packages/vllm/v1/attention/backends/gdn_attn.py
+# [patch_affinity] FAILED
+#
+# Verified separately on a fresh throwaway container (same image + mounts):
+# all three patches apply cleanly in entrypoint order
+# (mtp rc=0, boundary rc=0, affinity "All worker affinity patches installed
+# successfully.", rc=0), and `docker cp` of the crashed container's
+# xpu_worker.py showed the ok2 + ok3 injections present (4 B70 markers).
+# So attempt 1 patched fine and the engine is what died.

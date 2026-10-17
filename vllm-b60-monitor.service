@@ -1,0 +1,8 @@
+[Unit]
+Description=Sample Arc Pro B60 power/temperature/vLLM queue metrics into a CSV
+After=docker.service
+
+[Service]
+Type=oneshot
+User=yanchun
+ExecStart=/mnt/usb/vllm.xpu/phase10_monitor.sh --once
