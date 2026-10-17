@@ -729,4 +729,13 @@ on the same box; each entry is a **separate configuration** with its own record 
   **64 × 1024**, so a bare `./quantize_coder390.sh` now reproduces the successful
   artifact (deviation 8 updated). Also corrected a stale §6 line that still described the
   build as 128 × 2048.
+* \[x] **Published as the `b60` branch (2026-10-17)** — the whole working tree pushed to
+  `https://github.com/alpha2beta/vllm.xpu` as an **orphan** branch `b60` (initial commit
+  `c4dc5b8`, 77 files, 67,558 insertions, 9.3 MB), verbatim at the repo root so every
+  relative path in this record stays valid. `main` is untouched and remains the default
+  branch. Mechanics worth knowing: the directory lives on **exFAT** (`fmask=0022`), which
+  cannot store an exec bit, so the 16 `*.sh` were marked `100755` *in the index* via
+  `git update-index --chmod=+x` — verified `100755` on the remote tree; only
+  `__pycache__/` and `*.pyc` are gitignored. Because it is orphan, the branch shares no
+  history with `main` and cannot be merged into it by a normal PR.
 

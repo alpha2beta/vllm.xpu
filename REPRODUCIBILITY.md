@@ -1101,6 +1101,7 @@ run, re-measured after the change: **40.208 tok/s, TTFT 0.462 s** (3 runs, sprea
 |---|---|
 | `tasks.md` | the phase-by-phase checklist with results annotated into each box |
 | `GPTQ_quantization.md` | **operating guide** for GPTQ-Int4 quantization on this host: recipe, the one-memory-budget rule, toolchain image, verification, failure catalogue, serving |
+| **`github.com/alpha2beta/vllm.xpu` @ branch `b60`** | **public snapshot of this whole directory** — orphan branch, 77 files / 9.3 MB including every attempt log; initial commit `c4dc5b8`, verified byte-identical to local (`main` untouched, still the default branch) |
 | `phase5_launch.sh` | exact launch command (recreate with `docker rm -f` first) |
 | `serve_8081.sh` | same container published on :8081 for LAN/opencode use; parity-checks itself against `phase5_launch.sh` |
 | `compare_tp2.sh` | B60-vs-B60+B580 harness: derives control/TP2/restore from `serve_8081.sh`'s template, benches + samples both cards, `--summary` prints the table |
