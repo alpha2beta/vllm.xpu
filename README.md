@@ -18,42 +18,44 @@ Dense MoE serving with multi-token prediction (1024/128/1, MAX_LEN 4096 / up to 
 
 | Model | Quantization | MTP K=2 Speed | Quality (16p) | Hard Suite (10t) | HumanEval (Base) | HumanEval+ (Plus) |
 |---|---|---|---|---|---|---|
-| **KAT-Coder-V2.5-Dev** | MXFP4 (W4A4 MoE) | **24.82 tok/s** | 15/16 (93.8%) | 8/10 (80.0%) | **89.63%** (147/164) | **86.59%** (142/164) |
-| **Tiel-Coder-35B-A3B** | W4A16-GPTQ | **25.40 tok/s** | **16/16 (100%)** | **10/10 (100%)** | 84.15% (138/164) | 81.10% (133/164) |
+| **KAT-Coder-V2.5-Dev** | W4A16-GPTQ | **25.20 tok/s** | **15/16 (93.8%)** | 8/10 (80.0%) | 86.59% (142/164) | 82.93% (136/164) |
+| **KAT-Coder-V2.5-Dev** | MXFP4 (W4A4 MoE) | 24.82 tok/s | 14/16 (87.5%) | 8/10 (80.0%) | **89.63%** (147/164) | **86.59%** (142/164) |
+| **Tiel-Coder-35B-A3B** | W4A16-GPTQ | 25.40 tok/s | **16/16 (100%)** | **10/10 (100%)** | 84.15% (138/164) | 81.10% (133/164) |
 | **Tiel-Coder-35B-A3B** | MXFP4 (W4A4 MoE) | **27.69 tok/s** | 15/16 (93.8%) | 9/10 (90.0%) | 78.66% (129/164) | 75.61% (124/164) |
 
 ### HumanEval / HumanEval+ (EvalPlus 0.3.1) Benchmark Details
 
 Full 164-task standardized evaluation under greedy decoding (`temp=0.0`, single sequence, FP8 KV cache):
 
-| Benchmark Metric | KAT-Coder MXFP4 | Tiel-Coder GPTQ | Tiel-Coder MXFP4 |
-|---|---|---|---|
-| **HumanEval (Base)** | **89.63%** (147 / 164) | 84.15% (138 / 164) | 78.66% (129 / 164) |
-| **HumanEval+ (Base + Extra)** | **86.59%** (142 / 164) | 81.10% (133 / 164) | 75.61% (124 / 164) |
-| **Total Codegen Duration** | 47m 33s | **46m 58s** | 1h 30m 37s |
-| **Avg Latency per Task** | **~17.4s** | **~17.1s** | ~33.1s |
-| **Avg Output Chars / Task** | 1,244 chars | 1,231 chars | 2,135 chars (+60% verbosity) |
-| **Active Throughput** | ~24–25 tok/s | ~24–26 tok/s | ~20–22 tok/s |
-| **MTP Acceptance Rate** | **~75%–83%** | ~65%–75% | ~60%–73% |
-| **Max Context Served** | 128k (`131072`) | 96k (`98304`) | 96k (`98304`) |
+| Benchmark Metric | KAT-Coder GPTQ | KAT-Coder MXFP4 | Tiel-Coder GPTQ | Tiel-Coder MXFP4 |
+|---|---|---|---|---|
+| **HumanEval (Base)** | 86.59% (142 / 164) | **89.63%** (147 / 164) | 84.15% (138 / 164) | 78.66% (129 / 164) |
+| **HumanEval+ (Base + Extra)** | 82.93% (136 / 164) | **86.59%** (142 / 164) | 81.10% (133 / 164) | 75.61% (124 / 164) |
+| **Total Codegen Duration** | **42m 12s (Fastest)** ⚡ | 47m 33s | 46m 58s | 1h 30m 37s |
+| **Avg Latency per Task** | **~15.4s** | ~17.4s | ~17.1s | ~33.1s |
+| **Avg Output Chars / Task** | 1,235 chars | 1,244 chars | 1,231 chars | 2,135 chars (+60% verbosity) |
+| **Active Throughput** | ~24–25 tok/s | ~24–25 tok/s | ~24–26 tok/s | ~20–22 tok/s |
+| **MTP Acceptance Rate** | **~77%–85%** | ~75%–83% | ~65%–75% | ~60%–73% |
+| **Max Context Served** | 128k (`131072`) | 128k (`131072`) | 96k (`98304`) | 96k (`98304`) |
 
 - **Launchers:**
+  - `launch_vllm_kat_gptq.sh` (KAT W4A16-GPTQ, 128k default, FP8 KV, MTP K=2)
   - `launch_vllm_kat_coder.sh` (KAT MXFP4, 128k default, FP8 KV)
   - `launch_vllm_tiel_gptq.sh` (Tiel W4A16-GPTQ, 96k default, FP8 KV)
   - `launch_vllm_tiel_coder.sh` (Tiel MXFP4, 96k default, FP8 KV)
   - `scripts/run_evalplus_humaneval.sh` (Automated HumanEval/HumanEval+ benchmark runner)
-- Status: `status.md`, results: `results.csv`, fallback comparison: `fallback-comparison.md`
+- Status & Analysis: [**`GPTQ_vs_MXFP4.md`**](GPTQ_vs_MXFP4.md) (Reddit post & comprehensive shootout), `status.md`, `results.csv`
 
-## Published MXFP4 checkpoints (Hugging Face `alpha2beta/`)
+## Published Checkpoints (Hugging Face `alpha2beta/`)
 
-`compressed-tensors` `mxfp4-pack-quantized` builds for the vLLM XPU backend
-(`CompressedTensorsW4A4Mxfp4` + `XPUExpertsMxFp4`), quantized with the inference
-kernel's own quantizer. All load-verified on this box.
+Production `compressed-tensors` pack-quantized builds for the vLLM XPU backend
+(`CompressedTensorsWNA16MoEMethod` and `CompressedTensorsW4A4Mxfp4`). All load-verified on this box.
 
-| Checkpoint | Arch | Size | Measured |
+| Checkpoint | Format & Arch | Size | Measured Performance |
 |---|---|---|---|
+| [KAT-Coder-V2.5-Dev-W4A16-GPTQ](https://huggingface.co/alpha2beta/KAT-Coder-V2.5-Dev-W4A16-GPTQ) | W4A16 INT4 MoE + BF16 MTP draft | 20.0 GiB / 42 shards | 25.20 tok/s (peak 29.1), HumanEval+ 82.93% |
+| [KAT-Coder-V2.5-Dev-MXFP4](https://huggingface.co/alpha2beta/KAT-Coder-V2.5-Dev-MXFP4) | 35B-A3B MoE + MXFP4 MTP draft | 19.6 GiB / 29 shards | 24.82 tok/s MTP K=2, HumanEval+ 86.59% |
 | [Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4](https://huggingface.co/alpha2beta/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4) | 35B-A3B MoE + MXFP4 MTP draft | 20.5 GiB / 32 shards | 27.69 tok/s MTP K=2 |
-| [KAT-Coder-V2.5-Dev-MXFP4](https://huggingface.co/alpha2beta/KAT-Coder-V2.5-Dev-MXFP4) | 35B-A3B MoE + MXFP4 MTP draft | 19.6 GiB / 29 shards | 24.82 tok/s MTP K=2 |
 | [Qwen3.6-35B-A3B-occamy-1.0-MXFP4](https://huggingface.co/alpha2beta/Qwen3.6-35B-A3B-occamy-1.0-MXFP4) | 35B-A3B MoE + MXFP4 MTP draft | ~20.4 GiB / 21 shards | quality 13/16, hard 8/10 |
 | [Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-MXFP4](https://huggingface.co/alpha2beta/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-MXFP4) | dense 27B + BF16 MTP | 18.44 GiB / 16 shards | 2.6 tok/s (dense wall) |
 
