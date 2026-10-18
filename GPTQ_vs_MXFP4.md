@@ -15,6 +15,7 @@
 * **Complex Reasoning & Edge-Case Math Winner:** **W4A16 GPTQ** wins on delicate math and strict constraints (**15/16 vs 14/16** on the quality suite; solved Chinese Remainder Theorem Olympiad math where MXFP4 failed), thanks to retaining unquantized BF16 activations instead of quantizing activations to FP4.
 * **Prefill Speed (PP):** Both hit an identical theoretical peak of **1,247.1 tok/s** on 4k chunked prefill batches via FlashAttention-2.
 * **The "MoE Dense Quantization Trap":** Standard dense GPTQ heuristics (like zeroing out unobserved Hessian directions) will catastrophically destroy 256-expert MoE models. Unvisited experts in calibration batches must fallback to RTN with optimal clip factors, never masked to zero.
+* **Cross-platform check — the ordering holds, the magnitude does not:** re-running the same format pair on a **discrete Arc Pro B60** with a **dense 27B** (Coder390) separates them by **5.05× on decode** (40.18 vs 7.96 tok/s) and **~2.9× on prefill**, not ~10 %. On *that* stack the cause is an **unfused W4A4 activation-quantization path**, not memory bandwidth — the two artifacts differ by only ~3 % in bits per weight. Full matrix, decomposition and caveats in **§5**.
 
 ---
 
@@ -122,6 +123,107 @@ Here is how we did it:
 
 ---
 
+## 5. Cross-Platform Check: The Same Two Formats on an Intel Arc Pro B60 (Battlemage, 24 GB)
+
+Everything above is Lunar Lake / KAT-Coder. The same W4A16-vs-MXFP4 question was then measured independently on a **discrete** Arc Pro B60, with a different model *class* (dense, not MoE), a different Xe generation, and a different vLLM build. **The ordering survives. The magnitude does not** — it is **5×** here, not ~10 %.
+
+**Model under test:** [`huihui-ai/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated`](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated) — a **dense 27B** hybrid: 64 layers (**48 GDN linear-attention + 16 full-attention**, `full_attention_interval 4`), hidden 5120, 24 heads / 4 KV heads / `head_dim` 256, a 1-layer MTP draft block (BF16), and a vision tower. Both builds below are quantizations **of this same BF16 checkpoint**, so the *format* is the only variable in the weights.
+
+**Hardware:** Intel Arc Pro B60 — 24 GB GDDR6 at **456 GB/s** (192-bit, 19 Gbps effective), 20 Xe2-HPG cores / 160 XMX engines, negotiated PCIe Gen4 x8, **power-capped to 180 W**.
+**Runtime:** `vllm-openai-xpu` v0.30.0 (engine reports `vllm 0.27.2rc1.dev77+gac7509e2b`), native Level-Zero XPU kernels, FP8 KV cache, MTP $K=4$, batch size 1.
+**Harness:** identical for both builds — `bench_p512_g128.py` (p512 / g128, 1 warmup + 5 runs) for rate, `bench_quality_16p.py` (the same 16-prompt suite) for quality.
+
+### 5.1 Head-to-Head Benchmark Matrix
+
+| Benchmark / Metric | Coder390 **W4A16 GPTQ** | Coder390 **MXFP4** |
+| :--- | :---: | :---: |
+| **Quantization Format** | INT4 Group 128 (Sym), `desc_act=False` | MXFP4 E2M1 Group 32 |
+| **Activation Dtype** | **BFloat16 (Unquantized)** | **FP4 (Microscaled, quantized per token)** |
+| **Bits per weight** | **4.125** (int4 + fp16 scale / 128) | **4.25** (E2M1 + E8M0 scale / 32) |
+| **Disk Footprint** | 19 GB (**5** shards) | 19 GB (**16** shards) |
+| **Hub-resident size** | 18.23 GiB | 18.46 GiB |
+| **Decode (TG), p512/g128** | **40.183 tok/s** 🏆 | 7.962 tok/s |
+| **TTFT (512-token prompt)** | **0.460 s** 🏆 | 1.313 s |
+| **Prefill (PP) plateau** | **1,372 tok/s** 🏆 | ~410 tok/s (implied by TTFT) |
+| **Mean MTP acceptance length ($K=4$)** | **3.00** tok/step 🏆 | 2.83 tok/step |
+| **MTP on, $K=4$ (same session)** | 40.183 tok/s — MTP-off leg **not measured** | **16.620 tok/s** (**2.081×** over its own MTP-off 7.987) |
+| **Context ceiling** | 17,630-token KV pool (12,288 usable) | 81,920 (MTP off) / **40,960 (MTP on)** |
+| **16-Prompt Quality Score** | **15 / 16 (93.8 %)** | **not measured** |
+| **Decode vs context depth (512 → 12k)** | 40.200 → 37.315 tok/s (**−7.2 %**) | not swept |
+
+**Headline: 5.05× on decode, ~2.9× on prefill.** Unlike the KAT-Coder matrix above, the MXFP4 build is not visibly buying anything for that price on this stack: it uses **more** bits per weight, has **no measured accuracy advantage here at all** (its quality was never measured), and its rate is ~5× behind.
+
+### 5.2 Where the 5.05× Actually Comes From
+
+Decomposed on *measured step times*, not asserted. `40.183 / 7.962 = 5.05×`:
+
+| | MXFP4 | GPTQ |
+| :--- | ---: | ---: |
+| Decode | 7.962 tok/s | 40.183 tok/s |
+| Tokens per forward step | **1.00** | **3.00** |
+| ms per step | 125.6 | 74.7 |
+| **ms per emitted token** | **125.6** | **24.9** |
+
+MTP alone is therefore **at most** a `3.00×` factor — and the acceptance ratio is *not* a speedup, which was verified by turning MTP on for **both** builds so the term cancels:
+
+| Leg (same session, same harness) | Decode median | TTFT median |
+| :--- | ---: | ---: |
+| MXFP4 — MTP off (control) | 7.987 tok/s | 1.310 s |
+| MXFP4 — MTP on, $K=4$ | **16.620 tok/s** | 1.412 s |
+| | **2.081×** | +7.8 % |
+
+With MTP enabled on both sides the residual is `40.183 / 16.620 = **2.42×**`, and *that* residual is the stack. Acceptance is not quite equal either (2.83 vs 3.00); normalising to 3.00 gives a **2.28×** residual. So:
+
+> **5.05× = 2.08× (MTP) × 2.42× (the W4A4 / stack term)** — and note the direction: **MTP is the *smaller* of the two terms.**
+
+**Why the acceptance ratio overstates MTP.** A speculative step is itself more expensive — draft forward plus a 5-position verify costs **1.361×** a plain step here (125.2 ms → 170.5 ms), against 2.833 tokens accepted. The *net* is `2.833 / 1.361 = **2.081×**`, which is exactly the measured figure. Treat the acceptance ratio as an **upper bound** on MTP's gain, never the gain itself.
+
+**Prefill isolates the stack cleanly**, because MTP contributes nothing there and it is compute-bound: 0.460 s vs 1.313 s for the same 512-token prompt ⇒ **~2.9× slower per prompt token** (≈3.1× once the ~60 ms fixed TTFT overhead is netted out). Decode (~2.3–2.4×) and prefill (~2.9×) therefore **agree in magnitude** — which is the main reason to trust the split.
+
+### 5.3 The Mechanism: W4A4 Activation Quantization That Is Not Fused
+
+This is a *different* complaint from the MoE trap in §3, and it is readable straight from the kernel rather than inferred:
+
+```python
+class XPUMxFp4LinearKernel(MxFp4LinearKernel):
+    def apply_weights(self, layer, x, bias=None):
+        x_fp4, x_blockscale = quant_mxfp4(x)          # <- every single call
+        return torch.ops._xpu_C.fp4_gemm(x_fp4, layer.weight,
+                                         x_blockscale, layer.weight_scale, ...)
+```
+
+and, inside `_xpu_mxfp4_quantize_impl`:
+
+```python
+x_q = torch.empty(M, N // 2,  ...)   # packed FP4,   allocated per call
+x_s = torch.empty(M, N // 32, ...)   # block scales, allocated per call
+torch.ops._C.per_token_group_quant_mxfp4(x, x_q, x_s, MXFP4_BLOCK_SIZE, eps)
+x_s = x_s.to(dtype=torch.float8_e8m0fnu, ...)   # extra cast pass
+```
+
+So for **each of the 496 packed linear layers, on every forward pass**, MXFP4 pays: a group-32 activation-quantization kernel, an `fp32 → E8M0` scale cast, and two fresh allocations — *and then* a separate GEMM. Quantize and GEMM are **not fused**, so the floor is **~992 launches per step** before norms, attention or GDN. **W4A16 GPTQ pays none of it**: BF16 activations go straight into the fused dequant-GEMM.
+
+Ranked:
+1. **Per-token W4A4 activation quantization** (~3× per FLOP above) — the dominant stack term.
+2. **Non-fused FP4 GEMM** (`torch.ops._xpu_C.fp4_gemm`) — a second launch per linear.
+3. **`--enforce-eager`** — *amplifies* 1–2, since none of those launches can replay from a graph. It is inherited from the model README's measured config, not demonstrably required (`platforms/xpu.py` lists `mxfp4` under `supported_quantization` with no graph restriction). **Untested, not forced.**
+
+**It is emphatically *not* a bandwidth story — and the arithmetic says so before any profiling:** **4.25 bits/weight for MXFP4 vs 4.125 for GPTQ is a ~3 % difference**, and the two artifacts are 18.46 vs 18.23 GiB. A bandwidth-bound model predicts near-parity, not 5×. Two further confirmations that it is compute: the five MXFP4 runs sat within **0.02 %** of each other — a fixed per-token cost, not noisy traffic — and prefill, the pure-compute regime, is ~2.9× off **on its own**.
+
+### 5.4 Why This Is Not the §1 Answer, and What Would Reconcile Them
+
+On Lunar Lake the two formats landed within ~10 % of each other on decode, and MXFP4 even won HumanEval+. Here MXFP4 is 5× behind. Three differences could carry that, and **none of them was isolated on this box**:
+
+1. **vLLM build.** The Lunar Lake result is `vllm==0.31.0+xpu`; this box runs v0.30.0 (`vllm 0.27.2rc1.dev77`). Whether 0.31 fused the MXFP4 activation path was **not tested** — it is the most likely single explanation and the first thing worth re-measuring.
+2. **Model class.** KAT-Coder is a 256-expert MoE (8 active per token) routed through `CompressedTensorsWNA16MoEMethod` / `XPUExpertsWNA16`; Coder390 is **dense** and hits the plain `XPUMxFp4LinearKernel` for all 496 linears. The kernel mix differs, so "MXFP4 vs GPTQ" is not one experiment across the two documents.
+3. **Platform ratio.** 20 Xe2 cores over 456 GB/s of dedicated GDDR6 (discrete) vs 8 Xe2 cores over shared LPDDR5x (integrated). The W4A4 penalty is compute-side, so it should bite *harder* where FLOPs are scarcer relative to bytes — the direction of the observed gap.
+
+**Caveats, stated because this is a cross-session comparison and the warning above about those is real.** Rates here are only comparable **within one session** — this host's decode is bimodal (**~40.2 or ~48.5 tok/s, a ~20 % band**, mechanism unidentified), and every rate in §5.1 was taken in the *slow* state, so all rows shift together and the **ratios** are the transferable result. The MXFP4 number is the one build *provably immune* to that band: five runs within 0.02 % and TTFT identical to three decimals on a same-session re-run (7.987 vs the 7.962 recorded the previous day, **+0.3 %**). No same-session A/B of the two formats was run here — each costs a server swap and a ~200 s cold start — so the 5.05× rests on same-harness, cross-session legs, with the MXFP4 leg's stability measured. And the **declared limitation: no accuracy comparison was made at all** — unlike the KAT-Coder matrix above, Coder390 MXFP4 has no 16-prompt and no PPL score, so the speed gap is **not yet known to be bought or paid for in quality**.
+
+**Read-across to the recommendations below.** "W4A16 for speed, MXFP4 only where the finer 32-element groups buy accuracy" is consistent with what the B60 saw — but on this stack the speed penalty is ~5× rather than ~10 %. If you are targeting a **dense** model on **Intel discrete** silicon, check first whether your vLLM build fuses the MXFP4 activation quantization. If it does not, W4A16 is not a marginal win; it is a different tier.
+
+---
+
 ## Conclusion & Recommendations
 
 1. **If you want maximum decoding speed and lower latency:** Use **W4A16 GPTQ** (`CompressedTensorsWNA16MoEMethod`). It is 11–24% faster, lighter on the memory bus, and finishes large coding suites minutes ahead of MXFP4.
@@ -129,6 +231,9 @@ Here is how we did it:
 3. **If you are building an Intel Lunar Lake / Arc 140V local AI workstation:**
    - 35B MoE models with 8 active experts are the absolute sweet spot for 32 GB shared-memory handhelds.
    - Always enable MTP speculative decoding ($K=2$) and FP8 KV cache. It gives you 128k context support, zero swap thrashing, and desktop-class coding performance on battery power.
+4. **If you are on *discrete* Intel silicon (Arc Pro B-series),** the same ordering holds but the stakes are much higher: W4A16 GPTQ decoded **5.05×** faster than MXFP4 on a dense 27B (§5), with ~2.9× on prefill. Before assuming MXFP4 is "within ~10 %" as it is on Lunar Lake, check whether your vLLM build **fuses** the MXFP4 per-token activation quantization — on the build tested here it does not, and that unfused path alone accounts for the ~2.4× residual left after MTP is equalised.
 
 ---
 *All quantization scripts, preflight validators, and reproducible benchmark harnesses are open in our repo: [`alpha2beta/vllm.xpu`](https://github.com/alpha2beta/vllm.xpu).*
+
+*§5 provenance: Coder390 numbers come from that repo's `REPRODUCIBILITY.md` §6–§8 (`bench_p512_g128.py`, `bench_prefill.py`, `bench_quality_16p.py`, `compare_mxfp4_mtp.sh`, at 180 W, MTP $K=4$); the GPTQ artifact is published as [`alpha2beta/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-GPTQ-Int4-sym-G128-MTP-BF16`](https://huggingface.co/alpha2beta/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-GPTQ-Int4-sym-G128-MTP-BF16), and the MXFP4 checkpoint as [`…-abliterated-MXFP4`](https://huggingface.co/alpha2beta/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-MXFP4).*
