@@ -1,0 +1,114 @@
+{
+  "model": "KAT-Coder-V2.5-Dev-W4A16-GPTQ",
+  "base_url": "http://127.0.0.1:8000/v1",
+  "total_score": "8/10",
+  "pass_rate_pct": 80.0,
+  "category_stats": {
+    "long_ctx": "2/2",
+    "math": "1/2",
+    "code": "3/3",
+    "logic_constraint": "2/3"
+  },
+  "results": [
+    {
+      "id": "long_ctx_multihop_needle",
+      "category": "long_ctx",
+      "latency_s": 36.31,
+      "think_chars": 841,
+      "answer_chars": 1018,
+      "passed": true,
+      "reason": "Found target: 9f8a-c4e1-22b0",
+      "answer_preview": "## Audit Trace: Server Phoenix-7 Migration\n\n**Step 1 \u2014 Locate the migration event:**\n\nScanning the logs, I found the critical audit entry at `2026-10-08T06:30:30.390Z`:\n\n> `[CRITICAL-AUDIT] [infra-migrator] Event-ID: EVT-94821 | Source: dc-west-zone-2 | ACTION: Server **phoenix-7** was migrated to c"
+    },
+    {
+      "id": "long_ctx_distractor_amendment",
+      "category": "long_ctx",
+      "latency_s": 18.37,
+      "think_chars": 492,
+      "answer_chars": 585,
+      "passed": true,
+      "reason": "Found target: 3,180,000",
+      "answer_preview": "**Audit Finding:**\n\nReviewing the log entry at `2026-10-08T12:00:00.780Z` from the `[FINANCE-GOVERNANCE]` subsystem (`[budget-controller]`, Event-ID: `EVT-77215`):\n\n> *\"Project Chimera-Alpha initial budget of $4,500,000 was officially amended and capped at $3,180,000 by executive order. All subseque"
+    },
+    {
+      "id": "math_chinese_remainder",
+      "category": "math",
+      "latency_s": 53.55,
+      "think_chars": 1142,
+      "answer_chars": 1653,
+      "passed": true,
+      "reason": "Matched expected pattern: 3386",
+      "answer_preview": "# Solving the System of Congruences\n\n## Setting Up the Problem\n\nI need to find the smallest positive integer $x$ satisfying:\n$$x \\equiv 3 \\pmod{17}, \\quad x \\equiv 4 \\pmod{19}, \\quad x \\equiv 5 \\pmod{23}$$\n\nSince 17, 19, and 23 are pairwise coprime, the **Chinese Remainder Theorem** guarantees a uni"
+    },
+    {
+      "id": "math_bounded_combinatorics",
+      "category": "math",
+      "latency_s": 82.92,
+      "think_chars": 0,
+      "answer_chars": 9756,
+      "passed": false,
+      "reason": "Did not find pattern for 301 in: 'ate the coefficients by multiplying each term by the appropriate power of x, working through the sequence to find the coefficient for x^18. Continuing to calculate the coefficients by multiplying each'",
+      "answer_preview": "Let me find the number of integer solutions to $a + b + c + d = 24$ with the given constraints.\n\nFirst, let me make substitutions to simplify:\n- Let $a' = a - 1$, so $0 \\leq a' \\leq 5$\n- Let $b' = b - 2$, so $0 \\leq b' \\leq 6$\n- Let $c' = c - 0 = c$, so $0 \\leq c' \\leq 10$\n- Let $d' = d - 3$, so $0 "
+    },
+    {
+      "id": "code_trapping_rain_water",
+      "category": "code",
+      "latency_s": 9.38,
+      "think_chars": 253,
+      "answer_chars": 578,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\ndef trap(height: list[int]) -> int:\n    left, right = 0, len(height) - 1\n    left_max = right_max = 0\n    result = 0\n\n    while left < right:\n        if height[left] < height[right]:\n            if height[left] >= left_max:\n                left_max = height[left]\n            else:\n        "
+    },
+    {
+      "id": "code_lru_cache",
+      "category": "code",
+      "latency_s": 24.58,
+      "think_chars": 719,
+      "answer_chars": 1513,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\nclass Node:\n    __slots__ = ('key', 'value', 'prev', 'next')\n\n    def __init__(self, key=0, value=0):\n        self.key = key\n        self.value = value\n        self.prev = None\n        self.next = None\n\n\nclass LRUCache:\n\n    def __init__(self, capacity: int):\n        self.capacity = capaci"
+    },
+    {
+      "id": "code_min_window_substring",
+      "category": "code",
+      "latency_s": 14.62,
+      "think_chars": 497,
+      "answer_chars": 772,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\ndef min_window(s: str, t: str) -> str:\n    if not s or not t:\n        return ''\n\n    from collections import Counter\n\n    need = Counter(t)\n    missing = len(t)  # total characters still needed\n\n    left = 0\n    best_left = 0\n    best_len = float('inf')\n\n    for right, ch in enumerate(s):\n"
+    },
+    {
+      "id": "logic_five_floors",
+      "category": "logic_constraint",
+      "latency_s": 51.22,
+      "think_chars": 1996,
+      "answer_chars": 1486,
+      "passed": true,
+      "reason": "Matched expected pattern: Alice=5, Bob=3, Carol=2, David=4, Elena=1",
+      "answer_preview": "# Solving the Floor Assignment Puzzle\n\n## Step-by-Step Deduction\n\n**Starting with the most constrained clues:**\n\n**Rule 5:** Bob works on **floor 3**.\n\n**Rule 1:** Alice works on a higher floor than Bob \u2192 Alice is on **floor 4 or 5**.\n\n**Rule 2 & 3 (Carol and David):** Carol is on floor 2 or 3 (not "
+    },
+    {
+      "id": "format_multi_constraint_4rules",
+      "category": "logic_constraint",
+      "latency_s": 10.47,
+      "think_chars": 779,
+      "answer_chars": 242,
+      "passed": false,
+      "reason": "Failed Rule 3: Found letter 'z' or 'Z'",
+      "answer_preview": "Although the waves crashed against the shore, I felt completely at peace. Because the deep blue ocean stretched endlessly before us, we knew adventure awaited. Because the golden sun dipped below the horizon, we cherished every single moment."
+    },
+    {
+      "id": "trap_sheep_all_but_nine",
+      "category": "logic_constraint",
+      "latency_s": 1.84,
+      "think_chars": 97,
+      "answer_chars": 8,
+      "passed": true,
+      "reason": "Matched expected pattern: 9 (all but 9 die means 9 remain alive)",
+      "answer_preview": "Alive: 9"
+    }
+  ]
+}

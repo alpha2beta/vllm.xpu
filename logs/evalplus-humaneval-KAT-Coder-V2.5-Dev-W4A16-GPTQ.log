@@ -1,0 +1,181 @@
+=== HumanEval & HumanEval+ Benchmark for KAT-Coder-V2.5-Dev-W4A16-GPTQ Started: Sun Oct 18 02:50:31 PM CEST 2026 ===
+--- Generating 164 solutions via evalplus.codegen ---
+Initializing a decoder model: KAT-Coder-V2.5-Dev-W4A16-GPTQ ...
+Sanitized code outputs will be saved to evalplus_results/humaneval/KAT-Coder-V2.5-Dev-W4A16-GPTQ_openai_temp_0.0.jsonl
+Raw outputs will be saved to evalplus_results/humaneval/KAT-Coder-V2.5-Dev-W4A16-GPTQ_openai_temp_0.0.raw.jsonl
+Codegen: HumanEval/0 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/1 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/2 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/3 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/4 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/5 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/6 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/7 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/8 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/9 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/10 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/11 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/12 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/13 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/14 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/15 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/16 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/17 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/18 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/19 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/20 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/21 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/22 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/23 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/24 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/25 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/26 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/27 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/28 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/29 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/30 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/31 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/32 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/33 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/34 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/35 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/36 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/37 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/38 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/39 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/40 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/41 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/42 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/43 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/44 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/45 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/46 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/47 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/48 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/49 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/50 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/51 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/52 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/53 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/54 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/55 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/56 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/57 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/58 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/59 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/60 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/61 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/62 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/63 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/64 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/65 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/66 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/67 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/68 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/69 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/70 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/71 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/72 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/73 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/74 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/75 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/76 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/77 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/78 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/79 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/80 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/81 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/82 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/83 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/84 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/85 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/86 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/87 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/88 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/89 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/90 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/91 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/92 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/93 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/94 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/95 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/96 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/97 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/98 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/99 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/100 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/101 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/102 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/103 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/104 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/105 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/106 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/107 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/108 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/109 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/110 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/111 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/112 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/113 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/114 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/115 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/116 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/117 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/118 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/119 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/120 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/121 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/122 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/123 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/124 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/125 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/126 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/127 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/128 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/129 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/130 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/131 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/132 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/133 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/134 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/135 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/136 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/137 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/138 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/139 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/140 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/141 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/142 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/143 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/144 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/145 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/146 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/147 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/148 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/149 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/150 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/151 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/152 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/153 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/154 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/155 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/156 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/157 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/158 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/159 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/160 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/161 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/162 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+Codegen: HumanEval/163 @ KAT-Coder-V2.5-Dev-W4A16-GPTQ
+humaneval •100% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 164/164 • 0:42:12
+evalplus_results/humaneval/KAT-Coder-V2.5-Dev-W4A16-GPTQ_openai_temp_0.0.jsonl
+--- Evaluating solutions with EvalPlus (Base + Plus test suites) ---
+Load from ground-truth from /home/yanchun/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+0it [00:00, ?it/s]164it [00:00, 3555.21it/s]
+  0%|          | 0/164 [00:00<?, ?it/s]  5%|▍         | 8/164 [00:00<00:02, 64.45it/s]  9%|▉         | 15/164 [00:00<00:02, 59.64it/s] 13%|█▎        | 21/164 [00:00<00:03, 35.95it/s] 17%|█▋        | 28/164 [00:00<00:03, 43.44it/s] 21%|██        | 34/164 [00:00<00:02, 46.60it/s] 24%|██▍       | 40/164 [00:00<00:02, 45.00it/s] 27%|██▋       | 45/164 [00:00<00:02, 45.96it/s] 30%|███       | 50/164 [00:01<00:02, 43.06it/s] 34%|███▎      | 55/164 [00:01<00:02, 43.06it/s] 37%|███▋      | 61/164 [00:01<00:02, 45.10it/s] 40%|████      | 66/164 [00:01<00:02, 45.65it/s] 43%|████▎     | 71/164 [00:01<00:02, 46.05it/s] 46%|████▋     | 76/164 [00:01<00:01, 46.05it/s] 49%|████▉     | 81/164 [00:01<00:01, 47.02it/s] 52%|█████▏    | 86/164 [00:01<00:01, 46.22it/s] 55%|█████▌    | 91/164 [00:02<00:01, 38.89it/s] 59%|█████▊    | 96/164 [00:02<00:01, 35.91it/s] 61%|██████    | 100/164 [00:02<00:01, 34.52it/s] 63%|██████▎   | 104/164 [00:02<00:01, 35.39it/s] 66%|██████▋   | 109/164 [00:02<00:01, 35.02it/s] 70%|██████▉   | 114/164 [00:02<00:01, 37.08it/s] 73%|███████▎  | 120/164 [00:02<00:01, 41.60it/s] 77%|███████▋  | 126/164 [00:03<00:01, 29.40it/s] 79%|███████▉  | 130/164 [00:03<00:01, 30.44it/s] 83%|████████▎ | 136/164 [00:03<00:00, 34.40it/s] 86%|████████▌ | 141/164 [00:03<00:00, 35.10it/s] 88%|████████▊ | 145/164 [00:03<00:00, 35.23it/s] 92%|█████████▏| 151/164 [00:03<00:00, 39.00it/s] 96%|█████████▌| 157/164 [00:03<00:00, 42.50it/s] 99%|█████████▉| 162/164 [00:04<00:00, 40.95it/s]100%|██████████| 164/164 [00:06<00:00, 24.31it/s]
+humaneval (base tests)
+pass@1:	0.866
+humaneval+ (base + extra tests)
+pass@1:	0.829
+=== HumanEval & HumanEval+ Benchmark for KAT-Coder-V2.5-Dev-W4A16-GPTQ Completed: Sun Oct 18 03:33:08 PM CEST 2026 ===
