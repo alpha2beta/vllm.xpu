@@ -764,4 +764,19 @@ on the same box; each entry is a **separate configuration** with its own record 
   entirely and **committed 3.35 GiB in 78 s** (`d5e5bcf8`), so the retry was not a restart.
   Shards 2–5 (~15 GiB) were still in flight at ~0.8 MB/s when this was written; hours, not
   minutes.
+* \[x] **Coder390 MXFP4-vs-GPTQ comparison contributed to the upstream article (2026-10-18)** —
+  added **§5** to `GPTQ_vs_MXFP4.md` on `alpha2beta/vllm.xpu` **`main`** (commit `0bb6378`,
+  file 134 → 239 lines, +105 insert-only), so the KAT-Coder/Lunar-Lake shootout now carries the
+  B60/dense-27B cross-check. The point of the pairing is that it is the *same format pair* with
+  an order-of-magnitude different result: **5.05× on decode** (40.183 vs 7.962 tok/s) and
+  **~2.9× on prefill** (1,372 vs ~410 tok/s) on B60, against KAT-Coder's ~10 % on Lunar Lake.
+  Factorised on measured step times as **2.08× (MTP) × 2.42× (stack)**, noting MTP is the
+  *smaller* term and that the acceptance ratio (3.00) is an upper bound, not a gain — a spec
+  step costs 1.361× a plain one, so 2.833 / 1.361 = 2.081×. Mechanism attributed to the
+  **unfused W4A4 path** read from `XPUMxFp4LinearKernel`, and explicitly *not* bandwidth
+  (4.25 vs 4.125 bits/weight, ~3 %). Deliberately recorded as possibly non-generalisable
+  (vLLM 0.30 vs 0.31, dense vs 256-expert MoE kernel mix, compute:bandwidth ratio) and with
+  the **declared hole that no accuracy comparison exists** for Coder390 MXFP4 — rate-only.
+  Also added a TL;DR bullet, a 4th recommendation for discrete Intel silicon, and a
+  provenance footnote.
 
