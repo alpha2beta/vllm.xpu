@@ -738,4 +738,30 @@ on the same box; each entry is a **separate configuration** with its own record 
   `git update-index --chmod=+x` — verified `100755` on the remote tree; only
   `__pycache__/` and `*.pyc` are gitignored. Because it is orphan, the branch shares no
   history with `main` and cannot be merged into it by a normal PR.
+* \[x] **GPTQ-Int4 artifact published to Hugging Face (2026-10-18)** —
+  `alpha2beta/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-GPTQ-Int4-sym-G128-MTP-BF16`,
+  18.24 GiB / 5 shards / 18 files incl. `SHA256SUMS` and a full model card. Named and laid
+  out to match the author's MXFP4 sibling, and to mirror the reference's recipe naming.
+  **A survey of the Hub found no other GPTQ quantization of Coder390** (GGUF, MLX, EXL3,
+  NVFP4, compressed-tensors W4A16 and MXFP4 all exist) — so this build is currently the
+  only one, and the survey also confirmed our reference is a GPTQ of the *base*
+  `Qwen/Qwen3.8-27B`, not of Coder390. **Two things surfaced only at publication time:**
+  (1) `gptqmodel` 7.6.0 **omits `preprocessor_config.json` and
+  `video_preprocessor_config.json`** from its output — the visual tower's F16 weights ship
+  without their image-processor configs (known issue 14); both were copied from the BF16
+  source before upload. (2) A per-dtype element-count check against the reference proved
+  the artifact structurally identical (`2399` tensors; `F16 3,219,819,760 · I32
+  3,067,527,168 · BF16 424,699,392`), which is the strongest single verification we have.
+  `GPTQ_quantization.md` §7 gained both checks.
+* \[ ] **Shard upload is supervised, not fire-and-forget (2026-10-18)** — the first attempt (a
+  single whole-directory `hf upload`, 08:29 UTC) ran 1 h 53 m, pushed **5.75 GB into the Xet
+  CAS and died on a WAN blip at 10:22:54 UTC having committed nothing** (Hub still `0/5`).
+  Cause was the ~10 Mbps uplink, not the process: 18.24 GiB is a ~4 h floor and a drop inside
+  that window is near-certain. Re-run as **`publish_gptq_hf.sh`**, which does one shard per
+  invocation and retries until the Hub itself lists the file, so a drop costs at most the shard
+  in flight and every finished shard is durably committed (uncommitted xorbs are GC-eligible) —
+  this is **known issue 15**. The CAS had retained the earlier bytes: shard 1 dedup'd almost
+  entirely and **committed 3.35 GiB in 78 s** (`d5e5bcf8`), so the retry was not a restart.
+  Shards 2–5 (~15 GiB) were still in flight at ~0.8 MB/s when this was written; hours, not
+  minutes.
 

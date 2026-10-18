@@ -290,12 +290,13 @@ ends without a `TOTAL` line did not finish.
 
 ## 7. Verify the artifact — do not skip this
 
-A run can exit 0 and still be wrong. Check all five, every time:
+A run can exit 0 and still be wrong. Check all of it, every time:
 
 ```bash
 O=/mnt/usb/models/Huihui-Qwen3.8-27B-Coder390-GPTQ-Int4-sym-G128-MTP-BF16
 du -sh "$O"                       # 19 GB
 ls "$O"                           # 5 shards + quantize_config.json + quant_log.json
+                                  # + BOTH preprocessor configs — see the gap below
 
 python3 - "$O" <<'PY'
 import json, sys, os
@@ -319,6 +320,61 @@ PY
 | `mtp.*` | **15**, dtype **BF16** | §8 repair path |
 | `meta.quantizer` | `gptqmodel:7.6.0` | records *which* toolchain made it |
 | `quantize_config.json` | bits 4 / group 128 / sym True / desc_act False | recipe drifted — record it as a deviation |
+| `preprocessor_config.json` **and** `video_preprocessor_config.json` | both present, byte-equal to the source's | **GPTQModel does not write these** — see below |
+
+### The gap GPTQModel leaves: it drops the image-processor configs
+
+**gptqmodel 7.6.0 does not carry `preprocessor_config.json` or
+`video_preprocessor_config.json` into the output directory.** The saved model is
+otherwise complete — it keeps the 333-tensor visual tower in F16 — so you end up with a
+vision tower that has no image-preprocessor config beside it. Nothing fails loudly: a
+text-only launch (`--language-model-only`) works, and the omission only shows up when
+something tries to use vision, or when you compare your output against a reference
+checkpoint's file list.
+
+The reference `SergiioB/Qwen3.8-27B-GPTQ-Int4-sym-G128-MTP-BF16` ships **both** files
+(alongside `processor_config.json`), and so does the BF16 source. Repair by copying them
+straight across — they describe the *unquantized* tower, so they are bit-identical to the
+source's:
+
+```bash
+S=/mnt/usb/models/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-bf16
+for f in preprocessor_config.json video_preprocessor_config.json; do cp -p "$S/$f" "$O/$f"; done
+```
+
+`quant_log.json` is written by our build but not by the reference (which ships only
+`quant_log.csv`); it is harmless extra provenance.
+
+### Structural identity against the reference
+
+The strongest single check is per-dtype **element** totals against the reference
+checkpoint — it catches a wrong group size, a missed layer set, or a dtype slip in one
+number. Our coder390 build and the reference are identical:
+
+```
+tensors=2399  total=6,712,046,320
+F16 3,219,819,760   I32 3,067,527,168   BF16 424,699,392
+```
+
+(read the safetensors headers directly — 8-byte little-endian header length, then the
+JSON — rather than summing `torch` tensors, so it costs no RAM):
+
+```bash
+python3 - "$O" <<'PY'
+import json, struct, os, sys, collections
+t = collections.Counter(); n = 0
+for f in sorted(os.listdir(sys.argv[1])):
+    if not f.endswith(".safetensors"): continue
+    with open(os.path.join(sys.argv[1], f), "rb") as fh:
+        (hl,) = struct.unpack("<Q", fh.read(8)); hdr = json.loads(fh.read(hl))
+    for k, v in hdr.items():
+        if k == "__metadata__": continue
+        e = 1
+        for s in v["shape"]: e *= s
+        t[v["dtype"]] += e; n += 1
+print("tensors", n, dict(t))
+PY
+```
 
 Record the output size, the five counts, and the quantize/save timings in
 `REPRODUCIBILITY.md` §9 alongside a new artifact row.
@@ -447,6 +503,7 @@ Three things that will waste your afternoon if you skip them:
 | `preflight_probe.py` | validates tokenizer/config/shell before the long run (§5) |
 | `quant_merge_mtp.py` | repair path: re-inject `mtp-bf16.safetensors` (§8) |
 | `serve_coder390_gptq.sh` | serves the result on :8003 as `coder390-gptq` (§10) |
+| `publish_gptq_hf.sh` | resilient Hub publisher: one shard per invocation, retries until the Hub lists it; resumable, `--check` / `--shard N` (known issue 15) |
 | `bench_p512_g128.py` | decode/TTFT benchmark, 1 warmup + N runs |
 | `bench_prefill.py` | prefill (pp) sweep |
 | `bench_quality_16p.sh`, `bench_quality_16p.py` | 16-prompt quality benchmark |

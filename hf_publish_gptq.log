@@ -1,0 +1,20 @@
+[2026-10-18T12:51:55Z] publishing /mnt/usb/models/Huihui-Qwen3.8-27B-Coder390-GPTQ-Int4-sym-G128-MTP-BF16 -> alpha2beta/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-GPTQ-Int4-sym-G128-MTP-BF16
+[2026-10-18T12:51:55Z] disk free: 362 GiB
+[2026-10-18T12:51:56Z] START model-00001-of-00005.safetensors (3353 MiB)
+Found 1 files to upload
+Uploading... 1/1 files checked, 0/0 uploaded (0.00B transferred), 0 committed in 0 commit(s)
+Uploading... 1/1 files checked, 0/1 uploaded (20.4MB transferred), 0 committed in 0 commit(s)
+Uploading... 1/1 files checked, 0/1 uploaded (45.6MB transferred), 0 committed in 0 commit(s)
+url=https://huggingface.co/alpha2beta/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-GPTQ-Int4-sym-G128-MTP-BF16/commit/d5e5bcf85c21a8d1a452680fd2c9b9406e434aec
+[2026-10-18T12:53:13Z] DONE  model-00001-of-00005.safetensors (attempt 1)
+[2026-10-18T12:53:13Z] START model-00002-of-00005.safetensors (4080 MiB)
+Found 1 files to upload
+Uploading... 1/1 files checked, 0/0 uploaded (0.00B transferred), 0 committed in 0 commit(s)
+Uploading... 1/1 files checked, 0/1 uploaded (24.3MB transferred), 0 committed in 0 commit(s)
+Uploading... 1/1 files checked, 0/1 uploaded (50.2MB transferred), 0 committed in 0 commit(s)
+Uploading... 1/1 files checked, 0/1 uploaded (76.6MB transferred), 0 committed in 0 commit(s)
+Uploading... 1/1 files checked, 0/1 uploaded (100MB transferred), 0 committed in 0 commit(s)
+Uploading... 1/1 files checked, 0/1 uploaded (124MB transferred), 0 committed in 0 commit(s)
+Uploading... 1/1 files checked, 0/1 uploaded (141MB transferred), 0 committed in 0 commit(s)
+Uploading... 1/1 files checked, 0/1 uploaded (159MB transferred), 0 committed in 0 commit(s)
+Uploading... 1/1 files checked, 0/1 uploaded (174MB transferred), 0 committed in 0 commit(s)

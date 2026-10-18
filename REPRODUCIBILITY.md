@@ -1095,6 +1095,38 @@ run, re-measured after the change: **40.208 tok/s, TTFT 0.462 s** (3 runs, sprea
     item before calling it a model weakness, and never read a one-item delta between builds as
     real.**
 
+14. **GPTQModel's save silently drops the image-processor configs.** `gptqmodel` 7.6.0 writes
+    the quantized shards, `config.json`, `quantize_config.json` and the tokenizers, but **not**
+    `preprocessor_config.json` or `video_preprocessor_config.json` — even though the build keeps
+    the 333-tensor visual tower in F16. A text-only launch (`--language-model-only`) never
+    notices; the omission surfaces only when the file list is compared against the BF16 source
+    or the reference checkpoint (both ship the two files), or when vision is actually used. Fix
+    is a straight copy — they describe the *unquantized* tower. Caught on 2026-10-18 while
+    preparing the HF publication, i.e. **after** the artifact had been verified field-for-field,
+    benchmarked and served for a day: the `2399 / 400 / 333 / 15` counts prove the *weights* are
+    right and say nothing about the *sidecar* files.
+
+15. **Publishing ~18 GiB over this uplink is a multi-hour, failure-prone operation: supervise it
+    per shard, never fire it once.** On 2026-10-18 the first, naive attempt — a single
+    `hf upload` of the whole directory, launched 08:29 UTC — ran **1 h 53 m**, pushed **5.75 GB
+    into the Xet CAS, and then died silently at 10:22:54 UTC** after a WAN blip (`code 101
+    NetworkUnreachable` at 10:14:43, `code 110 Connection timed out` at 10:20:02), **having
+    committed nothing**: at 12:50 UTC the Hub still reported `0/5` shards and `0.02 GiB`. The
+    process was not at fault — it had survived ~2 h past the session that spawned it, with no
+    OOM and no signal in the journal — the *uplink* is ~10 Mbps, so 18.24 GiB is a ~4 h floor
+    even when nothing goes wrong, and a drop anywhere in a 4 h window is near-certain. Two
+    lessons, both now encoded in `publish_gptq_hf.sh`: (a) **one shard per invocation**, so a
+    drop costs at most the shard in flight *and* every finished shard is **durably committed**
+    rather than sitting in CAS unreferenced (unreferenced xorbs are garbage-collectable, so an
+    uncommitted multi-hour upload is a real GC risk, not just wasted time); (b) **retry until
+    the Hub itself lists the file**, not until the command exits 0. Reassurance on the scare the
+    retry produced: **the 5.75 GB was not lost.** When the supervised re-run (12:51:55 UTC)
+    reached shard 1 it dedup'd almost entirely and **committed 3.35 GiB in 78 s** (`d5e5bcf8`).
+    So content-addressed uploads are genuinely resumable — it is *commitment*, not the bytes,
+    that a mid-flight drop destroys. (A `not_found` pair early in the retry looked like the CAS
+    had been wiped; it actually belonged to the *next* shard, whose xorbs had never been sent.
+    Reading dedup results requires knowing which file's chunks the session is on.)
+
 ## 9. Artifacts
 
 | file | contents |
@@ -1102,6 +1134,8 @@ run, re-measured after the change: **40.208 tok/s, TTFT 0.462 s** (3 runs, sprea
 | `tasks.md` | the phase-by-phase checklist with results annotated into each box |
 | `GPTQ_quantization.md` | **operating guide** for GPTQ-Int4 quantization on this host: recipe, the one-memory-budget rule, toolchain image, verification, failure catalogue, serving |
 | **`github.com/alpha2beta/vllm.xpu` @ branch `b60`** | **public snapshot of this whole directory** — orphan branch, 77 files / 9.3 MB including every attempt log; initial commit `c4dc5b8`, verified byte-identical to local (`main` untouched, still the default branch) |
+| **`huggingface.co/alpha2beta/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-GPTQ-Int4-sym-G128-MTP-BF16`** | the published GPTQ-Int4 artifact — 2,399 tensors, 18.24 GiB / 5 shards, `SHA256SUMS`, model card and both repaired preprocessor configs; **the only GPTQ of Coder390 on the Hub** as of 2026-10-18. Shard upload is bandwidth-bound (~10 Mbps up); see known issue 15 and `publish_gptq_hf.sh` |
+| `publish_gptq_hf.sh` | **resilient** HF publisher: uploads one shard per `hf upload` invocation, retries until the *Hub* lists the file (not until the command exits 0), then the sidecars; idempotent/resumable, `--check` for status only, `--shard N` for one shard. Born from known issue 15 |
 | `phase5_launch.sh` | exact launch command (recreate with `docker rm -f` first) |
 | `serve_8081.sh` | same container published on :8081 for LAN/opencode use; parity-checks itself against `phase5_launch.sh` |
 | `compare_tp2.sh` | B60-vs-B60+B580 harness: derives control/TP2/restore from `serve_8081.sh`'s template, benches + samples both cards, `--summary` prints the table |
