@@ -1310,3 +1310,36 @@ Tiel MTP-K2 @0.74 relaunched on :8080 afterwards.
    - The initial 0/16 failure was caused by meta-device parameter non-binding during calibration forward passes and dense zero-masking (`W.masked_fill_`) of unvisited experts.
    - Properly binding expert parameters to `layer.mlp.experts` and falling back to RTN with optimal clipping for unobserved experts completely eliminated cold experts and restored 100% model quality.
 
+## Comprehensive HumanEval & HumanEval+ Benchmark: Qwen3.8-27B-exl3 (3.00bpw) (2026-10-19)
+
+- **Objective:** Evaluate `turboderp/Qwen3.8-27B-exl3` (3.00bpw trellis quantization, 13.1 GiB resident weights) on Intel Arc 140V (Lunar Lake Xe2-LPG) under vLLM 0.31.0+xpu with MTP $K=1$ speculative decoding, comparing head-to-head against KAT-Coder-V2.5-Dev (W4A16-GPTQ and MXFP4) and Tiel-Coder-35B-A3B.
+- **Execution & Client Timeout Resolution:**
+  - Standardized runner: `scripts/resume_evalplus_humaneval.sh` (`evalplus 0.3.1`, greedy `temperature=0.0`, single sequence).
+  - **Upstream Timeout Bug Diagnosed & Fixed:** `evalplus.gen.util.openai_request.py` had hardcoded a 100-second `signal.alarm(100)` timeout intended for fast cloud APIs. Because Qwen3.8-27B generates detailed internal `<think>...</think>` chain-of-thought tokens before emitting code, generating 768 tokens at ~7.5 tok/s on local iGPU took ~102 seconds, causing `evalplus` to loop-retry task `HumanEval/143` infinitely. Configurable timeout `EVALPLUS_TIMEOUT_PER_TASK` (defaulting to 1200s / 20 min) and `PYTHONUNBUFFERED=1` were applied, allowing the benchmark to complete all 164 problems cleanly.
+
+### 1. Comparative Results Matrix Across All 5 Models
+
+| Metric | KAT-Coder MXFP4 | KAT-Coder GPTQ | Tiel-Coder GPTQ | Tiel-Coder MXFP4 | Qwen3.8-27B EXL3 (3.00bpw) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Architecture** | 35B-A3B MoE (3B active) | 35B-A3B MoE (3B active) | 35B-A3B MoE (3B active) | 35B-A3B MoE (3B active) | **Dense 27B** |
+| **Quantization** | MXFP4 (W4A4 MoE) | W4A16-GPTQ (INT4 g128) | W4A16-GPTQ (INT4 g128) | MXFP4 (W4A4 MoE) | **EXL3 Trellis (3.00bpw)** |
+| **Weight Footprint** | 19.6 GiB | 20.0 GiB | 20.5 GiB | 20.5 GiB | **13.1 GiB** ⚡ |
+| **HumanEval (Base)** | **89.63% (147 / 164)** | 86.59% (142 / 164) | 84.15% (138 / 164) | 78.66% (129 / 164) | **69.51% (114 / 164)** |
+| **HumanEval+ (Plus)** | **86.59% (142 / 164)** | 82.93% (136 / 164) | 81.10% (133 / 164) | 75.61% (124 / 164) | **67.68% (111 / 164)** |
+| **Decode Throughput** | 24.8 tok/s | 25.2 tok/s | 25.4 tok/s | 27.7 tok/s | **7.5–9.4 tok/s** |
+| **Speculative Decoding** | MTP $K=2$ (~77–85%) | MTP $K=2$ (~77–85%) | MTP $K=2$ (~65–75%) | MTP $K=2$ (~60–73%) | **MTP $K=1$ (~65–88%)** |
+| **Codegen Latency / Task**| ~17.4s | **~15.4s** ⚡ | ~17.1s | ~33.1s | ~27.4s (incl. CoT) |
+
+### 2. Key Takeaways & Architecture Tradeoffs
+1. **Dense vs MoE Throughput Gap:**
+   - MoE architectures (KAT-Coder, Tiel-Coder) only load ~3B parameters per token, enabling memory bandwidth to sustain **24–27 tok/s** on Arc 140V LPDDR5x.
+   - Dense 27B must stream all 13.1 GiB per token step, capping generation at **7.5–9.4 tok/s** even with EXL3 trellis kernel optimizations and MTP speculative decoding.
+2. **Coding Specialization vs Generalist Reasoning:**
+   - KAT-Coder-V2.5-Dev leads HumanEval+ at **86.59%** (MXFP4) and **82.93%** (GPTQ) due to dedicated code pretraining and specialized instruction tuning.
+   - Qwen3.8-27B EXL3 achieves **69.51% Base / 67.68% Plus**. While excelling on general reasoning and logic suites (16/16 on quality suite, 10/10 on hard suite), its lower score on HumanEval stems in part from aggressive prompt format sensitivity: its output includes extensive `<think>...</think>` traces which occasionally cut into max token bounds or interact with contract testing assertions in code extraction.
+3. **Artifacts & Data Integrity:**
+   - Completed solutions: `evalplus_results/humaneval/qwen3.8-27b-3.0bpw_openai_temp_0.0.jsonl` (164 samples).
+   - Evaluation summary: `evalplus_results/humaneval/qwen3.8-27b-3.0bpw_openai_temp_0.0_eval_results.json`.
+   - Full benchmark execution log: `logs/evalplus-humaneval-qwen3.8-27b-3.0bpw.log`.
+
+

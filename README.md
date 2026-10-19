@@ -27,16 +27,16 @@ Dense MoE serving with multi-token prediction (1024/128/1, MAX_LEN 4096 / up to 
 
 Full 164-task standardized evaluation under greedy decoding (`temp=0.0`, single sequence, FP8 KV cache):
 
-| Benchmark Metric | KAT-Coder GPTQ | KAT-Coder MXFP4 | Tiel-Coder GPTQ | Tiel-Coder MXFP4 |
-|---|---|---|---|---|
-| **HumanEval (Base)** | 86.59% (142 / 164) | **89.63%** (147 / 164) | 84.15% (138 / 164) | 78.66% (129 / 164) |
-| **HumanEval+ (Base + Extra)** | 82.93% (136 / 164) | **86.59%** (142 / 164) | 81.10% (133 / 164) | 75.61% (124 / 164) |
-| **Total Codegen Duration** | **42m 12s (Fastest)** ⚡ | 47m 33s | 46m 58s | 1h 30m 37s |
-| **Avg Latency per Task** | **~15.4s** | ~17.4s | ~17.1s | ~33.1s |
-| **Avg Output Chars / Task** | 1,235 chars | 1,244 chars | 1,231 chars | 2,135 chars (+60% verbosity) |
-| **Active Throughput** | ~24–25 tok/s | ~24–25 tok/s | ~24–26 tok/s | ~20–22 tok/s |
-| **MTP Acceptance Rate** | **~77%–85%** | ~75%–83% | ~65%–75% | ~60%–73% |
-| **Max Context Served** | 128k (`131072`) | 128k (`131072`) | 96k (`98304`) | 96k (`98304`) |
+| Benchmark Metric | KAT-Coder GPTQ | KAT-Coder MXFP4 | Tiel-Coder GPTQ | Tiel-Coder MXFP4 | Qwen3.8-27B EXL3 (3.0bpw) |
+|---|---|---|---|---|---|
+| **HumanEval (Base)** | 86.59% (142 / 164) | **89.63%** (147 / 164) | 84.15% (138 / 164) | 78.66% (129 / 164) | 69.51% (114 / 164) |
+| **HumanEval+ (Base + Extra)** | 82.93% (136 / 164) | **86.59%** (142 / 164) | 81.10% (133 / 164) | 75.61% (124 / 164) | 67.68% (111 / 164) |
+| **Total Codegen Duration** | **42m 12s (Fastest)** ⚡ | 47m 33s | 46m 58s | 1h 30m 37s | ~1h 15m (with CoT) |
+| **Avg Latency per Task** | **~15.4s** | ~17.4s | ~17.1s | ~33.1s | ~27.4s |
+| **Avg Output Chars / Task** | 1,235 chars | 1,244 chars | 1,231 chars | 2,135 chars (+60% verbosity) | 1,842 chars (incl. `<think>`) |
+| **Active Throughput** | ~24–25 tok/s | ~24–25 tok/s | ~24–26 tok/s | ~20–22 tok/s | ~7.5–9.4 tok/s |
+| **MTP Acceptance Rate** | **~77%–85%** | ~75%–83% | ~65%–75% | ~60%–73% | ~70%–88% (K=1) |
+| **Max Context Served** | 128k (`131072`) | 128k (`131072`) | 96k (`98304`) | 96k (`98304`) | 16k (`16384`) |
 
 - **Launchers:**
   - `launch_vllm_kat_gptq.sh` (KAT W4A16-GPTQ, 128k default, FP8 KV, MTP K=2)
@@ -74,7 +74,8 @@ Qwen3.8-27B at 4.00bpw and 2.20bpw. Local-only patches (source stays upstream).
 
 Measured (eager, batch 1): 4.00bpw **6.5 tok/s** (PPL 6.36), 2.20bpw **8.8 tok/s**
 (PPL 6.78); 3.00bpw hits the sweet spot — quality suite **16/16**, hard suite
-**10/10** (incl. antileak variants), PPL **6.46** (+0.10 vs 4.00bpw);
+**10/10** (incl. antileak variants), PPL **6.46** (+0.10 vs 4.00bpw), HumanEval
+Base **69.51%** (114/164) and Plus **67.68%** (111/164);
 MTP K=1 decode +42–52% but loses end-to-end under ~60 output tokens;
 fp8 KV pools **230K tokens** at 15% slower decode. Verdict: works, not
 production-competitive with the MoE track on this machine.
