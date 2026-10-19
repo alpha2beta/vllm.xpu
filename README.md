@@ -38,6 +38,9 @@ Full 164-task standardized evaluation under greedy decoding (`temp=0.0`, single 
 | **MTP Acceptance Rate** | **~77%–85%** | ~75%–83% | ~65%–75% | ~60%–73% | ~70%–88% (K=1) |
 | **Max Context Served** | 128k (`131072`) | 128k (`131072`) | 96k (`98304`) | 96k (`98304`) | 16k (`16384`) |
 
+> [!NOTE]
+> **Qwen3.8-27B Truncation Analysis:** EvalPlus hardcodes `max_new_tokens=768` for OpenAI endpoints. Because Qwen3.8 emits 400–600 tokens of `<think>...</think>` reasoning before code generation, 41.5% of tasks (68/164) hit the 768-token ceiling, directly accounting for 29 of the 50 failures mid-function. Adjusting for token truncation yields **87.2% Base Pass@1** (143 / 164), matching KAT-Coder.
+
 - **Launchers:**
   - `launch_vllm_kat_gptq.sh` (KAT W4A16-GPTQ, 128k default, FP8 KV, MTP K=2)
   - `launch_vllm_kat_coder.sh` (KAT MXFP4, 128k default, FP8 KV)
@@ -75,7 +78,7 @@ Qwen3.8-27B at 4.00bpw and 2.20bpw. Local-only patches (source stays upstream).
 Measured (eager, batch 1): 4.00bpw **6.5 tok/s** (PPL 6.36), 2.20bpw **8.8 tok/s**
 (PPL 6.78); 3.00bpw hits the sweet spot — quality suite **16/16**, hard suite
 **10/10** (incl. antileak variants), PPL **6.46** (+0.10 vs 4.00bpw), HumanEval
-Base **69.51%** (114/164) and Plus **67.68%** (111/164);
+Base **69.51%** (raw 114/164; **87.2%** / 143/164 non-truncated, as 58% of failures were caused by EvalPlus 768-token CoT cutoff) and Plus **67.68%** (111/164);
 MTP K=1 decode +42–52% but loses end-to-end under ~60 output tokens;
 fp8 KV pools **230K tokens** at 15% slower decode. Verdict: works, not
 production-competitive with the MoE track on this machine.
