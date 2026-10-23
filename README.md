@@ -61,6 +61,7 @@ Production `compressed-tensors` pack-quantized builds for the vLLM XPU backend
 | [Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4](https://huggingface.co/alpha2beta/Tiel-Coder-35B-A3B-Genesis-Hermes-MXFP4) | 35B-A3B MoE + MXFP4 MTP draft | 20.5 GiB / 32 shards | 27.69 tok/s MTP K=2 |
 | [Qwen3.6-35B-A3B-occamy-1.0-MXFP4](https://huggingface.co/alpha2beta/Qwen3.6-35B-A3B-occamy-1.0-MXFP4) | 35B-A3B MoE + MXFP4 MTP draft | ~20.4 GiB / 21 shards | quality 13/16, hard 8/10 |
 | [Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-MXFP4](https://huggingface.co/alpha2beta/Huihui-Qwen3.8-27B-Coder390-EfficientThink-abliterated-MXFP4) | dense 27B + BF16 MTP | 18.44 GiB / 16 shards | 2.6 tok/s (dense wall) |
+| [Qwen3.8-9B-Distill-EXL3-K2](https://huggingface.co/alpha2beta/Qwen3.8-9B-Distill-EXL3-K2) | EXL3 K=2 (`mul1`) + BF16 pass-through | 6.72 GiB / 35 shards | PPL 7.55 (+18.6% vs FP16), 52s load on 140V |
 
 - Quantizers: `scripts/quantize_{tiel,kat,occamy}_mxfp4.py` (+ `*_mtp_mxfp4.py`,
   `finalize_*`, `audit_*`) for MoE; `scripts/quantize_huihui_qwen38_mxfp4.py`
