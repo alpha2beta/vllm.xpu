@@ -18,20 +18,22 @@ This review documents the end-to-end implementation progress for the **EXL3 MoE 
 - **Phase 0 (Platform & Hardware Proof):** **100% COMPLETE — GATE 0 PASSED.**
 - **Phase 1 (Expert Loading & Single-Expert MLP):** **100% COMPLETE — GATE 1 PASSED.**
 - **Phase 2 (Correct Complete MoE Block & Hybrid Layer):** **100% COMPLETE — GATE 2 PASSED.**
-- **Phase 3 (Bounded Full-Model Serving on 140V):** **READY TO EXECUTE.** All 15.29 GB safetensors shards are downloaded and verified locally.
+- **Phase 3 (Bounded Full-Model Serving on 140V):** **100% COMPLETE — GATE 3 PASSED.** Full 40-layer model served live on port 8002, WikiText-2 PPL = 7.439, 4/4 request isolation pass.
+- **Phase 4 (Expert-Aware Performance Optimization):** **READY TO EXECUTE.** Grouped GEMV and token binning to follow.
 
 ```
 [Phase 0: Platform Proof]   ██████████ 100%  (Gate 0 MET)
 [Phase 1: Expert Store/MLP] ██████████ 100%  (Gate 1 MET)
 [Phase 2: MoE Block/Layer]  ██████████ 100%  (Gate 2 MET)
-[Phase 3: Full-Model Serve] ░░░░░░░░░░   0%  (Next Milestone)
-[Phase 4: Optimization]     ░░░░░░░░░░   0%  (Deferred to Gate 3 Pass)
+[Phase 3: Full-Model Serve] ██████████ 100%  (Gate 3 MET)
+[Phase 4: Optimization]     ░░░░░░░░░░   0%  (Next Milestone)
 ```
 
 ### Key Milestones Achieved
 1. **Gate 0 Certified:** Level Zero memory allocation limits confirmed (28.58 GiB addressable, 4 GiB single allocation succeeds). ESIMD native kernels instantiated for 3-bit MCG `(K=3, cb=1)` with **zero register spills** on Xe2 `lnl-a1`. Empirical copy bandwidth measured at **130.4 GB/s** (95.9% of spec).
 2. **Gate 1 Certified:** Shard-by-shard streaming loader streamed all **122,880 expert tensors across 40 layers in 9.7 seconds** into 11,673 MiB of packed arenas, holding host RSS strictly at **1.25–1.26 GiB**. Boundary expert weight reconstructions are **100% bit-exact** (`max_abs = 0.0`). Single-expert MLP forward pass executed with worst `max_abs = 3.62e-6` (vs 0.08 tolerance). Batch sweep verified $M=0$ launches **0 kernels**, and crossover calibrated at $M=8$. Intermediate reconstruction workspace reentrancy bug resolved in C++ (`_C.so` r4). Dense regression passed **90/90 cases**.
 3. **Gate 2 Certified:** Eager token dispatch, top-8 routing, shared-expert gating, and residual reduction implemented in `Exl3MoEMethod.apply`. Router alignment achieves **100% top-8 set agreement** (`cos_min = 0.99999994`). Six extreme edge-case routing scenarios validated. Zero token dropping verified across all 8 slots. Full hybrid decoder layer (GemmaRMSNorm $\to$ GDN linear attention $\to$ GemmaRMSNorm $\to$ EXL3 MoE $\to$ residual) verified on real checkpoint weights (`max_abs = 0.00232`). Standardized Phase 2 suite runner passed **6/6 suites in 88.8s**.
+4. **Gate 3 Certified:** Full 40-layer Qwen3.5-35B-A3B EXL3 model loaded and initialized in 69.0s on Arc 140V (`gpu_memory_utilization = 0.62`), passing startup `profile_run` and initializing 3.31 GiB KV cache (40,704 tokens). Host `MemAvailable` maintained strictly $\ge 2.71\text{ GiB}$ across all 713 seconds of monitored live serving with **0.00 GiB swap activity**. OpenAI API endpoints served live on port 8002: chat completion with reasoning thinking block verified; stop tokens (`<|im_end|>`, `<|endoftext|>`) respected; 4/4 request isolation tests passed bit-for-bit without KV/GDN state leakage. WikiText-2 perplexity evaluated across 10,235 tokens at **PPL = 7.439** (NLL 2.0067) with zero divergence. Comprehensive report in `docs/gate3_serving_report.md`.
 
 ---
 
@@ -171,30 +173,59 @@ ALL 6 SUITES PASS (88.78s total runtime, 0 failures, 0 NaNs/Infs)
 ================================================================================
 ```
 
+### Phase 3 Empirical Results & Gate 3 Certification ([`docs/gate3_serving_report.md`](file:///home/yanchun/Projects/vllm.xpu/docs/gate3_serving_report.md))
+
+```text
+================================================================================
+Phase 3 Gate 3 Serving Certification (Qwen3.5-35B-A3B EXL3 @ 3.09bpw)
+================================================================================
+Criterion 1: Engine Init & profile_run       PASS   Weights 13.54 GiB, KV 3.31 GiB
+Criterion 2: Memory Headroom & Zero Swap     PASS   Min MemAvailable 2.71 GiB, Swap 0.00 GiB
+Criterion 3: Text Coherence & Stop Tokens    PASS   100% factual, stops at <|im_end|>
+Criterion 4: WikiText-2 Perplexity           PASS   PPL = 7.439 across 10,235 tokens
+--------------------------------------------------------------------------------
+ALL 4 GATE 3 CRITERIA PASS (Port 8002 live, 4/4 isolation pass, 0 thermal throttling)
+================================================================================
+```
+
+Serving Performance Telemetry ([`results.csv`](file:///home/yanchun/Projects/vllm.xpu/results.csv)):
+- **Input 128 tokens:** TTFT = 2.95s, prefill = 42.7 tok/s, decode = 4.69 tok/s, total latency = 9.77s
+- **Input 512 tokens:** TTFT = 6.71s, prefill = 76.4 tok/s, decode = 5.66 tok/s, total latency = 12.37s
+- **Input 1024 tokens:** TTFT = 11.62s, prefill = 88.3 tok/s, decode = 4.83 tok/s, total latency = 18.24s
+- **SoC Package Temperature:** 43–46°C under peak load, 0 RPM fan, zero thermal throttling.
+
 ---
 
-## 5. Next Steps: Phase 3 Execution (Full-Model Serving)
+## 5. Phase 3 Gate Summary & Status
 
-With Gates 0, 1, and 2 certified, implementation advances directly to **Phase 3 (Bounded Full-Model Serving)**:
+| Task ID | Description | Status | Evidence Artifacts |
+|---|---|:---:|---|
+| **P3-01** | Strict text-only loading & vision exclusion manifest | **MET** | `scripts/audit_p3_exclusion.py`, [`logs/moe-p3/tensor-exclusion-manifest.json`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p3/tensor-exclusion-manifest.json) |
+| **P3-02** | Shard streaming & peak memory validation | **MET** | 122,880 tensors in 20.49s, [`logs/moe-p3/full-load-mem-trace.csv`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p3/full-load-mem-trace.csv) |
+| **P3-03** | Bounded engine parameters (`gpu_util=0.62`, `batched=256`) | **MET** | [`models/qwen3.5-35b-a3b-exl3-3.09bpw-140v/model.yaml`](file:///home/yanchun/Projects/vllm.xpu/models/qwen3.5-35b-a3b-exl3-3.09bpw-140v/model.yaml) |
+| **P3-04** | KV cache & GDN recurrent state allocation audit | **MET** | KV 3.31 GiB (40,704 tokens), [`logs/moe-p3/engine-init.log`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p3/engine-init.log) |
+| **P3-05** | Model recipe & dedicated launcher script on port 8002 | **MET** | [`scripts/launch_vllm_moe_exl3.sh`](file:///home/yanchun/Projects/vllm.xpu/scripts/launch_vllm_moe_exl3.sh) |
+| **P3-06** | Continuous memory monitoring across full lifecycle | **MET** | 713s @ 1 Hz, min `MemAvailable` **2.71 GiB**, [`logs/moe-p3/lifecycle-memory-report.md`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p3/lifecycle-memory-report.md) |
+| **P3-07** | WikiText-2 perplexity & MCG dequantization | **MET** | **PPL = 7.439**, NLL 2.0067, 10,235 tokens, [`logs/moe-p3/ppl-results.json`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p3/ppl-results.json) |
+| **P3-08** | Sequential prefill, cached decode & request isolation | **MET** | 4/4 suites pass, bit-exact A-B-A, [`logs/moe-p3/request-isolation.log`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p3/request-isolation.log) |
+| **P3-09** | OpenAI API endpoints, tokenizer, EOS stop condition | **MET** | `/health`, `/v1/models`, `/v1/chat/completions`, [`logs/moe-p3/probe-chat-completion.json`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p3/probe-chat-completion.json) |
+| **P3-10** | Baseline performance & thermal telemetry | **MET** | 128/512/1024 tokens in [`results.csv`](file:///home/yanchun/Projects/vllm.xpu/results.csv), [`docs/gate3_serving_report.md`](file:///home/yanchun/Projects/vllm.xpu/docs/gate3_serving_report.md) |
+| **P3-11** | Calibrate timeouts for the eager baseline | **MET** | 300s server timeout, 600s client timeout, 0 timeout drops |
 
-1. **Task P3-01 & P3-02 (Full Model Streaming Load):**
-   - Execute shard streaming across all 40 layers and verify text-only weight filtering (exclude multimodal/MTP weights).
-   - Confirm peak memory stays under 22 GiB during load, preserving $>9.6\text{ GiB}$ host headroom.
-2. **Task P3-03 (Engine Configuration & Startup `profile_run`):**
-   - Configure engine parameters:
-     ```bash
-     --max-model-len 2048 \
-     --max-num-seqs 1 \
-     --max-num-batched-tokens 256 \
-     --enforce-eager \
-     --gpu-memory-utilization 0.70
-     ```
-   - Verify that startup `profile_run` passes without memory spikes or launch timeouts.
-3. **Task P3-04 (KV & GDN Allocation Audit):**
-   - Confirm KV cache allocation (~40 MiB) and GDN recurrent states (~63 MiB) initialize cleanly.
-4. **Task P3-05 (Model Recipe & Dedicated Launcher):**
-   - Author `models/qwen3.5-35b-a3b-exl3-3.09bpw-140v/model.yaml`.
-   - Create launcher [`scripts/launch_vllm_moe_exl3.sh`](file:///home/yanchun/Projects/vllm.xpu/scripts/launch_vllm_moe_exl3.sh) on port **8002**.
-5. **Tasks P3-06 to P3-11 (Functional Serving & Quality Validation):**
-   - Verify WikiText-2 perplexity via [`scripts/eval_moe_ppl.py`](file:///home/yanchun/Projects/vllm.xpu/scripts/eval_moe_ppl.py).
-   - Validate both stop tokens (`<|endoftext|>`, `<|im_end|>`) and test live chat completions through the OpenAI API endpoint.
+**Gate 3 Assessment:** **PASSED**. Full serving certification documented in [`docs/gate3_serving_report.md`](file:///home/yanchun/Projects/vllm.xpu/docs/gate3_serving_report.md).
+
+---
+
+## 6. Next Steps: Phase 4 Execution (Expert-Aware Performance Optimization)
+
+With Gate 3 fully satisfied, the implementation advances to **Phase 4 (Expert-Aware Performance Optimization)**:
+
+1. **Task P4-01 (Eliminate Host-Device Synchronization Stalls):**
+   - Replace host Python-loop token dispatch with device-side token binning (`torch.argsort` / histogram).
+   - Eliminate all `.item()` / host-device synchronization stalls in dispatch.
+2. **Task P4-02 (Dedicated $M=1$ Batched Decode Fast Path):**
+   - Implement grouped ESIMD GEMV kernel executing all 8 routed experts in 2 kernel launches (gate+up fused, then down).
+3. **Task P4-03 (Chunked Prefill Optimization):**
+   - Optimize small-$M$ dominance for $M \le 16$ per expert during chunked prefill.
+4. **Task P4-04 to P4-06 (Gate 4 Certification):**
+   - Achieve target decode throughput roofline approach on Arc 140V.

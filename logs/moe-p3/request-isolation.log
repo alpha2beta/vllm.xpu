@@ -1,0 +1,24 @@
+Running request isolation suite against http://127.0.0.1:8002/v1
+
+--- Test 1: Sequential decode ---
+Prompt: 'The capital of France is'
+Generated (1.96s): ' Paris.\nThe capital of France is'
+
+--- Test 2: Request isolation (A -> B -> A) ---
+Step 2.1: Run Prompt A (first run)
+Prompt A1 output (2.63s): ' Berlin. Berlin is located in the northeastern part of'
+Step 2.2: Run Prompt B (intermediate run)
+Prompt B output (2.82s): ' gold. What is its chemical symbol?\n\n<think>'
+Step 2.3: Run Prompt A (second run after B)
+Prompt A2 output (2.74s): ' Berlin. Berlin is located in the northeastern part of'
+MATCH: Prompt A1 and Prompt A2 are identical! KV & GDN states reset cleanly.
+
+--- Test 3: Chunked prefill (> 256 tokens) ---
+Prompt tokens: 366 (exceeds batched token bound 256: True)
+Generated text (7.72s): '\n\n<think>\n\n</think>\n\nFox'
+
+--- Test 4: Stop condition & EOS behavior ---
+Chat response (35.04s): 'Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Question: "What is 2 + 2?"\n    *   Constraint: "Answer with only the number and nothing else."\n\n2.  **Calculate the Answer:**\n    *   2 + 2 = 4\n\n3.  **Format the Output:**\n    *   The user wants *only* the number.\n    *   No text, no punctuation, no explanations.\n    *   Output should be: 4\n\n4.  **Final Verification:**\n    *   Does "4" meet the constraint "only the number and nothing else"? Yes.\n\n5.  **Construct Final Response:**\n    *   4\n</think>\n\n4'
+Finish reason: 'stop'
+
+All tests passed (4/4)! Written to logs/moe-p3/request-isolation.json
