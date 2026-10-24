@@ -130,3 +130,26 @@ INFO:     127.0.0.1:33222 - "POST /v1/chat/completions HTTP/1.1" 200 OK
 (APIServer pid=196700) INFO 10-24 21:13:50 [loggers.py:320] Engine 000: Avg prompt throughput: 155.9 tokens/s, Avg generation throughput: 4.9 tokens/s, Running: 1 reqs, Waiting: 0 reqs, XPU KV cache usage: 2.9%, Prefix cache hit rate: 0.0%
 (APIServer pid=196700) INFO 10-24 21:14:00 [loggers.py:320] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 1.5 tokens/s, Running: 0 reqs, Waiting: 0 reqs, XPU KV cache usage: 0.0%, Prefix cache hit rate: 0.0%
 (APIServer pid=196700) INFO 10-24 21:14:10 [loggers.py:320] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 0.0 tokens/s, Running: 0 reqs, Waiting: 0 reqs, XPU KV cache usage: 0.0%, Prefix cache hit rate: 0.0%
+INFO:     127.0.0.1:60742 - "GET /health HTTP/1.1" 200 OK
+(APIServer pid=196700) INFO 10-24 23:15:47 [launcher.py:128] [shutdown] API server: shutdown triggered
+(APIServer pid=196700) INFO 10-24 23:15:47 [launcher.py:144] [shutdown] API server: stopping engine client mode=drain timeout=5s
+(APIServer pid=196700) INFO 10-24 23:15:47 [core_client.py:762] [shutdown] MPClient: start timeout=5s
+(APIServer pid=196700) INFO 10-24 23:15:47 [core_client.py:764] [shutdown] MPClient: stopping engine manager
+(APIServer pid=196700) INFO 10-24 23:15:47 [utils.py:638] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=196986) INFO 10-24 23:15:47 [core.py:1409] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=196986) INFO 10-24 23:15:47 [core.py:1558] [shutdown] EngineCore: start mode=drain timeout=5s
+(EngineCore pid=196986) INFO 10-24 23:15:47 [core.py:1589] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=196986) INFO 10-24 23:15:47 [core.py:1422] [shutdown] EngineCore: exiting busy loop
+(EngineCore pid=196986) INFO 10-24 23:15:47 [xpu_worker.py:228] XPUWorker shutdown: cleaning up (rank=0, local_rank=0)
+(EngineCore pid=196986) INFO 10-24 23:15:49 [xpu_worker.py:238] XPUWorker shutdown: done (rank=0, local_rank=0)
+(APIServer pid=196700) WARNING 10-24 23:15:52 [utils.py:658] [shutdown] Process manager: force killing remaining processes count=1
+(APIServer pid=196700) WARNING 10-24 23:15:52 [utils.py:663] [shutdown] Process manager: force killing remaining process EngineCore pid 196986
+(APIServer pid=196700) INFO 10-24 23:15:52 [core_client.py:766] [shutdown] MPClient: engine manager stopped
+(APIServer pid=196700) INFO 10-24 23:15:52 [core_client.py:767] [shutdown] MPClient: cleaning up background resources
+(APIServer pid=196700) INFO 10-24 23:15:52 [core_client.py:769] [shutdown] MPClient: complete
+(APIServer pid=196700) INFO 10-24 23:15:52 [launcher.py:153] [shutdown] API server: engine client stopped
+(APIServer pid=196700) INFO 10-24 23:15:52 [launcher.py:156] [shutdown] API server: signalling HTTP server shutdown
+(APIServer pid=196700) INFO 10-24 23:15:52 [launcher.py:178] [shutdown] API server: shutting down FastAPI HTTP server
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
