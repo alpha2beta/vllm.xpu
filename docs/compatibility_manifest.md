@@ -245,7 +245,14 @@ Two readings matter for Phase 1/4:
 > fallback (measured: +2000 µs/token of `_reconstruct_kernel`/`gemm_kernel`,
 > −33 % decode throughput). Phase 4 rebuilt as **r6 with
 > `-DEXL3_ALL_CODEBOOKS`**, restoring ESIMD for `(4,1)`/`(6,1)` and reclaiming
-> that loss. Gate 3 serving numbers were produced on r5; Gate 4 targets use r6.
+> that loss. Gate 3 serving numbers were produced on r5; Gate 4 targets use r6+.
+>
+> **r7 (Gate 4, current): `b627e3a4…`, `-DEXL3_ALL_CODEBOOKS` + the P4-02
+> grouped decode op** (`csrc/exl3_moe_gemv.sycl`, op
+> `exl3_moe_grouped_gemv(Tensor, …, int x_unit_stride) -> Tensor`). All r6
+> instantiations are carried forward; the new op is additionally templated on
+> fp16/bf16 activations. Build log:
+> `logs/moe-preflight/esimd-build-moegrouped-r7/`.
 The build in use at the start of Gate 0 had ESIMD instantiations for
 `(K=4, mcg)` and the `mul1` variants only, so all 30 720 routed expert modules
 fell back to the K-generic Triton path at ≈ 1.3 GB/s effective.
@@ -261,7 +268,8 @@ Acceptance evidence:
 | --- | --- | --- |
 | Build | `logs/moe-preflight/esimd-build-k3cb1-r3/` | BUILD OK, load-validated |
 | Build (per-stream workspace) | `logs/moe-preflight/esimd-build-reentrancy-r4/` | BUILD OK, `exl3_supported(3,1)=true`, `small_m_max(3,1)=8`; sha256 `7642ee7f…` |
-| Build (ALL_CODEBOOKS, **current**) | `logs/moe-preflight/esimd-build-allcb-r6/` | BUILD OK, restores `(4,1)`/`(6,1)` for shared + GDN linears; sha256 `d8c1e7ac…` |
+| Build (ALL_CODEBOOKS, r6) | `logs/moe-preflight/esimd-build-allcb-r6/` | BUILD OK, restores `(4,1)`/`(6,1)` for shared + GDN linears; sha256 `d8c1e7ac…` |
+| Build (P4-02 grouped op, **r7 current**) | `logs/moe-preflight/esimd-build-moegrouped-r7/` | BUILD OK, load-validated; sha256 `b627e3a4…` |
 | Bit-exact reconstruction, T-1 | `parity-esimd-forced/exl3-backend-parity.{log,json}` | 18/18 modules `recon_diff=0` |
 | Linear accuracy, T-2 (M ≤ 8) | same | worst max abs 1.2e-4 ≤ 0.08, cosine 1.000000 |
 | M-bucket routing (9…128) | `logs/moe-preflight/k3-mr-sweep.{log,json}` | 32/32 pass; M > 8 → reconstruct+GEMM |
@@ -336,3 +344,11 @@ experiment must record its overrides alongside its logs.
 | Dispatch profiler + host-sync audit (P4-01) | `bench/moe_profile.py`, `logs/moe-p4/moe-profile-{r5-baseline,r6-allcb,r6-p401}.json`, `logs/moe-p4/phase4-dispatch-summary.json` |
 | Bandwidth / weight-writeout discipline (P4-05) | `logs/moe-p4/bandwidth-efficiency.log` |
 | Dense regression on r6 | `logs/moe-p4/dense-regression-r6.{log,json}` (90/90 ALL PASS) |
+| Grouped M=1 decode kernel (P4-02, **r7 current**) | `csrc/exl3_moe_gemv.sycl` (exl3xpu `306192e`), `tests/test_grouped_gemv.py` (3/3: fp16+bf16 bit-exact parity), build `logs/moe-preflight/esimd-build-moegrouped-r7/` (sha256 `b627e3a4…`) |
+| Gate 4 profile: 0 syncs, 41 launches, 0.835 ms/token | `logs/moe-p4/moe-profile-r7-p402.json` |
+| Gate 4 C1 server sweep (4.9–5.4× vs Gate 3) | `results.csv` rows at git `fae3379` (notes `Phase 4 grouped r7+P4-02 …`) |
+| Gate 4 C4 PPL parity (bit-identical to Gate 3) | `logs/moe-p4/gate4-c4-ppl-parity.log`, `logs/moe-p3/ppl-results.json` |
+| Dense regression on r7 (grouped op present) | `logs/moe-p4/dense-regression-r7.{log,json}` (91/91, identical case set to r6) |
+| P4-07 matrix (18 cells, 18 OK) | `bench/bench_moe_envelope.py`, `results_moe.csv` |
+| Gate 4 perf report | `docs/gate4_perf_report.md` |
+| C5 multi-hour soak (in progress) | `bench/soak_moe.py`, `logs/moe-p4/soak-r7.jsonl` |
