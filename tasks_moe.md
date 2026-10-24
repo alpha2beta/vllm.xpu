@@ -922,13 +922,15 @@ Comprehensive certification documented in `docs/gate3_serving_report.md`.
   `bench/moe_profile.py`, `logs/moe-p4/moe-profile-{r5-baseline,r6-allcb,r6-p401}.json`,
   `logs/moe-p4/phase4-dispatch-summary.json`.
 
-- [ ] **P4-02 — Implement dedicated $M=1$ batched decode fast path.**  
+- [x] **P4-02 — Implement dedicated $M=1$ batched decode fast path.**  
   During single-sequence decode, exactly 8 distinct routed experts and 1 shared expert execute per layer with token count $M=1$:
-  1. Gather the 8 active expert descriptors directly on the device.
-  2. Implement a grouped ESIMD GEMV kernel in `csrc/exl3_moe_gemv.sycl` that executes `gate_proj` and `up_proj` across all 8 experts in a **single kernel launch**.
-  3. Compute gated SiLU in registers/SLM.
-  4. Execute a second grouped ESIMD kernel launch for `down_proj` across all 8 experts.  
-  *Evidence:* `csrc/exl3_moe_gemv.sycl`, kernel microbenchmark in `tests/test_grouped_gemv.py`.
+  1. Gather the 8 active expert descriptors directly on the device — `expert_ids` is built from `topk_ids` with `repeat_interleave` on the device (no host read).
+  2. Implement a grouped ESIMD GEMV kernel in `csrc/exl3_moe_gemv.sycl` that executes `gate_proj` and `up_proj` across all 8 experts in a **single kernel launch** — `GroupedFusedKernel<T,K,CB,MR,NT>` with `nslots=2`, `x_unit_stride=0`; one launch for all 16 (expert, slot) units.
+  3. Compute gated SiLU — as one device expression between the two grouped launches (silu+mul elementwise kernels); fusing it into the grouped kernel epilogue is deferred to P4-03+ (activation exchange needs SLM or a follow-on kernel either way).
+  4. Execute a second grouped ESIMD kernel launch for `down_proj` across all 8 experts — `nslots=1`, `x_unit_stride=Kdim` (each unit consumes its own activation row).  
+  Numerics: **bit-for-bit equal** to the eager path at fp16 *and* bf16 (the model's dtype) — row-granular `part` + an exact `HadOutKernel` reduction-chain replica in `grouped_had_out` make the result independent of the grouped split-K geometry (`tests/test_grouped_gemv.py`, 3/3 batteries incl. `apply()` end-to-end).  
+  *Evidence:* `csrc/exl3_moe_gemv.sycl`, `tests/test_grouped_gemv.py`, `logs/moe-p4/moe-profile-r7-p402.json`
+  (decode 0.835 ms/token, **0 host syncs/token**, 41 launches/token vs P4-01's 3.064 ms / 2 syncs / 145 launches), artifact r7 `b627e3a4`.
 
 - [ ] **P4-03 — Optimize chunked prefill for small-$M$ dominance.**  
   Recognize that under top-8 routing over 256 experts, a 256-token prefill chunk averages only $M=8$ tokens per active expert (and 512 tokens averages $M=16$):
