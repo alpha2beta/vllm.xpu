@@ -1,0 +1,204 @@
+{
+  "inputs/x": {
+    "shape": [
+      4,
+      2048
+    ],
+    "dtype": "float16",
+    "sha256": "1bddd194f351942a21744ef73b010884d72c5c63e4a1703fbcaa762c39f78536"
+  },
+  "expert/0/gate_proj/y": {
+    "shape": [
+      4,
+      512
+    ],
+    "dtype": "float32",
+    "sha256": "7d5382514d3d51318ac9ccbc6256a17f4c2e93c5c31e050da11b2e64758f979d"
+  },
+  "expert/0/up_proj/y": {
+    "shape": [
+      4,
+      512
+    ],
+    "dtype": "float32",
+    "sha256": "fd03d425fdbcdcefd6b085448c5a3a7e4d83df7cd087b1322e0608e9d63014bb"
+  },
+  "expert/0/down_proj/y": {
+    "shape": [
+      4,
+      2048
+    ],
+    "dtype": "float32",
+    "sha256": "a9b228c60d2e0067a4e3d80aed9a55971505652611d525373d51d3943af93701"
+  },
+  "expert/0/act": {
+    "shape": [
+      4,
+      512
+    ],
+    "dtype": "float32",
+    "sha256": "0b3d250a8847751289fd67d9667057cb2712d794025f9e8574adf745584622d1"
+  },
+  "meta/expert/0/gate_proj": {
+    "shape": [
+      4
+    ],
+    "dtype": "int32",
+    "sha256": "020705df887db0696f2a823d7a0a76d0ce23ee5a23d591e79095965b7eaf3b22"
+  },
+  "meta/expert/0/up_proj": {
+    "shape": [
+      4
+    ],
+    "dtype": "int32",
+    "sha256": "020705df887db0696f2a823d7a0a76d0ce23ee5a23d591e79095965b7eaf3b22"
+  },
+  "meta/expert/0/down_proj": {
+    "shape": [
+      4
+    ],
+    "dtype": "int32",
+    "sha256": "162a336bdb0406d9b0bb7d389dfa7102ba20d0993ca49b20a09808cb6a251f0d"
+  },
+  "expert/255/gate_proj/y": {
+    "shape": [
+      4,
+      512
+    ],
+    "dtype": "float32",
+    "sha256": "ce0d7b12f9effc199dba331a6aab596be820ca7500394b9eb4f49ec1cc5f1826"
+  },
+  "expert/255/up_proj/y": {
+    "shape": [
+      4,
+      512
+    ],
+    "dtype": "float32",
+    "sha256": "01f551ed526624a193fb82bb7ab8f7b9480ec6352af1d275d0c6a04711f5c93c"
+  },
+  "expert/255/down_proj/y": {
+    "shape": [
+      4,
+      2048
+    ],
+    "dtype": "float32",
+    "sha256": "618fd316b5c51677c7228c5baa54e1690cbad3f0841e52a1595b5e074873d09a"
+  },
+  "expert/255/act": {
+    "shape": [
+      4,
+      512
+    ],
+    "dtype": "float32",
+    "sha256": "2349e20af57bcbdd2fba08dff7afff0feeab754c803f14c508465856b421d708"
+  },
+  "meta/expert/255/gate_proj": {
+    "shape": [
+      4
+    ],
+    "dtype": "int32",
+    "sha256": "020705df887db0696f2a823d7a0a76d0ce23ee5a23d591e79095965b7eaf3b22"
+  },
+  "meta/expert/255/up_proj": {
+    "shape": [
+      4
+    ],
+    "dtype": "int32",
+    "sha256": "020705df887db0696f2a823d7a0a76d0ce23ee5a23d591e79095965b7eaf3b22"
+  },
+  "meta/expert/255/down_proj": {
+    "shape": [
+      4
+    ],
+    "dtype": "int32",
+    "sha256": "162a336bdb0406d9b0bb7d389dfa7102ba20d0993ca49b20a09808cb6a251f0d"
+  },
+  "shared/gate_proj/y": {
+    "shape": [
+      4,
+      512
+    ],
+    "dtype": "float32",
+    "sha256": "ae49a8157dbc63c4d0a87da7c4a962a75f8e9e9a5c6f233e0e2adf3d10230747"
+  },
+  "shared/up_proj/y": {
+    "shape": [
+      4,
+      512
+    ],
+    "dtype": "float32",
+    "sha256": "9233d08686da1533cc499c11823595991368242a60b7d4137121c09b3fe8e481"
+  },
+  "shared/act": {
+    "shape": [
+      4,
+      512
+    ],
+    "dtype": "float32",
+    "sha256": "080e3bc1d38edf28bf7b0270a442f7fc8fc29895aec22aff9664397ad758eeb2"
+  },
+  "shared/down_proj/y": {
+    "shape": [
+      4,
+      2048
+    ],
+    "dtype": "float32",
+    "sha256": "5c19c9fd79007ae62e8ec614359557d2c71918340f6a0863a8e7fc71f47e21ac"
+  },
+  "shared/y": {
+    "shape": [
+      4,
+      2048
+    ],
+    "dtype": "float32",
+    "sha256": "debd8198c80e07cc9bdd2aa9866e8c791401ff1b5b4b2997c69e0b03fc604a44"
+  },
+  "shared/gate_scalar": {
+    "shape": [
+      4,
+      1
+    ],
+    "dtype": "float32",
+    "sha256": "901b84022ab5d1d59ae6d44270470f6bdbb20af54266667db855cbf817de6d07"
+  },
+  "router/logits": {
+    "shape": [
+      4,
+      256
+    ],
+    "dtype": "float32",
+    "sha256": "7bff9d778fbade39398eb68a2b282a407b91c8f08580335601c5b199df1245c8"
+  },
+  "router/topk_ids": {
+    "shape": [
+      4,
+      8
+    ],
+    "dtype": "int32",
+    "sha256": "a57c68ddb887f3c2c56449e38799c559d326ddca6c3f86b24d06658cc90173c8"
+  },
+  "router/topk_weights": {
+    "shape": [
+      4,
+      8
+    ],
+    "dtype": "float32",
+    "sha256": "037b5618ec8dbf1f36654d038f1fd72f147ced096100bdc594d9521db14d0543"
+  },
+  "block/y": {
+    "shape": [
+      4,
+      2048
+    ],
+    "dtype": "float32",
+    "sha256": "cd6c469e10f23d6ca83c012b66725314270775cad1c3ec50030b5f15ca1dc788"
+  },
+  "block/routing_weights": {
+    "shape": [
+      4,
+      2
+    ],
+    "dtype": "float32",
+    "sha256": "87da30f2d53ad98929d083a6129e233b0ac2b04ec5d3448e8e3e59cbf8af577f"
+  }
+}

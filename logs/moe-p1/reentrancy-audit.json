@@ -1,0 +1,117 @@
+{
+  "task": "P1-09",
+  "pass": true,
+  "source": "checkpoint",
+  "model_dir": "/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw",
+  "device": "Intel(R) Arc(TM) Graphics",
+  "recon_slice_n": 1024,
+  "workspace": "per-call stream-ordered at::empty (no static scratch)",
+  "cases": [
+    {
+      "case": "small-M materializes no FP16 weights",
+      "pass": true
+    },
+    {
+      "case": "large-M workspace bounded at slice=1024",
+      "pass": true
+    },
+    {
+      "case": "concurrent streams bit-identical to serial",
+      "pass": true
+    }
+  ],
+  "failures": [],
+  "records": [
+    {
+      "case": "small_m_no_weight_materialization",
+      "proj": "gate_proj",
+      "M": 8,
+      "kernels": [
+        {
+          "name": "exl3::HadInKernel<sycl::_V1::detail::half_impl::half>",
+          "count": 1
+        },
+        {
+          "name": "exl3::GemvKernel<3, 1, 8, 4, false>",
+          "count": 1
+        },
+        {
+          "name": "exl3::HadOutKernel<sycl::_V1::detail::half_impl::half, float>",
+          "count": 1
+        }
+      ],
+      "reconstruct_kernel": false,
+      "gemm_kernel": false,
+      "gemv_kernel": true,
+      "baseline_mib": 0.7919921875,
+      "peak_mib": 2.8310546875,
+      "delta_mib": 2.0390625,
+      "after_mib": 0.7919921875,
+      "persistent_mib": 0.0,
+      "pass": true
+    },
+    {
+      "case": "small_m_no_weight_materialization",
+      "proj": "down_proj",
+      "M": 8,
+      "kernels": [
+        {
+          "name": "exl3::HadInKernel<sycl::_V1::detail::half_impl::half>",
+          "count": 1
+        },
+        {
+          "name": "exl3::GemvKernel<3, 1, 8, 4, false>",
+          "count": 1
+        },
+        {
+          "name": "exl3::HadOutKernel<sycl::_V1::detail::half_impl::half, float>",
+          "count": 1
+        }
+      ],
+      "reconstruct_kernel": false,
+      "gemm_kernel": false,
+      "gemv_kernel": true,
+      "baseline_mib": 0.7685546875,
+      "peak_mib": 2.8076171875,
+      "delta_mib": 2.0390625,
+      "after_mib": 0.7685546875,
+      "persistent_mib": 0.0,
+      "pass": true
+    },
+    {
+      "case": "large_m_workspace_bounded",
+      "proj": "gate_proj",
+      "M": 64,
+      "recon_slice_n": 1024,
+      "reconstruct_launches": 1,
+      "expected_slices": 1,
+      "slice_mib": 2.0,
+      "bound_mib": 3.3125,
+      "peak_1_call_delta_mib": 2.375,
+      "peak_40_calls_delta_mib": 2.375,
+      "persistent_mib": 0.0,
+      "pass": true
+    },
+    {
+      "case": "large_m_workspace_bounded",
+      "proj": "down_proj",
+      "M": 64,
+      "recon_slice_n": 1024,
+      "reconstruct_launches": 2,
+      "expected_slices": 2,
+      "slice_mib": 1.0,
+      "bound_mib": 2.3125,
+      "peak_1_call_delta_mib": 1.5625,
+      "peak_40_calls_delta_mib": 1.5625,
+      "persistent_mib": 0.0,
+      "pass": true
+    },
+    {
+      "case": "concurrent_streams_reentrant",
+      "trials": 100,
+      "streams": 2,
+      "mismatches": 0,
+      "pass": true
+    }
+  ]
+}

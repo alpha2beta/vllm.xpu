@@ -1,0 +1,21 @@
+W1023 22:31:24.984000 149463 torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1023 22:31:24.984000 149463 torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1023 22:31:24.984000 149463 torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+OK   dense linear -> Exl3LinearMethod
+OK   unquantized dense stays unquantized
+OK   routed experts -> Exl3MoEMethod
+OK   direct get_quant_method -> Exl3MoEMethod
+OK   model-qualified prefix normalizes
+OK   apply stub fails closed
+OK   unquantized MoE raises
+OK   partially-quantized expert raises
+OK   expert-count mismatch raises
+OK   mixed-K experts raise
+OK   unsupported K raises
+OK   empty storage raises
+OK   TP/EP raise
+OK   unknown codebook raises
+OK   moe.py has no unquantized fallback
+
+15/15 dispatch cases pass
+wrote logs/moe-preflight/test-dispatch.json

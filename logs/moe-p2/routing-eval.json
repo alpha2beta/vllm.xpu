@@ -1,0 +1,156 @@
+{
+  "task": "P2-02/P2-03/P2-06",
+  "pass": true,
+  "model_dir": "/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw",
+  "device": "Intel(R) Arc(TM) Graphics",
+  "tolerance": {
+    "T2_max_abs": 0.08
+  },
+  "cases": [
+    {
+      "case": "P2-02 router reference",
+      "pass": true
+    },
+    {
+      "case": "P2-02 consumes precomputed weights",
+      "pass": true
+    },
+    {
+      "case": "P2-03 weight after down projection",
+      "pass": true
+    },
+    {
+      "case": "P2-03 weight not on input",
+      "pass": true
+    },
+    {
+      "case": "P2-06 extreme skew",
+      "pass": true
+    },
+    {
+      "case": "P2-06 uniform 256",
+      "pass": true
+    },
+    {
+      "case": "P2-06 zero-token experts",
+      "pass": true
+    },
+    {
+      "case": "P2-06 logit near-ties",
+      "pass": true
+    },
+    {
+      "case": "P2-06 empty M=0",
+      "pass": true
+    },
+    {
+      "case": "P2-06 single token M=1",
+      "pass": true
+    }
+  ],
+  "failures": [],
+  "records": [
+    {
+      "case": "router_reference",
+      "cos_min": 0.9999999403953552,
+      "top8_agreement": 1.0,
+      "weight_max_abs": 2.9802322387695312e-08,
+      "weight_row_sum_min": 1.0,
+      "weight_row_sum_max": 1.0000001192092896,
+      "pass": true
+    },
+    {
+      "case": "consumes_precomputed_weights",
+      "scale_error": 5.960464477539063e-08,
+      "pass": true
+    },
+    {
+      "case": "weight_applied_after_down",
+      "vs_w_times_mlp_max_abs": 5.223744665272534e-06,
+      "vs_mlp_of_wx_max_abs": 0.00026109517784789205,
+      "wrong_over_right_error_ratio": 49.98237750471484,
+      "pass": true
+    },
+    {
+      "case": "weight_not_on_input",
+      "max_abs": 2.3247175704455003e-06,
+      "p99_abs": 1.5612411061738385e-06,
+      "nan_inf": 0,
+      "pass": true
+    },
+    {
+      "case": "extreme_skew_single_expert",
+      "tokens": 16,
+      "unique_experts": 1,
+      "max_abs": 2.8888534870930016e-06,
+      "p99_abs": 1.7057094510164461e-06,
+      "nan_inf": 0,
+      "pass": true
+    },
+    {
+      "case": "uniform_256",
+      "tokens": 256,
+      "unique_experts": 256,
+      "sampled_experts": [
+        0,
+        1,
+        2,
+        63,
+        127,
+        128,
+        254,
+        255
+      ],
+      "sample_max_abs": 3.1628660508431494e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "case": "zero_token_experts",
+      "active": [
+        0,
+        5,
+        100
+      ],
+      "inactive_experts": 253,
+      "max_abs": 3.4492331906221807e-06,
+      "p99_abs": 1.9971539586549625e-06,
+      "nan_inf": 0,
+      "pass": true
+    },
+    {
+      "case": "logit_near_ties",
+      "logits_max_abs": 0.0,
+      "ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ids_stable_across_calls": true,
+      "ids_are_first_topk_set": true,
+      "weights_uniform": true,
+      "pass": true
+    },
+    {
+      "case": "empty_m0",
+      "shape": [
+        0,
+        2048
+      ],
+      "kernels": 0,
+      "pass": true
+    },
+    {
+      "case": "single_token_decode",
+      "max_abs": 1.0716985343606211e-06,
+      "p99_abs": 6.996181127760792e-07,
+      "nan_inf": 0,
+      "pass": true
+    }
+  ]
+}

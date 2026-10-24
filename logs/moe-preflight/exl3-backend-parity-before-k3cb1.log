@@ -1,0 +1,86 @@
+# EXL3 backend parity on Qwen3.5-35B-A3B 3.09bpw fixtures (P0-04 / P0-06)
+fixtures: /home/yanchun/Projects/vllm.xpu/fixtures/exl3-moe/moe-fixtures.safetensors
+device: Intel(R) Arc(TM) Graphics
+torch: 2.14.0+xpu
+modules checked: 18
+result: PASS
+
+## ESIMD support matrix (as-built _C.so)
+ K  codebook esimd  modules
+ 3  mcg      NO     12
+ 4  mcg      yes    6
+
+## Per-module results
+module,K,codebook,esimd_path,recon_diff,worst_max_abs_err,M
+layers.0.mlp.experts.0.down_proj,3,mcg,triton,0,0.000012,1
+layers.0.mlp.experts.0.down_proj,3,mcg,triton,0,0.000015,2
+layers.0.mlp.experts.0.down_proj,3,mcg,triton,0,0.000014,4
+layers.0.mlp.experts.0.down_proj,3,mcg,triton,0,0.000017,8
+layers.0.mlp.experts.0.gate_proj,3,mcg,triton,0,0.000027,1
+layers.0.mlp.experts.0.gate_proj,3,mcg,triton,0,0.000031,2
+layers.0.mlp.experts.0.gate_proj,3,mcg,triton,0,0.000030,4
+layers.0.mlp.experts.0.gate_proj,3,mcg,triton,0,0.000040,8
+layers.0.mlp.experts.0.up_proj,3,mcg,triton,0,0.000030,1
+layers.0.mlp.experts.0.up_proj,3,mcg,triton,0,0.000028,2
+layers.0.mlp.experts.0.up_proj,3,mcg,triton,0,0.000026,4
+layers.0.mlp.experts.0.up_proj,3,mcg,triton,0,0.000033,8
+layers.0.mlp.experts.255.down_proj,3,mcg,triton,0,0.000012,1
+layers.0.mlp.experts.255.down_proj,3,mcg,triton,0,0.000015,2
+layers.0.mlp.experts.255.down_proj,3,mcg,triton,0,0.000012,4
+layers.0.mlp.experts.255.down_proj,3,mcg,triton,0,0.000013,8
+layers.0.mlp.experts.255.gate_proj,3,mcg,triton,0,0.000026,1
+layers.0.mlp.experts.255.gate_proj,3,mcg,triton,0,0.000034,2
+layers.0.mlp.experts.255.gate_proj,3,mcg,triton,0,0.000042,4
+layers.0.mlp.experts.255.gate_proj,3,mcg,triton,0,0.000036,8
+layers.0.mlp.experts.255.up_proj,3,mcg,triton,0,0.000023,1
+layers.0.mlp.experts.255.up_proj,3,mcg,triton,0,0.000031,2
+layers.0.mlp.experts.255.up_proj,3,mcg,triton,0,0.000030,4
+layers.0.mlp.experts.255.up_proj,3,mcg,triton,0,0.000027,8
+layers.0.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000022,1
+layers.0.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000087,2
+layers.0.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000116,4
+layers.0.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000076,8
+layers.0.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000057,1
+layers.0.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000059,2
+layers.0.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000085,4
+layers.0.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000088,8
+layers.0.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000035,1
+layers.0.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000042,2
+layers.0.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000050,4
+layers.0.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000057,8
+layers.3.mlp.experts.0.down_proj,3,mcg,triton,0,0.000019,1
+layers.3.mlp.experts.0.down_proj,3,mcg,triton,0,0.000021,2
+layers.3.mlp.experts.0.down_proj,3,mcg,triton,0,0.000021,4
+layers.3.mlp.experts.0.down_proj,3,mcg,triton,0,0.000027,8
+layers.3.mlp.experts.0.gate_proj,3,mcg,triton,0,0.000035,1
+layers.3.mlp.experts.0.gate_proj,3,mcg,triton,0,0.000037,2
+layers.3.mlp.experts.0.gate_proj,3,mcg,triton,0,0.000038,4
+layers.3.mlp.experts.0.gate_proj,3,mcg,triton,0,0.000043,8
+layers.3.mlp.experts.0.up_proj,3,mcg,triton,0,0.000024,1
+layers.3.mlp.experts.0.up_proj,3,mcg,triton,0,0.000030,2
+layers.3.mlp.experts.0.up_proj,3,mcg,triton,0,0.000037,4
+layers.3.mlp.experts.0.up_proj,3,mcg,triton,0,0.000032,8
+layers.3.mlp.experts.255.down_proj,3,mcg,triton,0,0.000023,1
+layers.3.mlp.experts.255.down_proj,3,mcg,triton,0,0.000019,2
+layers.3.mlp.experts.255.down_proj,3,mcg,triton,0,0.000022,4
+layers.3.mlp.experts.255.down_proj,3,mcg,triton,0,0.000024,8
+layers.3.mlp.experts.255.gate_proj,3,mcg,triton,0,0.000035,1
+layers.3.mlp.experts.255.gate_proj,3,mcg,triton,0,0.000035,2
+layers.3.mlp.experts.255.gate_proj,3,mcg,triton,0,0.000042,4
+layers.3.mlp.experts.255.gate_proj,3,mcg,triton,0,0.000045,8
+layers.3.mlp.experts.255.up_proj,3,mcg,triton,0,0.000032,1
+layers.3.mlp.experts.255.up_proj,3,mcg,triton,0,0.000050,2
+layers.3.mlp.experts.255.up_proj,3,mcg,triton,0,0.000034,4
+layers.3.mlp.experts.255.up_proj,3,mcg,triton,0,0.000039,8
+layers.3.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000052,1
+layers.3.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000092,2
+layers.3.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000047,4
+layers.3.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000093,8
+layers.3.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000046,1
+layers.3.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000049,2
+layers.3.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000051,4
+layers.3.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000051,8
+layers.3.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000046,1
+layers.3.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000045,2
+layers.3.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000051,4
+layers.3.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000061,8

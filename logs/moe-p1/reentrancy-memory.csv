@@ -1,0 +1,5 @@
+case,path,proj,M,baseline_mib,peak_mib,delta_mib,after_mib,persistent_mib,slice_mib,bound_mib,pass
+small_m_no_weight_materialization,fused_vector,gate_proj,8,0.7919921875,2.8310546875,2.0390625,0.7919921875,0.0,,,True
+small_m_no_weight_materialization,fused_vector,down_proj,8,0.7685546875,2.8076171875,2.0390625,0.7685546875,0.0,,,True
+large_m_workspace_bounded,reconstruct_gemm,gate_proj,64,,,,,0.0,2.0,3.3125,True
+large_m_workspace_bounded,reconstruct_gemm,down_proj,64,,,,,0.0,1.0,2.3125,True

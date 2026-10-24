@@ -1,0 +1,29 @@
+P1-06 reconstruction audit  source=checkpoint layer=0
+experts=[0, 1, 127, 254, 255]
+reconstructions=25 bit_exact=19
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 0, "k": 2048, "max_abs": 0.0, "n": 512, "proj": "gate_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 0, "k": 2048, "max_abs": 0.0, "n": 512, "proj": "up_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 0, "k": 512, "max_abs": 0.0, "n": 2048, "proj": "down_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 1, "k": 2048, "max_abs": 0.0, "n": 512, "proj": "gate_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 1, "k": 2048, "max_abs": 0.0, "n": 512, "proj": "up_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 1, "k": 512, "max_abs": 0.0, "n": 2048, "proj": "down_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 127, "k": 2048, "max_abs": 0.0, "n": 512, "proj": "gate_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 127, "k": 2048, "max_abs": 0.0, "n": 512, "proj": "up_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 127, "k": 512, "max_abs": 0.0, "n": 2048, "proj": "down_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 254, "k": 2048, "max_abs": 0.0, "n": 512, "proj": "gate_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 254, "k": 2048, "max_abs": 0.0, "n": 512, "proj": "up_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 254, "k": 512, "max_abs": 0.0, "n": 2048, "proj": "down_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 255, "k": 2048, "max_abs": 0.0, "n": 512, "proj": "gate_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 255, "k": 2048, "max_abs": 0.0, "n": 512, "proj": "up_proj", "status": "ok"}
+  {"K": 3, "bit_exact": true, "cb": 1, "differing": 0, "elements": 1048576, "expert": 255, "k": 512, "max_abs": 0.0, "n": 2048, "proj": "down_proj", "status": "ok"}
+  {"bit_exact": true, "differing": 0, "expert": 0, "proj": "gate_proj", "slice": [128, 384], "status": "ok"}
+  {"bit_exact": true, "differing": 0, "expert": 0, "proj": "gate_proj", "slice": [256, 512], "status": "ok"}
+  {"bit_exact": true, "differing": 0, "expert": 255, "proj": "down_proj", "slice": [128, 640], "status": "ok"}
+  {"bit_exact": true, "differing": 0, "expert": 255, "proj": "down_proj", "slice": [1536, 2048], "status": "ok"}
+  {"expert": 0, "proj": "gate_proj", "status": "ok", "trace_max_abs": 2.2351741790771484e-08}
+  {"expert": 0, "proj": "up_proj", "status": "ok", "trace_max_abs": 1.4901161193847656e-08}
+  {"expert": 0, "proj": "down_proj", "status": "ok", "trace_max_abs": 3.637978807091713e-11}
+  {"expert": 255, "proj": "gate_proj", "status": "ok", "trace_max_abs": 1.862645149230957e-08}
+  {"expert": 255, "proj": "up_proj", "status": "ok", "trace_max_abs": 1.862645149230957e-08}
+  {"expert": 255, "proj": "down_proj", "status": "ok", "trace_max_abs": 3.637978807091713e-11}
+pass=True failures=[]

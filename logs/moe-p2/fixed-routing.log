@@ -1,0 +1,5 @@
+P2-05a fixed routing T2=0.08
+{"case": "fixed_uniform", "experts": [0, 1, 2, 3, 4, 5, 6, 7], "max_abs": 1.066484401235357e-06, "nan_inf": 0, "p99_abs": 6.873444249322347e-07, "pass": true, "tokens": 8}
+{"case": "fixed_uniform", "experts": [0, 1, 2, 3, 4, 5, 6, 7], "max_abs": 9.069190127775073e-07, "nan_inf": 0, "p99_abs": 7.03841692484275e-07, "pass": true, "tokens": 1}
+{"case": "fixed_nonuniform", "experts": [0, 1, 2, 3, 4, 5, 6, 7], "max_abs": 1.3490825949702412e-06, "nan_inf": 0, "p99_abs": 9.429738270227972e-07, "pass": true, "tokens": 4}
+pass=True

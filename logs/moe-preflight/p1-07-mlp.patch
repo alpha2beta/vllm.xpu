@@ -1,0 +1,3151 @@
+# P1-07 evidence: single-expert MLP forward through ops.exl3_linear
+# repo: /home/yanchun/Projects/exl3xpu (dirty worktree) + vllm.xpu
+# date: 2026-10-24T08:04:13Z
+
+## file: exl3xpu/moe.py
+--- a/exl3xpu/moe.py	2026-10-21 22:05:50.341775534 +0200
++++ b/exl3xpu/moe.py	2026-10-24 07:52:40.811102005 +0200
+@@ -0,0 +1,1126 @@
++"""EXL3 routed-expert quantization method (Phase 1: dispatch + expert loading).
++
++Why this file exists
++--------------------
++``Exl3Config.get_quant_method`` used to return ``None`` for
++``RoutedExperts``.  vLLM turns ``None`` into
++``UnquantizedFusedMoEMethod`` (``routed_experts.py:219-220``), which allocates
++256 x (2 x 2048x512 + 512x2048) fp16 experts per layer -- ~64 GiB for this
++model -- before failing on the missing ``.weight`` tensors.  The project rule
++is fail-closed, so this module registers a real ``FusedMoEMethodBase`` that
++either serves the layer or raises.
++
++Stage boundary
++--------------
++P1-01 wired dispatch.  P1-02 registers one compressed allocation per tensor
++kind per layer (trellis / suh / svh / codebook scalars, no fp16 expert weights)
++and loads them through a purpose-built expert loader.  P1-03 packs int64
++per-expert descriptors, and P1-04 adds ``verify_expert_integrity`` (stride/
++offset tiling, no metadata aliasing, tile-not-dense trellis).  ``apply`` is
++still a stub.  There is no unquantized or Triton-backed expert path to fall
++back to.
++
++Why a custom ``load_weights``
++-----------------------------
++``RoutedExperts.load_weights`` decides "fused checkpoint tensor" with
++``loaded_weight.dim() == 3`` and then chunks along dim 1 for ``w1``/``w3``.
++EXL3 trellis tensors are *also* 3-D (``[k/16, n/16, 16K]`` per expert), so the
++stock loader would split one expert's trellis into 64 fake experts.  The
++method therefore binds a per-layer loader that parses
++``<expert>.<proj>.<trellis|suh|svh|codebook>`` explicitly and copies each
++tensor into ``[expert, slot]``.  See ``docs/moe_api_audit.md`` §3.2.
++"""
++
++from __future__ import annotations
++
++import math
++import types
++from dataclasses import dataclass
++from typing import TYPE_CHECKING, Any, Iterable, Iterator
++
++import torch
++from torch.nn import Parameter
++
++from vllm.model_executor.layers.fused_moe.config import (
++    FusedMoEConfig,
++    FusedMoEQuantConfig,
++)
++from vllm.model_executor.layers.fused_moe.fused_moe_method_base import (
++    FusedMoEMethodBase,
++)
++
++if TYPE_CHECKING:  # pragma: no cover - typing only
++    from vllm.model_executor.layers.fused_moe.routed_experts import RoutedExperts
++
++    from .vllm_plugin import Exl3Config
++
++#: EXL3 codebook name -> numeric id used by the kernels and the checkpoint.
++CODEBOOK_IDS = {"3inst": 0, "mcg": 1, "mul1": 2}
++
++#: Projections every routed expert must provide in this checkpoint schema.
++CHECKPOINT_PROJECTIONS = ("gate_proj", "up_proj", "down_proj")
++
++
++class Exl3MoEUnsupported(NotImplementedError):
++    """The MoE layer cannot be served by EXL3.
++
++    Deliberately an exception rather than a ``None`` return: ``None`` makes
++    vLLM silently construct ``UnquantizedFusedMoEMethod`` (~64 GiB of fp16
++    experts).  Callers may catch this to produce a richer error, but must not
++    downgrade it to an unquantized path.
++    """
++
++
++#: Level Zero per-allocation ceiling from the P1-02 plan. Every registered
++#: expert tensor must stay below this *and* the per-layer total must too.
++MAX_ALLOCATION_BYTES = 4 * 1024**3
++
++#: MoE shard id -> fused slot index inside w13 (w2 has a single slot).
++_SHARD_SLOT = {"w1": 0, "w3": 1, "w2": 0}
++
++#: Canonical projection order used by the packed expert descriptors.
++_PROJ_ORDER = ("gate_proj", "up_proj", "down_proj")
++_PROJ_SHARDS = ("w1", "w3", "w2")
++
++#: Fields of one descriptor row (int64), indexed by
++#: ``layer.exl3_moe_descriptors[expert, projection, field]``.
++#: ``*_tensor`` indexes ``layer.exl3_moe_tensor_names``; ``*_offset`` is an
++#: element offset into that allocation. -1 marks an absent tensor (3inst has no
++#: codebook scalar).
++DESCRIPTOR_FIELDS = (
++    "trellis_tensor",
++    "trellis_offset",
++    "suh_tensor",
++    "suh_offset",
++    "svh_tensor",
++    "svh_offset",
++    "codebook_tensor",
++    "codebook_offset",
++    "k",
++    "n",
++    "K",
++    "cb",
++    "family",
++    "slot",
++)
++
++#: family id used in descriptor rows.
++_FAMILY_ID = {"w13": 0, "w2": 1}
++
++
++def _s32(value: int) -> int:
++    """Interpret an unsigned 32-bit constant as a signed int32 (checkpoint form)."""
++    return value - (1 << 32) if value >= (1 << 31) else value
++
++
++#: Value stored in the per-expert codebook scalar. The tensor's *presence*
++#: selects the codebook; its value is the codebook multiplier, so a mismatch
++#: means the checkpoint is not what the config claims.
++CODEBOOK_MULTIPLIERS = {
++    "mcg": _s32(0xCBAC1FED),
++    "mul1": _s32(0x83DCD12D),
++}
++
++
++def _trellis_shape(k: int, n: int, K: int) -> tuple[int, int, int]:
++    return (k // 16, n // 16, 16 * K)
++
++
++@dataclass(frozen=True)
++class ExpertTensorSpec:
++    """One per-layer stacked expert tensor (all experts share the layout)."""
++
++    name: str  # parameter name on RoutedExperts, e.g. "w13_trellis"
++    tensor: str  # checkpoint suffix: trellis | suh | svh | <codebook>
++    slots: int  # 2 for w13 (gate+up), 1 for w2 (down)
++    shape: tuple[int, ...]
++    dtype: torch.dtype
++
++    @property
++    def nbytes(self) -> int:
++        return math.prod(self.shape) * self.dtype.itemsize
++
++
++class Exl3ExpertStore:
++    """Shape/dtype/budget plan for one layer's compressed expert tensors.
++
++    All experts of a layer live in one allocation per tensor kind (eight
++    allocations per layer for the mcg checkpoint). At 3.09 bpw that is
++    ~192 MiB for ``w13_trellis`` and ~96 MiB for ``w2_trellis``, so each
++    allocation and the per-layer total stay far below
++    ``MAX_ALLOCATION_BYTES``.
++    """
++
++    def __init__(
++        self,
++        num_experts: int,
++        hidden_size: int,
++        intermediate_size: int,
++        K: int,
++        codebook: str,
++    ):
++        if num_experts <= 0:
++            raise Exl3MoEUnsupported(f"exl3: MoE: bad expert count {num_experts}")
++        for label, dim in (
++            ("hidden_size", hidden_size),
++            ("intermediate_size", intermediate_size),
++        ):
++            if dim % 128 != 0:
++                raise Exl3MoEUnsupported(
++                    f"exl3: MoE: {label}={dim} must be a multiple of 128 "
++                    "(trellis tile / grouped-GEMV requirement)"
++                )
++        self.num_experts = num_experts
++        self.hidden_size = hidden_size
++        self.intermediate_size = intermediate_size
++        self.K = K
++        self.codebook = codebook
++
++        def spec(name, tensor, slots, shape, dtype):
++            return ExpertTensorSpec(name, tensor, slots, tuple(shape), dtype)
++
++        specs = [
++            spec(
++                "w13_trellis", "trellis", 2,
++                (num_experts, 2, *_trellis_shape(hidden_size, intermediate_size, K)),
++                torch.int16,
++            ),
++            spec("w13_suh", "suh", 2, (num_experts, 2, hidden_size), torch.float16),
++            spec("w13_svh", "svh", 2, (num_experts, 2, intermediate_size), torch.float16),
++            spec(
++                "w2_trellis", "trellis", 1,
++                (num_experts, 1, *_trellis_shape(intermediate_size, hidden_size, K)),
++                torch.int16,
++            ),
++            spec("w2_suh", "suh", 1, (num_experts, 1, intermediate_size), torch.float16),
++            spec("w2_svh", "svh", 1, (num_experts, 1, hidden_size), torch.float16),
++        ]
++        if codebook != "3inst":
++            specs += [
++                spec(f"w13_{codebook}", codebook, 2, (num_experts, 2), torch.int32),
++                spec(f"w2_{codebook}", codebook, 1, (num_experts, 1), torch.int32),
++            ]
++        self.specs: tuple[ExpertTensorSpec, ...] = tuple(specs)
++        self.total_bytes = sum(s.nbytes for s in self.specs)
++
++        oversized = [s for s in self.specs if s.nbytes >= MAX_ALLOCATION_BYTES]
++        if oversized:
++            raise Exl3MoEUnsupported(
++                "exl3: MoE: single-allocation limit exceeded: "
++                + ", ".join(
++                    f"{s.name}={s.nbytes / 2**30:.2f} GiB" for s in oversized
++                )
++                + f" (limit {MAX_ALLOCATION_BYTES / 2**30:.0f} GiB)"
++            )
++        if self.total_bytes >= MAX_ALLOCATION_BYTES:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE: per-layer expert buffers total "
++                f"{self.total_bytes / 2**30:.2f} GiB >= "
++                f"{MAX_ALLOCATION_BYTES / 2**30:.0f} GiB"
++            )
++
++    def get(self, name: str) -> ExpertTensorSpec:
++        for s in self.specs:
++            if s.name == name:
++                return s
++        raise KeyError(name)
++
++    def meta(self) -> dict[str, Any]:
++        return {
++            "num_experts": self.num_experts,
++            "hidden_size": self.hidden_size,
++            "intermediate_size": self.intermediate_size,
++            "K": self.K,
++            "total_bytes": self.total_bytes,
++            "max_allocation_bytes": MAX_ALLOCATION_BYTES,
++            "tensors": {
++                s.name: {
++                    "shape": list(s.shape),
++                    "dtype": str(s.dtype).removeprefix("torch."),
++                    "bytes": s.nbytes,
++                }
++                for s in self.specs
++            },
++        }
++
++
++class Exl3MoEMethod(FusedMoEMethodBase):
++    """Quantization method for EXL3-compressed routed experts.
++
++    Holds the per-layer format contract (K, codebook, expert count), registers
++    the compressed expert tensors in :meth:`create_weights`, loads them
++    through the per-layer expert loader described in the module docstring, and
++    verifies packed-arena integrity in :meth:`verify_expert_integrity`.
++    Execution (:meth:`apply`) is P1-05+.
++    """
++
++    def __init__(self, config: "Exl3Config", layer: "RoutedExperts", prefix: str):
++        moe: FusedMoEConfig = layer.moe_config
++        super().__init__(moe)
++
++        self.config = config
++        self.prefix = prefix
++        # Checkpoint storage keys are normalized ("layers.0..."), while vLLM
++        # passes the model-qualified prefix ("model.language_model.layers.0...").
++        from .vllm_plugin import _norm_key
++        self.key_prefix = _norm_key(prefix)
++        self.num_local_experts = int(moe.num_local_experts)
++        self.hidden_size = int(moe.hidden_dim)
++        self.intermediate_size_per_partition = int(moe.intermediate_size_per_partition)
++
++        self._validate_parallel(moe)
++
++        codebook = config.codebook
++        if codebook not in CODEBOOK_IDS:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {prefix}: unknown codebook {codebook!r}; "
++                f"expected one of {sorted(CODEBOOK_IDS)}"
++            )
++        self.cb = CODEBOOK_IDS[codebook]
++
++        # Raises if the checkpoint has no / inconsistent / unsupported expert
++        # format for this layer.  Resolved before the constructor returns so a
++        # bad checkpoint fails at model construction, not at first token.
++        self.K = self._resolve_expert_K(layer)
++        self._check_kernel_support()
++
++    # -- validation ---------------------------------------------------------
++
++    @staticmethod
++    def _validate_parallel(moe: FusedMoEConfig) -> None:
++        pc = moe.moe_parallel_config
++        if pc.tp_size > 1 or pc.ep_size > 1 or getattr(pc, "use_ep", False):
++            raise Exl3MoEUnsupported(
++                "exl3: MoE tensor/expert parallelism is not supported "
++                f"(tp_size={pc.tp_size}, ep_size={pc.ep_size}, use_ep={pc.use_ep}); "
++                "run with TP=1 and EP off"
++            )
++
++    def _checkpoint_projection_names(self, layer: "RoutedExperts") -> tuple[str, str, str]:
++        """Checkpoint-side projection names for gate/up/down.
++
++        ``RoutedExperts`` stores the ckpt names it was built with; defaults
++        match the EXL3 Qwen3.5 checkpoint.  Ordering is gate, up, down.
++        """
++        return (
++            getattr(layer, "ckpt_gate_proj_name", CHECKPOINT_PROJECTIONS[0]),
++            getattr(layer, "ckpt_up_proj_name", CHECKPOINT_PROJECTIONS[1]),
++            getattr(layer, "ckpt_down_proj_name", CHECKPOINT_PROJECTIONS[2]),
++        )
++
++    def _resolve_expert_K(self, layer: "RoutedExperts") -> int:
++        """Validate the checkpoint schema and return the routed trellis K."""
++        storage = self.config.storage
++        if not storage:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: checkpoint storage map is empty, so the "
++                "routed-expert format cannot be resolved (was "
++                "Exl3Config.maybe_update_config called?)"
++            )
++
++        prefix = self.key_prefix + "."
++        entries = {k: v for k, v in storage.items() if k.startswith(prefix)}
++        if not entries:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: no EXL3 expert tensors found for this "
++                "layer (partially-quantized or unquantized MoE is not supported)"
++            )
++
++        proj_names = set(self._checkpoint_projection_names(layer))
++        by_expert: dict[int, dict[str, int]] = {}
++        for key, bits in entries.items():
++            rest = key[len(prefix):].split(".")
++            if len(rest) != 2 or not rest[0].isdigit():
++                raise Exl3MoEUnsupported(
++                    f"exl3: MoE {self.prefix}: unexpected expert tensor name {key!r}"
++                )
++            expert_id, proj = int(rest[0]), rest[1]
++            if proj not in proj_names:
++                raise Exl3MoEUnsupported(
++                    f"exl3: MoE {self.prefix}: unexpected projection {proj!r} in {key!r}"
++                )
++            info = self.config.member_trellis.get(key)
++            K = int(info[1]) if info is not None else int(bits)
++            by_expert.setdefault(expert_id, {})[proj] = K
++
++        # Completeness: an expert missing a projection would load partially and
++        # silently produce garbage, so reject the layer up front.
++        for expert_id, projs in sorted(by_expert.items()):
++            missing = proj_names - projs.keys()
++            if missing:
++                raise Exl3MoEUnsupported(
++                    f"exl3: MoE {self.prefix}: expert {expert_id} is missing "
++                    f"quantized projections {sorted(missing)}"
++                )
++
++        if len(by_expert) != self.num_local_experts:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: checkpoint has {len(by_expert)} experts, "
++                f"layer expects {self.num_local_experts}"
++            )
++
++        Ks = {K for projs in by_expert.values() for K in projs.values()}
++        if len(Ks) != 1:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: mixed trellis K across experts: {sorted(Ks)}"
++            )
++        return Ks.pop()
++
++    def _check_kernel_support(self) -> None:
++        """Fail closed unless the built extension has a kernel for (K, cb)."""
++        from . import ops
++
++        try:
++            esimd = ops._get_esimd()
++        except RuntimeError as exc:  # library missing / ABI mismatch
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: ESIMD op library is not loadable and "
++                "routed experts have no Triton fallback"
++            ) from exc
++        if not esimd or not hasattr(esimd, "exl3_supported"):
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: ESIMD op library is not available "
++                "(EXL3_BACKEND=triton disables it) and routed experts have no "
++                "fallback"
++            )
++        if not bool(esimd.exl3_supported(self.K, self.cb)):
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: no ESIMD kernel for K={self.K}, "
++                f"codebook={self.config.codebook!r} (cb={self.cb}); rebuild with "
++                "-DEXL3_ALL_CODEBOOKS or use a supported bitrate"
++            )
++
++    # -- FusedMoEMethodBase contract ---------------------------------------
++
++    def create_weights(
++        self,
++        layer: "RoutedExperts",
++        num_experts: int,
++        hidden_size: int,
++        intermediate_size_per_partition: int,
++        params_dtype: torch.dtype,
++        **extra_weight_attrs: Any,
++    ) -> None:
++        """Register the compressed expert tensors for one layer.
++
++        Exactly one allocation per tensor kind:
++        ``w13_trellis[E,2,k/16,n/16,16K]``, ``w13_suh[E,2,k]``,
++        ``w13_svh[E,2,n]``, ``w2_trellis[E,1,n/16,k/16,16K]``, ``w2_suh``,
++        ``w2_svh`` and (for ``mcg``/``mul1``) one scalar ``int32`` per expert
++        and slot.  There is no fp16 copy of any expert matrix.
++        """
++        if int(num_experts) != self.num_local_experts:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: create_weights got num_experts="
++                f"{num_experts}, method was built for {self.num_local_experts}"
++            )
++        if int(hidden_size) != self.hidden_size:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: create_weights got hidden_size="
++                f"{hidden_size}, method was built for {self.hidden_size}"
++            )
++        if int(intermediate_size_per_partition) != self.intermediate_size_per_partition:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: create_weights got "
++                f"intermediate_size_per_partition={intermediate_size_per_partition}, "
++                f"method was built for {self.intermediate_size_per_partition}"
++            )
++
++        store = Exl3ExpertStore(
++            num_experts=self.num_local_experts,
++            hidden_size=self.hidden_size,
++            intermediate_size=self.intermediate_size_per_partition,
++            K=self.K,
++            codebook=self.config.codebook,
++        )
++        self.store = store
++        self._loaded: set[tuple[str, int, int]] = set()
++        self._load_attempted = False
++
++        for spec in store.specs:
++            # Allocate on the active device: vLLM constructs the model inside
++            # `with torch.device(target_device)` (base_loader.py:67).
++            param = Parameter(
++                torch.empty(spec.shape, dtype=spec.dtype), requires_grad=False
++            )
++            param.weight_loader = self._make_weight_loader(spec)
++            param.exl3_spec = spec
++            layer.register_parameter(spec.name, param)
++
++        tensor_names = [s.name for s in store.specs]
++        layer.exl3_moe_tensor_names = tensor_names
++        descriptors = self._build_descriptors(layer, tensor_names)
++        # Non-persistent: moves with the module, absent from state_dict, and
++        # skipped by the dummy loader.
++        layer.register_buffer(
++            "exl3_moe_descriptors", descriptors, persistent=False
++        )
++
++        meta = store.meta()
++        meta.update(
++            {
++                "prefix": self.key_prefix,
++                "codebook": self.config.codebook,
++                "codebook_id": self.cb,
++                "allocations": len(store.specs),
++                "tensor_order": tensor_names,
++                "descriptor_fields": list(DESCRIPTOR_FIELDS),
++                "descriptor_shape": list(descriptors.shape),
++            }
++        )
++        layer.exl3_moe_meta = meta
++
++        # Replace the generic expert loader (see module docstring): trellis
++        # tensors are 3-D and would otherwise be treated as fused w13 tensors.
++        layer.load_weights = types.MethodType(self._layer_load_weights, layer)
++
++    # -- expert weight loading ---------------------------------------------
++
++    def _make_weight_loader(self, spec: ExpertTensorSpec):
++        """Per-parameter loader used by the per-layer expert loader.
++
++        Signature mirrors vLLM's ``weight_loader`` protocol; ``return_success``
++        is honoured so the stock mapping bookkeeping keeps working.
++        """
++
++        def weight_loader(
++            param: Parameter,
++            loaded_weight: torch.Tensor,
++            weight_name: str = "",
++            shard_id: str | None = None,
++            expert_id: int | None = None,
++            return_success: bool = False,
++            **_: Any,
++        ):
++            self._copy_expert_tensor(
++                spec, param, loaded_weight, shard_id, expert_id, weight_name
++            )
++            return True if return_success else None
++
++        return weight_loader
++
++    def _copy_expert_tensor(
++        self,
++        spec: ExpertTensorSpec,
++        param: Parameter,
++        loaded_weight: torch.Tensor,
++        shard_id: str | None,
++        expert_id: int | None,
++        weight_name: str,
++    ) -> None:
++        if shard_id not in _SHARD_SLOT:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: {spec.name} got unknown shard_id "
++                f"{shard_id!r} (expected one of {sorted(_SHARD_SLOT)}) for "
++                f"{weight_name!r}"
++            )
++        if spec.name.startswith("w13_") != (shard_id in ("w1", "w3")):
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: shard_id {shard_id!r} does not match "
++                f"parameter {spec.name!r}"
++            )
++        if expert_id is None or not isinstance(expert_id, int):
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: {spec.name} requires an integer "
++                f"expert_id, got {expert_id!r} for {weight_name!r}"
++            )
++        if not 0 <= expert_id < self.num_local_experts:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: expert_id {expert_id} out of range "
++                f"for {spec.name} ({self.num_local_experts} experts)"
++            )
++
++        slot = _SHARD_SLOT[shard_id]
++        expected = spec.shape[2:]
++        if tuple(loaded_weight.shape) != expected:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: {weight_name!r} has shape "
++                f"{tuple(loaded_weight.shape)}, expected {expected} for "
++                f"{spec.name} (expert {expert_id}, slot {slot})"
++            )
++        if loaded_weight.dtype != spec.dtype:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: {weight_name!r} has dtype "
++                f"{loaded_weight.dtype}, expected {spec.dtype} for {spec.name}"
++            )
++
++        param.data[expert_id, slot].copy_(loaded_weight)
++        self._loaded.add((spec.name, expert_id, slot))
++
++    def _layer_load_weights(
++        self, layer: "RoutedExperts", weights: Iterable[tuple[str, torch.Tensor]]
++    ) -> Iterator[str]:
++        """Layer-bound replacement for ``RoutedExperts.load_weights``.
++
++        Consumes names relative to the ``RoutedExperts`` module (the form
++        ``AutoWeightsLoader`` passes after stripping the child prefix), e.g.
++        ``"0.gate_proj.trellis"``.
++
++        Kept as a plain function returning a generator so the "a real load was
++        attempted" flag is set eagerly, even if a caller forgets to iterate.
++        """
++        self._load_attempted = True
++        return self._iter_layer_weights(layer, weights)
++
++    def _iter_layer_weights(
++        self, layer: "RoutedExperts", weights: Iterable[tuple[str, torch.Tensor]]
++    ) -> Iterator[str]:
++        gate, up, down = self._checkpoint_projection_names(layer)
++        shard_of_proj = {gate: "w1", up: "w3", down: "w2"}
++
++        for name, loaded_weight in weights:
++            parts = name.split(".")
++            if len(parts) != 3 or not parts[0].isdigit():
++                raise Exl3MoEUnsupported(
++                    f"exl3: MoE {self.prefix}: unexpected routed-expert tensor "
++                    f"{name!r} (expected '<expert>.<projection>.<suffix>')"
++                )
++            expert_id, proj, suffix = int(parts[0]), parts[1], parts[2]
++            shard_id = shard_of_proj.get(proj)
++            if shard_id is None:
++                raise Exl3MoEUnsupported(
++                    f"exl3: MoE {self.prefix}: unexpected projection {proj!r} in "
++                    f"{name!r} (expected one of {sorted(shard_of_proj)})"
++                )
++            family = "w13" if shard_id in ("w1", "w3") else "w2"
++            param_name = f"{family}_{suffix}"
++            try:
++                spec = self.store.get(param_name)
++            except KeyError:
++                raise Exl3MoEUnsupported(
++                    f"exl3: MoE {self.prefix}: unexpected tensor suffix {suffix!r} "
++                    f"in {name!r}; expected "
++                    f"{sorted(s.tensor for s in self.store.specs)}"
++                ) from None
++            param = getattr(layer, param_name)
++            param.weight_loader(
++                param=param,
++                loaded_weight=loaded_weight,
++                weight_name=name,
++                shard_id=shard_id,
++                expert_id=expert_id,
++                return_success=True,
++            )
++            yield param_name
++
++    # -- packed expert descriptors (P1-03) ----------------------------------
++
++    def _build_descriptors(
++        self, layer: "RoutedExperts", tensor_names: list[str]
++    ) -> torch.Tensor:
++        """Build ``[E, 3, len(DESCRIPTOR_FIELDS)]`` int64 descriptor rows.
++
++        Rows are derived from the allocation plan only (no data), so every
++        expert/projection resolves to an explicit ``(allocation, element
++        offset, slot, k, n, K, cb)`` rather than an implicit concatenation.
++        """
++        index = {name: i for i, name in enumerate(tensor_names)}
++        rows: list[list[int]] = []
++        for expert_id in range(self.num_local_experts):
++            for proj_index, shard_id in enumerate(_PROJ_SHARDS):
++                family = "w13" if shard_id in ("w1", "w3") else "w2"
++                slot = _SHARD_SLOT[shard_id]
++                trellis = self.store.get(f"{family}_trellis")
++                suh = self.store.get(f"{family}_suh")
++                svh = self.store.get(f"{family}_svh")
++                if self.config.codebook == "3inst":
++                    cb_spec = None
++                else:
++                    cb_spec = self.store.get(f"{family}_{self.config.codebook}")
++
++                def offset(spec: ExpertTensorSpec) -> int:
++                    per_expert = math.prod(spec.shape[2:])
++                    return (expert_id * spec.slots + slot) * per_expert
++
++                # NOTE: projection identity follows _PROJ_ORDER/_PROJ_SHARDS;
++                # custom checkpoint projection names are resolved by the loader
++                # (``_checkpoint_projection_names``), not here.
++                if shard_id in ("w1", "w3"):
++                    k, n = self.hidden_size, self.intermediate_size_per_partition
++                else:
++                    k, n = self.intermediate_size_per_partition, self.hidden_size
++
++                rows.append(
++                    [
++                        index[trellis.name],
++                        offset(trellis),
++                        index[suh.name],
++                        offset(suh),
++                        index[svh.name],
++                        offset(svh),
++                        index[cb_spec.name] if cb_spec is not None else -1,
++                        offset(cb_spec) if cb_spec is not None else -1,
++                        k,
++                        n,
++                        self.K,
++                        self.cb,
++                        _FAMILY_ID[family],
++                        slot,
++                    ]
++                )
++        device = getattr(layer, tensor_names[0]).device
++        return torch.tensor(rows, dtype=torch.int64, device=device).reshape(
++            self.num_local_experts, len(_PROJ_ORDER), len(DESCRIPTOR_FIELDS)
++        )
++
++    def descriptor(self, layer: "RoutedExperts", expert_id: int, projection: str) -> dict[str, int]:
++        """One descriptor row as a named dict (raises on bad ids)."""
++        if projection not in _PROJ_ORDER:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: unknown projection {projection!r}"
++            )
++        if not 0 <= expert_id < self.num_local_experts:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: expert_id {expert_id} out of range"
++            )
++        row = layer.exl3_moe_descriptors[
++            expert_id, _PROJ_ORDER.index(projection)
++        ].tolist()
++        return dict(zip(DESCRIPTOR_FIELDS, row))
++
++    def expert_views(
++        self, layer: "RoutedExperts", expert_id: int
++    ) -> dict[str, dict[str, torch.Tensor | None]]:
++        """Actual parameter views for one expert, one dict per projection.
++
++        This is the P1-03/P1-04 bridge: consumers never index the stacked
++        allocation by hand, and tests can compare views against the descriptor
++        offsets.
++        """
++        out: dict[str, dict[str, torch.Tensor | None]] = {}
++        for projection in _PROJ_ORDER:
++            row = self.descriptor(layer, expert_id, projection)
++            shard_id = _PROJ_SHARDS[_PROJ_ORDER.index(projection)]
++            family = "w13" if shard_id in ("w1", "w3") else "w2"
++            slot = row["slot"]
++            codebook = None
++            if row["codebook_tensor"] >= 0:
++                cb_name = layer.exl3_moe_tensor_names[row["codebook_tensor"]]
++                codebook = getattr(layer, cb_name)[expert_id, slot]
++            out[projection] = {
++                "trellis": getattr(layer, f"{family}_trellis")[expert_id, slot],
++                "suh": getattr(layer, f"{family}_suh")[expert_id, slot],
++                "svh": getattr(layer, f"{family}_svh")[expert_id, slot],
++                "codebook": codebook,
++                "k": row["k"],
++                "n": row["n"],
++                "K": row["K"],
++                "cb": row["cb"],
++            }
++        return out
++
++    # -- integrity verification (P1-04) -------------------------------------
++
++    def verify_expert_integrity(self, layer: "RoutedExperts") -> dict[str, Any]:
++        """Assert the packed arenas keep per-expert metadata intact (P1-04).
++
++        Structural only (no checkpoint values), so it is safe for
++        ``--load-format dummy`` too:
++
++        * each tensor kind owns a distinct allocation;
++        * every ``(expert, slot)`` slice owns distinct storage, so ``suh``/``svh``
++          scales and Hadamard vectors are never shared between experts or
++          between gate and up;
++        * registered parameter shapes match the plan (tiled, not dense);
++        * the ``[E, slots, ...]`` arena is exactly tiled by the descriptor
++          offsets ``(expert*slots + slot) * per_expert``, so codes are always
++          addressed through explicit stride/offset tracking;
++        * trellis uses the tile layout ``[k/16, n/16, 16K]`` (``w2`` is
++          ``[n/16, k/16, 16K]``), never a dense ``[k, n]`` row store;
++        * ``suh``/``svh`` lengths equal ``k``/``n`` and codebook entries carry
++          the expected multiplier.
++
++        Returns a small summary (used in evidence) and raises
++        :class:`Exl3MoEUnsupported` on any violation.
++        """
++        names = list(getattr(layer, "exl3_moe_tensor_names", []))
++        if names != [s.name for s in self.store.specs]:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: expert tensor order {names} does not "
++                "match the allocation plan"
++            )
++
++        descriptors = getattr(layer, "exl3_moe_descriptors", None)
++        expected_shape = (
++            self.num_local_experts,
++            len(_PROJ_ORDER),
++            len(DESCRIPTOR_FIELDS),
++        )
++        if descriptors is None or tuple(descriptors.shape) != expected_shape:
++            got = None if descriptors is None else tuple(descriptors.shape)
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: descriptor shape {got} != {expected_shape}"
++            )
++        if descriptors.dtype != torch.int64:
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: descriptor dtype {descriptors.dtype} "
++                "!= int64"
++            )
++
++        # 1. A distinct allocation per tensor kind.
++        owners: dict[int, str] = {}
++        for name in names:
++            ptr = getattr(layer, name).data_ptr()
++            if ptr in owners:
++                raise Exl3MoEUnsupported(
++                    f"exl3: MoE {self.prefix}: {name} aliases the allocation of "
++                    f"{owners[ptr]}"
++                )
++            owners[ptr] = name
++
++        # 2. Registered shapes match the plan; every (expert, slot) slice owns
++        #    distinct storage and the arena is exactly tiled.
++        for spec in self.store.specs:
++            param = getattr(layer, spec.name)
++            if tuple(param.shape) != spec.shape:
++                raise Exl3MoEUnsupported(
++                    f"exl3: MoE {self.prefix}: {spec.name} has shape "
++                    f"{tuple(param.shape)}, expected tiled {spec.shape} (codes must "
++                    "not be stored as concatenated dense rows)"
++                )
++            per = math.prod(spec.shape[2:])
++            if param.numel() != self.num_local_experts * spec.slots * per:
++                raise Exl3MoEUnsupported(
++                    f"exl3: MoE {self.prefix}: {spec.name} arena size "
++                    f"{param.numel()} is not E*slots*per={self.num_local_experts}"
++                    f"*{spec.slots}*{per}"
++                )
++            seen: set[int] = set()
++            for expert_id in range(self.num_local_experts):
++                for slot in range(spec.slots):
++                    ptr = param[expert_id, slot].data_ptr()
++                    if ptr in seen:
++                        raise Exl3MoEUnsupported(
++                            f"exl3: MoE {self.prefix}: {spec.name}[expert="
++                            f"{expert_id},slot={slot}] aliases another expert slice"
++                        )
++                    seen.add(ptr)
++
++        expected_multiplier = CODEBOOK_MULTIPLIERS.get(self.config.codebook)
++        for expert_id in range(self.num_local_experts):
++            for proj_index, shard_id in enumerate(_PROJ_SHARDS):
++                family = "w13" if shard_id in ("w1", "w3") else "w2"
++                slot = _SHARD_SLOT[shard_id]
++                row = dict(
++                    zip(DESCRIPTOR_FIELDS, descriptors[expert_id, proj_index].tolist())
++                )
++                if row["family"] != _FAMILY_ID[family] or row["slot"] != slot:
++                    raise Exl3MoEUnsupported(
++                        f"exl3: MoE {self.prefix}: descriptor[{expert_id},"
++                        f"{proj_index}] family/slot {row['family']}/{row['slot']} "
++                        f"!= {_FAMILY_ID[family]}/{slot}"
++                    )
++                if row["K"] != self.K or row["cb"] != self.cb:
++                    raise Exl3MoEUnsupported(
++                        f"exl3: MoE {self.prefix}: descriptor[{expert_id},"
++                        f"{proj_index}] K/cb {row['K']}/{row['cb']} != "
++                        f"{self.K}/{self.cb}"
++                    )
++
++                if family == "w13":
++                    k = self.hidden_size
++                    n = self.intermediate_size_per_partition
++                else:
++                    k = self.intermediate_size_per_partition
++                    n = self.hidden_size
++                # Trellis tiles are always [k/16, n/16, 16K] (see
++                # docs/checkpoint_schema.md); w2 is *not* transposed.
++                tile = _trellis_shape(k, n, self.K)
++                if row["k"] != k or row["n"] != n:
++                    raise Exl3MoEUnsupported(
++                        f"exl3: MoE {self.prefix}: descriptor[{expert_id},"
++                        f"{proj_index}] k/n {row['k']}/{row['n']} != {k}/{n}"
++                    )
++
++                for kind, spec_name in (
++                    ("trellis", f"{family}_trellis"),
++                    ("suh", f"{family}_suh"),
++                    ("svh", f"{family}_svh"),
++                ):
++                    spec = self.store.get(spec_name)
++                    per = math.prod(spec.shape[2:])
++                    if row[f"{kind}_tensor"] != names.index(spec.name):
++                        raise Exl3MoEUnsupported(
++                            f"exl3: MoE {self.prefix}: descriptor[{expert_id},"
++                            f"{proj_index}] {kind}_tensor {row[f'{kind}_tensor']} "
++                            f"!= {names.index(spec.name)} ({spec.name})"
++                        )
++                    expected_offset = (expert_id * spec.slots + slot) * per
++                    if row[f"{kind}_offset"] != expected_offset:
++                        raise Exl3MoEUnsupported(
++                            f"exl3: MoE {self.prefix}: descriptor[{expert_id},"
++                            f"{proj_index}] {kind}_offset {row[f'{kind}_offset']} "
++                            f"!= strided offset {expected_offset}"
++                        )
++                    if expected_offset + per > getattr(layer, spec.name).numel():
++                        raise Exl3MoEUnsupported(
++                            f"exl3: MoE {self.prefix}: descriptor[{expert_id},"
++                            f"{proj_index}] {kind} slice runs past {spec.name}"
++                        )
++
++                trellis_spec = self.store.get(f"{family}_trellis")
++                if tuple(trellis_spec.shape[2:]) != tile:
++                    raise Exl3MoEUnsupported(
++                        f"exl3: MoE {self.prefix}: {family}_trellis tile "
++                        f"{tuple(trellis_spec.shape[2:])} != {tile}"
++                    )
++                if self.store.get(f"{family}_suh").shape[2] != k:
++                    raise Exl3MoEUnsupported(
++                        f"exl3: MoE {self.prefix}: {family}_suh length "
++                        f"{self.store.get(f'{family}_suh').shape[2]} != k={k}"
++                    )
++                if self.store.get(f"{family}_svh").shape[2] != n:
++                    raise Exl3MoEUnsupported(
++                        f"exl3: MoE {self.prefix}: {family}_svh length "
++                        f"{self.store.get(f'{family}_svh').shape[2]} != n={n}"
++                    )
++
++                if self.config.codebook == "3inst":
++                    if row["codebook_tensor"] != -1 or row["codebook_offset"] != -1:
++                        raise Exl3MoEUnsupported(
++                            f"exl3: MoE {self.prefix}: descriptor[{expert_id},"
++                            f"{proj_index}] has a codebook entry for 3inst"
++                        )
++                    continue
++                cb_spec = self.store.get(f"{family}_{self.config.codebook}")
++                if row["codebook_tensor"] != names.index(cb_spec.name):
++                    raise Exl3MoEUnsupported(
++                        f"exl3: MoE {self.prefix}: descriptor[{expert_id},"
++                        f"{proj_index}] codebook_tensor "
++                        f"{row['codebook_tensor']} != {names.index(cb_spec.name)}"
++                    )
++                if row["codebook_offset"] != expert_id * cb_spec.slots + slot:
++                    raise Exl3MoEUnsupported(
++                        f"exl3: MoE {self.prefix}: descriptor[{expert_id},"
++                        f"{proj_index}] codebook_offset {row['codebook_offset']} "
++                        f"!= {expert_id * cb_spec.slots + slot}"
++                    )
++                if expected_multiplier is not None and self._load_attempted:
++                    value = int(
++                        getattr(layer, cb_spec.name).data[expert_id, slot].item()
++                    )
++                    if value != expected_multiplier:
++                        raise Exl3MoEUnsupported(
++                            f"exl3: MoE {self.prefix}: {cb_spec.name}[expert="
++                            f"{expert_id},slot={slot}] multiplier 0x"
++                            f"{value & 0xFFFFFFFF:08X} != 0x"
++                            f"{expected_multiplier & 0xFFFFFFFF:08X} "
++                            f"({self.config.codebook!r})"
++                        )
++
++        return {
++            "experts": self.num_local_experts,
++            "projections": len(_PROJ_ORDER),
++            "allocations": len(names),
++            "tiled_slices": sum(
++                self.num_local_experts * s.slots for s in self.store.specs
++            ),
++            "trellis_tile_w13": list(
++                self.store.get("w13_trellis").shape[2:]
++            ),
++            "trellis_tile_w2": list(self.store.get("w2_trellis").shape[2:]),
++        }
++
++    def process_weights_after_loading(self, layer: "RoutedExperts") -> None:
++        """Settle the layer after loading.
++
++        * fail closed if the checkpoint did not cover every expert/slot (a
++          missing slice would otherwise be uninitialised memory that silently
++          produces garbage tokens) — only when a real load was attempted, since
++          ``--load-format dummy`` never calls ``load_weights``;
++        * then run the P1-04 structural integrity check, which is safe on any
++          path because it reads the plan and descriptor buffer only.
++        """
++        if self._load_attempted:
++            self._require_complete(layer)
++            self._verify_codebook_multipliers(layer)
++        self.verify_expert_integrity(layer)
++
++    def _require_complete(self, layer: "RoutedExperts") -> None:
++        missing: list[tuple[str, int, int]] = []
++        for spec in self.store.specs:
++            for expert_id in range(self.num_local_experts):
++                for slot in range(spec.slots):
++                    if (spec.name, expert_id, slot) not in self._loaded:
++                        missing.append((spec.name, expert_id, slot))
++        if missing:
++            preview = ", ".join(
++                f"{name}[expert={e},slot={s}]" for name, e, s in missing[:6]
++            )
++            raise Exl3MoEUnsupported(
++                f"exl3: MoE {self.prefix}: {len(missing)} expert tensor slice(s) "
++                f"were not loaded ({preview}"
++                f"{', ...' if len(missing) > 6 else ''}); refusing to run with "
++                "uninitialised compressed experts"
++            )
++
++    def _verify_codebook_multipliers(self, layer: "RoutedExperts") -> None:
++        # The per-expert codebook scalar stores the codebook *multiplier*
++        # (presence selects the codebook; see ``exl3xpu/ref.py``). A config/
++        # checkpoint mismatch (e.g. `mcg` weights with a `mul1` config) would
++        # decode nonsense, so verify the value here.
++        expected_multiplier = CODEBOOK_MULTIPLIERS.get(self.config.codebook)
++        if expected_multiplier is not None:
++            for spec in self.store.specs:
++                if spec.tensor != self.config.codebook:
++                    continue
++                param = getattr(layer, spec.name)
++                if not bool(torch.all(param.data == expected_multiplier)):
++                    bad = int((param.data != expected_multiplier).sum().item())
++                    raise Exl3MoEUnsupported(
++                        f"exl3: MoE {self.prefix}: {spec.name} contains {bad} "
++                        f"codebook multiplier(s) != 0x"
++                        f"{expected_multiplier & 0xFFFFFFFF:08X} "
++                        f"({self.config.codebook!r} expected); checkpoint and "
++                        "config disagree"
++                    )
++
++    def get_fused_moe_quant_config(
++        self, layer: "RoutedExperts"
++    ) -> FusedMoEQuantConfig | None:
++        # EXL3 never calls a vLLM fused-MoE kernel, so there is no
++        # FusedMoEQuantConfig to publish.
++        return None
++
++    def apply(
++        self,
++        layer: "RoutedExperts",
++        x: torch.Tensor,
++        topk_weights: torch.Tensor,
++        topk_ids: torch.Tensor,
++        shared_experts: Any,
++        shared_experts_input: torch.Tensor | None,
++    ) -> torch.Tensor:
++        raise NotImplementedError(
++            f"exl3: MoE {self.prefix}: expert execution (grouped GEMV) is not "
++            "implemented yet (P1-06+); dispatch, loading and packed-arena "
++            "integrity are in place, but there is no unquantized fallback."
++        )
++
++
++# ---------------------------------------------------------------------------
++# P1-05: shard-by-shard streaming loader
++# ---------------------------------------------------------------------------
++
++#: Checkpoint suffixes that make up one routed-expert module.
++EXPERT_SUFFIXES = frozenset({"trellis", "suh", "svh", "mcg", "mul1"})
++
++
++def split_expert_key(key: str) -> tuple[str | None, str | None]:
++    """Split a checkpoint key into ``(layer_key, relative_name)``.
++
++    ``layer_key`` is the normalized ``RoutedExperts`` key
++    (``"layers.3.mlp.experts"``); ``relative_name`` is the name the per-layer
++    loader consumes (``"0.gate_proj.trellis"``). Non-routed keys (shared
++    expert, attention, vision, embedding, ``lm_head``, MTP) return
++    ``(None, None)``.
++    """
++    stem, dot, suffix = key.rpartition(".")
++    if not dot or suffix not in EXPERT_SUFFIXES:
++        return None, None
++    from .vllm_plugin import _norm_key
++
++    parts = _norm_key(stem).split(".")
++    if (
++        len(parts) < 6
++        or parts[0] != "layers"
++        or parts[2] != "mlp"
++        or parts[3] != "experts"
++        or not parts[4].isdigit()
++    ):
++        return None, None
++    layer_key = ".".join(parts[:4])
++    relative = ".".join(parts[4:]) + "." + suffix
++    return layer_key, relative
++
++
++def stream_expert_shards(
++    shard_paths: Iterable[Any],
++    layers: dict[str, "RoutedExperts"],
++    *,
++    on_shard: Any = None,
++) -> dict[str, Any]:
++    """Pack routed experts into ``layers`` one ``safetensors`` shard at a time.
++
++    P1-05. On the unified-memory Arc part, holding several 8 GiB shards'
++    mmaps open while also touching the packed arenas duplicates host and
++    device traffic. This loader:
++
++    1. opens exactly one shard at a time with ``safe_open``;
++    2. reads each routed-expert tensor lazily via ``get_tensor`` inside a
++       generator, so at most one checkpoint tensor's payload is resident in
++       addition to the arenas;
++    3. feeds it to the layer's per-layer loader (``RoutedExperts.load_weights``
++       override), then tears the shard down with ``gc.collect()`` and
++       ``torch.xpu.empty_cache()`` before moving on.
++
++    ``layers`` maps a *normalized* layer key (``"layers.3.mlp.experts"``) to
++    its ``RoutedExperts`` whose ``create_weights`` has already run.
++
++    Returns a report with:
++
++    * ``consumed`` — routed-expert checkpoint keys handed to a layer loader;
++    * ``out_of_scope`` — routed keys for layers not in ``layers`` (deliberately
++      skipped, e.g. a ``--layers`` subset; the caller decides whether it
++      expects these);
++    * ``shards`` — per-shard timing/telemetry (fed to ``on_shard`` as it goes);
++    * ``expert_tensors`` — total routed tensors streamed.
++    """
++    import gc
++    import time
++
++    from safetensors import safe_open
++
++    consumed: list[str] = []
++    out_of_scope: list[str] = []
++    shards: list[dict[str, Any]] = []
++
++    for shard_index, path in enumerate(shard_paths):
++        t0 = time.perf_counter()
++        n_read = 0
++        by_layer: dict[str, list[tuple[str, str]]] = {}
++        with safe_open(str(path), framework="pt") as f:
++            for key in f.keys():
++                layer_key, relative = split_expert_key(key)
++                if layer_key is None:
++                    continue
++                by_layer.setdefault(layer_key, []).append((key, relative))
++
++            for layer_key, entries in by_layer.items():
++                layer = layers.get(layer_key)
++                if layer is None:
++                    out_of_scope.extend(key for key, _ in entries)
++                    continue
++
++                def _tensors(entries=entries, f=f):
++                    for key, relative in entries:
++                        yield relative, f.get_tensor(key)
++
++                list(layer.load_weights(_tensors()))
++                consumed.extend(key for key, _ in entries)
++                n_read += len(entries)
++            # Drop the key map before closing so mmap pages can be reclaimed.
++            del by_layer
++
++        gc.collect()
++        try:
++            torch.xpu.empty_cache()
++        except Exception:  # pragma: no cover - CPU-only / no XPU
++            pass
++
++        row = {
++            "shard_index": shard_index,
++            "shard": str(path),
++            "expert_tensors": n_read,
++            "seconds": time.perf_counter() - t0,
++        }
++        if on_shard is not None:
++            on_shard(row)
++        shards.append(row)
++
++    return {
++        "consumed": consumed,
++        "out_of_scope": out_of_scope,
++        "shards": shards,
++        "expert_tensors": sum(r["expert_tensors"] for r in shards),
++    }
+
+## file: tests/test_expert_reconstruction.py
+--- a/tests/test_expert_reconstruction.py	2026-10-21 22:05:50.341775534 +0200
++++ b/tests/test_expert_reconstruction.py	2026-10-24 10:00:43.325934986 +0200
+@@ -0,0 +1,333 @@
++#!/usr/bin/env python3
++"""P1-06: exact weight reconstruction for representative experts.
++
++Reconstructs full Hadamard-domain weights for experts ``{0, 1, 127, 254, 255}``
++across ``gate``/``up``/``down`` with the **C++ dequantizer**
++(``exl3xpu_C::exl3_reconstruct``) and compares them **bit-for-bit** against the
++deterministic CPU oracle (:func:`exl3xpu.ref.reconstruct_inner`, the same
++bit-exact dequantizer that backs the P0-08 traces).
++
++Runs as a plain script (this venv has no pytest):
++
++    .venv/bin/python tests/test_expert_reconstruction.py \
++        --model-dir /home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw
++
++Sources (auto-detected):
++  * real checkpoint shards via ``model.safetensors.index.json`` when
++    ``--model-dir`` exists (all five experts);
++  * otherwise the layer-0 fixtures ``fixtures/exl3-moe/moe-fixtures.safetensors``
++    (experts 0 and 255 only), so the harness is usable pre-download.
++
++Covered contract:
++  * C++ ``exl3_reconstruct`` == CPU oracle, zero differing fp16 elements, for
++    both ``w13`` (k=2048, n=512) and ``w2`` (k=512, n=2048) tile geometry;
++  * the ``n0`` column-offset path reconstructs the requested slice exactly;
++  * ``suh``/``svh`` lengths equal ``k``/``n`` and the checkpoint codebook agrees
++    with the reconstructed ``cb``;
++  * for experts covered by the P0-08 traces (0, 255), the C++-reconstructed
++    weights reproduce the recorded CPU-oracle linear outputs.
++
++Evidence: ``logs/moe-p1/reconstruction-audit.log`` (+ ``--json-out``).
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++import traceback
++from collections.abc import Callable
++from pathlib import Path
++
++import numpy as np
++import torch
++from safetensors import safe_open
++
++from exl3xpu import ops
++from exl3xpu import ref
++
++ROOT = Path(__file__).resolve().parents[1]
++FIXTURES = ROOT / "fixtures" / "exl3-moe" / "moe-fixtures.safetensors"
++TRACES = ROOT / "fixtures" / "reference_moe_traces.npz"
++DEFAULT_MODEL = "/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw"
++PROJECTIONS = ("gate_proj", "up_proj", "down_proj")
++DEFAULT_EXPERTS = (0, 1, 127, 254, 255)
++
++
++# ---------------------------------------------------------------------------
++# tensor sources
++# ---------------------------------------------------------------------------
++
++class ShardSource:
++    """Reads EXL3 tensors straight from the real checkpoint shards."""
++
++    def __init__(self, model_dir: Path, layer: int):
++        self.model_dir = model_dir
++        self.layer = layer
++        self.prefix = f"model.language_model.layers.{layer}.mlp.experts"
++        index = model_dir / "model.safetensors.index.json"
++        self.weight_map = json.loads(index.read_text())["weight_map"]
++        self._handles: dict[str, object] = {}
++
++    def _handle(self, shard: str):
++        if shard not in self._handles:
++            self._handles[shard] = safe_open(
++                str(self.model_dir / shard), framework="pt"
++            )
++        return self._handles[shard]
++
++    def has(self, expert: int, proj: str) -> bool:
++        key = f"{self.prefix}.{expert}.{proj}.trellis"
++        shard = self.weight_map.get(key)
++        return shard is not None and (self.model_dir / shard).is_file()
++
++    def get(self, expert: int, proj: str, suffix: str) -> torch.Tensor:
++        key = f"{self.prefix}.{expert}.{proj}.{suffix}"
++        return self._handle(self.weight_map[key]).get_tensor(key)
++
++    def codebook(self, expert: int, proj: str) -> int:
++        if self.has(expert, proj):
++            if f"{self.prefix}.{expert}.{proj}.mcg" in self.weight_map:
++                return ref.CB_MCG
++            if f"{self.prefix}.{expert}.{proj}.mul1" in self.weight_map:
++                return ref.CB_MUL1
++        return ref.CB_3INST
++
++
++class FixtureSource:
++    """Fallback: layer-0 fixtures (experts 0/255 only)."""
++
++    def __init__(self, layer: int):
++        self.layer = layer
++        self.prefix = f"model.language_model.layers.{layer}.mlp.experts"
++        self._f = safe_open(str(FIXTURES), framework="pt")
++        self._keys = set(self._f.keys())
++
++    def has(self, expert: int, proj: str) -> bool:
++        return f"{self.prefix}.{expert}.{proj}.trellis" in self._keys
++
++    def get(self, expert: int, proj: str, suffix: str) -> torch.Tensor:
++        return self._f.get_tensor(f"{self.prefix}.{expert}.{proj}.{suffix}")
++
++    def codebook(self, expert: int, proj: str) -> int:
++        if f"{self.prefix}.{expert}.{proj}.mcg" in self._keys:
++            return ref.CB_MCG
++        if f"{self.prefix}.{expert}.{proj}.mul1" in self._keys:
++            return ref.CB_MUL1
++        return ref.CB_3INST
++
++
++# ---------------------------------------------------------------------------
++# reconstruction
++# ---------------------------------------------------------------------------
++
++def cpp_reconstruct(trellis: torch.Tensor, K: int, cb: int, n0: int, n_slice: int) -> torch.Tensor:
++    """C++ dequantizer for columns ``[n0, n0 + n_slice)`` of the inner weight."""
++    k = trellis.shape[0] * 16
++    w = torch.empty((k, n_slice), dtype=torch.float16, device=trellis.device)
++    ops._get_esimd().exl3_reconstruct(trellis.contiguous(), w, n0, K, cb)
++    return w
++
++
++def case_reconstruct_bit_exact(source, experts, records: list[dict]) -> None:
++    """C++ reconstruct == CPU oracle, full width, for every expert/projection."""
++    for expert in experts:
++        for proj in PROJECTIONS:
++            if not source.has(expert, proj):
++                records.append({"expert": expert, "proj": proj, "status": "missing"})
++                continue
++            trellis = source.get(expert, proj, "trellis")
++            suh = source.get(expert, proj, "suh")
++            svh = source.get(expert, proj, "svh")
++            k, n = trellis.shape[0] * 16, trellis.shape[1] * 16
++            K = trellis.shape[-1] // 16
++            cb = source.codebook(expert, proj)
++
++            assert trellis.dtype == torch.int16, (expert, proj, trellis.dtype)
++            assert suh.numel() == k, (expert, proj, "suh", suh.numel(), k)
++            assert svh.numel() == n, (expert, proj, "svh", svh.numel(), n)
++            assert K == 3, (expert, proj, "unexpected K", K)
++            assert cb == ref.CB_MCG, (expert, proj, "unexpected codebook", cb)
++
++            oracle = ref.reconstruct_inner(trellis.cpu(), K, cb).to(torch.float16)
++            got = cpp_reconstruct(trellis.to("xpu"), K, cb, 0, n).cpu()
++
++            assert got.shape == oracle.shape == (k, n), (got.shape, oracle.shape)
++            n_diff = int((got != oracle).sum().item())
++            max_abs = float((got.float() - oracle.float()).abs().max().item())
++            exact = bool(torch.equal(got, oracle))
++            records.append({
++                "expert": expert, "proj": proj, "status": "ok" if exact else "FAIL",
++                "k": k, "n": n, "K": K, "cb": cb,
++                "elements": got.numel(), "differing": n_diff, "max_abs": max_abs,
++                "bit_exact": exact,
++            })
++            assert exact, f"expert {expert} {proj}: {n_diff} fp16 elements differ"
++
++
++def case_reconstruct_sliced(source, experts, records: list[dict]) -> None:
++    """The ``n0`` column-offset path reconstructs the requested slice exactly."""
++    # (expert, proj) is chosen so both w13 (n=512) and w2 (n=2048) are covered.
++    checks = [(experts[0], "gate_proj"), (experts[-1], "down_proj")]
++    for expert, proj in checks:
++        if not source.has(expert, proj):
++            continue
++        trellis = source.get(expert, proj, "trellis")
++        n = trellis.shape[1] * 16
++        K = trellis.shape[-1] // 16
++        cb = source.codebook(expert, proj)
++        oracle = ref.reconstruct_inner(trellis.cpu(), K, cb).to(torch.float16)
++        n_slice = 256 if n <= 512 else 512
++        for n0 in (128, max(0, n - n_slice)):
++            if n0 % 128 or n0 + n_slice > n:
++                continue
++            got = cpp_reconstruct(trellis.to("xpu"), K, cb, n0, n_slice).cpu()
++            ref_slice = oracle[:, n0:n0 + n_slice]
++            exact = bool(torch.equal(got, ref_slice))
++            records.append({
++                "expert": expert, "proj": proj, "status": "ok" if exact else "FAIL",
++                "slice": [n0, n0 + n_slice],
++                "differing": int((got != ref_slice).sum().item()),
++                "bit_exact": exact,
++            })
++            assert exact, f"expert {expert} {proj} slice [{n0}:{n0 + n_slice}] differs"
++
++
++def case_trace_crosscheck(source, records: list[dict]) -> None:
++    """C++-reconstructed weights reproduce the P0-08 CPU-oracle linear outputs."""
++    if not TRACES.is_file():
++        records.append({"status": "missing", "note": "no reference_moe_traces.npz"})
++        return
++    data = np.load(TRACES)
++    if not all(f"expert/{e}/gate_proj/y" in data for e in (0, 255)):
++        records.append({"status": "missing", "note": "traces lack experts 0/255"})
++        return
++    x = torch.from_numpy(data["inputs/x"].copy()).float()
++    for expert in (0, 255):
++        if not source.has(expert, "gate_proj"):
++            continue
++        for proj in PROJECTIONS:
++            trellis = source.get(expert, proj, "trellis")
++            suh = source.get(expert, proj, "suh").float()
++            svh = source.get(expert, proj, "svh").float()
++            K = trellis.shape[-1] // 16
++            cb = source.codebook(expert, proj)
++            w = cpp_reconstruct(trellis.to("xpu"), K, cb, 0, trellis.shape[1] * 16).cpu()
++            xin = x if proj != "down_proj" else torch.from_numpy(
++                data[f"expert/{expert}/act"].copy()).float()
++            xh = ref.had_rows(xin * suh)
++            y = ref.had_rows(xh @ w.float()) * svh
++            ref_y = torch.from_numpy(data[f"expert/{expert}/{proj}/y"].copy()).float()
++            max_abs = float((y - ref_y).abs().max().item())
++            # The reconstructed weights are bit-exact; this last leg is a CPU
++            # fp32 matmul against the stored trace, so BLAS reassociation can
++            # move the result by a few ULP. Require a tight bound, not 0.
++            ok = max_abs <= 1e-5
++            records.append({
++                "expert": expert, "proj": proj, "status": "ok" if ok else "FAIL",
++                "trace_max_abs": max_abs,
++            })
++            assert ok, f"expert {expert} {proj}: trace cross-check max abs {max_abs}"
++
++
++# ---------------------------------------------------------------------------
++# runner
++# ---------------------------------------------------------------------------
++
++def make_source(model_dir: Path, layer: int):
++    index = model_dir / "model.safetensors.index.json"
++    if index.is_file():
++        src = ShardSource(model_dir, layer)
++        present = [e for e in DEFAULT_EXPERTS if src.has(e, "gate_proj")]
++        if present:
++            return src, "checkpoint"
++    if layer == 0:
++        src = FixtureSource(layer)
++        if any(src.has(e, "gate_proj") for e in DEFAULT_EXPERTS):
++            return src, "fixtures"
++    raise SystemExit(
++        f"no EXL3 expert tensors available (model-dir={model_dir}, layer={layer}); "
++        "download the checkpoint shards or use --layer 0 fixtures"
++    )
++
++
++def main() -> int:
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--model-dir", default=DEFAULT_MODEL)
++    ap.add_argument("--layer", type=int, default=0)
++    ap.add_argument("--experts", type=int, nargs="*", default=list(DEFAULT_EXPERTS))
++    ap.add_argument("--log-out", default=str(ROOT / "logs/moe-p1/reconstruction-audit.log"))
++    ap.add_argument("--json-out", default=str(ROOT / "logs/moe-p1/reconstruction-audit.json"))
++    ap.add_argument("--verbose", action="store_true")
++    args = ap.parse_args()
++
++    if not torch.xpu.is_available():
++        raise SystemExit("P1-06 needs the XPU (C++ dequantizer); none available")
++    esimd = ops._get_esimd()
++    assert bool(esimd.exl3_supported(3, 1)), "C++ dequantizer lacks (K=3, cb=1)"
++
++    source, source_kind = make_source(Path(args.model_dir), args.layer)
++    experts = [e for e in args.experts if source.has(e, "gate_proj")]
++    records: list[dict] = []
++    failures: list[str] = []
++
++    cases: list[tuple[str, Callable[[], None]]] = [
++        ("reconstruct bit-exact (C++ vs oracle)",
++         lambda: case_reconstruct_bit_exact(source, experts, records)),
++        ("reconstruct n0-slice path",
++         lambda: case_reconstruct_sliced(source, experts, records)),
++        ("P0-08 trace cross-check",
++         lambda: case_trace_crosscheck(source, records)),
++    ]
++
++    results = []
++    for label, fn in cases:
++        try:
++            fn()
++            results.append({"case": label, "pass": True})
++            print(f"OK   {label}")
++        except Exception as exc:  # noqa: BLE001
++            failures.append(f"{label}: {exc}")
++            results.append({"case": label, "pass": False, "error": str(exc)})
++            print(f"FAIL {label}: {exc}")
++            if args.verbose:
++                traceback.print_exc()
++
++    exact = [r for r in records if r.get("bit_exact") is True]
++    summary = {
++        "task": "P1-06",
++        "pass": not failures,
++        "source": source_kind,
++        "model_dir": str(args.model_dir),
++        "layer": args.layer,
++        "experts": experts,
++        "device": torch.xpu.get_device_properties(0).name,
++        "cases": results,
++        "failures": failures,
++        "reconstructions": records,
++        "bit_exact_count": len(exact),
++    }
++
++    log_path = Path(args.log_out)
++    log_path.parent.mkdir(parents=True, exist_ok=True)
++    lines = [
++        f"P1-06 reconstruction audit  source={source_kind} layer={args.layer}",
++        f"experts={experts}",
++        f"reconstructions={len(records)} bit_exact={len(exact)}",
++    ]
++    for r in records:
++        lines.append("  " + json.dumps(r, sort_keys=True))
++    lines.append(f"pass={summary['pass']} failures={failures}")
++    log_path.write_text("\n".join(lines) + "\n")
++
++    if args.json_out:
++        out = Path(args.json_out)
++        out.parent.mkdir(parents=True, exist_ok=True)
++        out.write_text(json.dumps(summary, indent=2) + "\n")
++
++    print(f"\n{len(records)} reconstructions, {len(exact)} bit-exact; "
++          f"wrote {log_path}")
++    return 0 if summary["pass"] else 1
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+
+## file: scripts/test_shard_streaming.py
+--- a/scripts/test_shard_streaming.py	2026-10-21 22:05:50.341775534 +0200
++++ b/scripts/test_shard_streaming.py	2026-10-24 09:46:21.475836303 +0200
+@@ -0,0 +1,260 @@
++#!/usr/bin/env python3
++"""P1-05: shard-by-shard streaming loader test.
++
++Drives ``exl3xpu.moe.stream_expert_shards`` over the *real* 3.09bpw checkpoint
++and records memory/telemetry per shard, then audits that every routed-expert
++key was consumed and that each packed layer passes the P1-02..P1-04 checks.
++
++    .venv/bin/python scripts/test_shard_streaming.py \
++        --model-dir /home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw
++
++Artifacts (defaults):
++
++* ``logs/moe-p1/shard-loading-memory.csv``  — one row per shard
++* ``logs/moe-p1/shard-streaming-audit.json`` — key audit + per-layer status
++
++Why a dedicated harness: on the Arc unified-memory part, keeping several
++8 GiB shard mmaps open *while* touching the packed arenas doubles the
++transient traffic. The loader opens one shard at a time, reads each tensor
++lazily, and releases the mmap + ``torch.xpu.empty_cache()`` before the next.
++"""
++
++from __future__ import annotations
++
++import argparse
++import csv
++import json
++import os
++import time
++import types
++from pathlib import Path
++
++import torch
++import torch.nn as nn
++from vllm.model_executor.layers.fused_moe.routed_experts import RoutedExperts
++
++from exl3xpu.moe import (
++    Exl3MoEMethod,
++    split_expert_key,
++    stream_expert_shards,
++)
++from exl3xpu.vllm_plugin import Exl3Config
++
++NUM_EXPERTS = 256
++HIDDEN = 2048
++INTERMEDIATE = 512
++ROOT = Path(__file__).resolve().parents[1]
++DEFAULT_MODEL = "/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw"
++_PAGE = os.sysconf("SC_PAGE_SIZE")
++
++
++def rss_mib() -> float:
++    with open("/proc/self/statm") as f:
++        pages = int(f.read().split()[1])
++    return pages * _PAGE / 2**20
++
++
++def xpu_stats() -> dict[str, float]:
++    try:
++        free, total = torch.xpu.mem_get_info()
++        return {
++            "xpu_allocated_mib": torch.xpu.memory_allocated() / 2**20,
++            "xpu_reserved_mib": torch.xpu.memory_reserved() / 2**20,
++            "xpu_free_mib": free / 2**20,
++            "xpu_total_mib": total / 2**20,
++        }
++    except Exception:
++        return {
++            "xpu_allocated_mib": -1.0,
++            "xpu_reserved_mib": -1.0,
++            "xpu_free_mib": -1.0,
++            "xpu_total_mib": -1.0,
++        }
++
++
++def make_layer(layer_key: str, prefix: str) -> RoutedExperts:
++    layer = object.__new__(RoutedExperts)
++    nn.Module.__init__(layer)
++    layer.layer_name = prefix
++    layer.ckpt_gate_proj_name = "gate_proj"
++    layer.ckpt_up_proj_name = "up_proj"
++    layer.ckpt_down_proj_name = "down_proj"
++    layer.lora_base_layer_prefix = ""
++    layer.is_fused_checkpoint_transposed = False
++    layer.moe_config = types.SimpleNamespace(
++        num_experts=NUM_EXPERTS,
++        num_local_experts=NUM_EXPERTS,
++        hidden_dim=HIDDEN,
++        intermediate_size_per_partition=INTERMEDIATE,
++        moe_parallel_config=types.SimpleNamespace(
++            tp_size=1, ep_size=1, use_ep=False, enable_eplb=False
++        ),
++    )
++    layer.expert_map_manager = types.SimpleNamespace(num_fused_shared_experts=0)
++    return layer
++
++
++def build_config(model_dir: str) -> Exl3Config:
++    with open(Path(model_dir) / "quantization_config.json") as f:
++        qc = json.load(f)
++    config = Exl3Config(
++        bits=float(qc.get("bits", 3)),
++        head_bits=int(qc.get("head_bits", 6)),
++        codebook=qc.get("codebook", "mcg"),
++    )
++    config.maybe_update_config(model_dir)
++    return config
++
++
++def main() -> int:
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--model-dir", default=DEFAULT_MODEL)
++    ap.add_argument("--layers", type=int, nargs="*", default=None,
++                    help="layer ids to pack (default: all found in the index)")
++    ap.add_argument("--device", default=None, help="xpu (default) or cpu")
++    ap.add_argument("--csv-out", default=str(ROOT / "logs/moe-p1/shard-loading-memory.csv"))
++    ap.add_argument("--audit-out", default=str(ROOT / "logs/moe-p1/shard-streaming-audit.json"))
++    ap.add_argument("--limit-shards", type=int, default=None,
++                    help="only process the first N shards (smoke test)")
++    args = ap.parse_args()
++
++    model_dir = Path(args.model_dir)
++    index_path = model_dir / "model.safetensors.index.json"
++    if not index_path.is_file():
++        raise SystemExit(f"missing index: {index_path}")
++    weight_map = json.loads(index_path.read_text())["weight_map"]
++
++    device = args.device or ("xpu" if torch.xpu.is_available() else "cpu")
++
++    # Expected routed-expert keys, grouped by their shard.
++    expected_by_shard: dict[str, list[str]] = {}
++    expected_keys: set[str] = set()
++    layer_ids: set[int] = set()
++    for key, shard in weight_map.items():
++        layer_key, _ = split_expert_key(key)
++        if layer_key is None:
++            continue
++        expected_keys.add(key)
++        expected_by_shard.setdefault(shard, []).append(key)
++        layer_ids.add(int(layer_key.split(".")[1]))
++
++    selected = sorted(layer_ids if args.layers is None else set(args.layers))
++    shard_files = sorted(expected_by_shard)
++    if args.limit_shards is not None:
++        shard_files = shard_files[: args.limit_shards]
++
++    print(f"model_dir      : {model_dir}")
++    print(f"device         : {device}")
++    print(f"shards         : {len(expected_by_shard)} ({', '.join(shard_files)})")
++    print(f"layer ids      : {selected[0]}..{selected[-1]} ({len(selected)})")
++    print(f"expected keys  : {len(expected_keys)} routed-expert tensors")
++
++    config = build_config(str(model_dir))
++
++    print(f"building {len(selected)} packed layers ...")
++    t_build = time.perf_counter()
++    layers: dict[str, RoutedExperts] = {}
++    with torch.device(device):
++        for layer_id in selected:
++            prefix = f"model.language_model.layers.{layer_id}.mlp.experts"
++            layer_key = f"layers.{layer_id}.mlp.experts"
++            layer = make_layer(layer_key, prefix)
++            method = Exl3MoEMethod(config, layer, prefix)
++            method.create_weights(
++                layer, NUM_EXPERTS, HIDDEN, INTERMEDIATE, torch.bfloat16
++            )
++            # Real ``RoutedExperts.__init__`` assigns ``self.quant_method``
++            # (routed_experts.py:145); mirror it so the settle path matches.
++            layer.quant_method = method
++            layers[layer_key] = layer
++    print(f"  built in {time.perf_counter() - t_build:.1f}s; "
++          f"{xpu_stats()['xpu_allocated_mib']:.0f} MiB allocated")
++
++    csv_rows: list[dict] = []
++
++    def on_shard(row: dict) -> None:
++        stats = {**xpu_stats(), "rss_mib": rss_mib()}
++        row.update(stats)
++        csv_rows.append(row)
++        print(f"  shard {row['shard_index']}: {row['expert_tensors']} tensors in "
++              f"{row['seconds']:.1f}s | rss {row['rss_mib']:.0f} MiB | "
++              f"xpu alloc {row['xpu_allocated_mib']:.0f} MiB")
++
++    print("streaming shards ...")
++    t_stream = time.perf_counter()
++    report = stream_expert_shards(
++        [str(model_dir / s) for s in shard_files], layers, on_shard=on_shard
++    )
++    stream_seconds = time.perf_counter() - t_stream
++    peak = {**xpu_stats(), "rss_mib": rss_mib()}
++
++    consumed = set(report["consumed"])
++    selected_set = set(selected)
++    scope = {k for k in expected_keys
++             if int(split_expert_key(k)[0].split(".")[1]) in selected_set}
++    missing = sorted(scope - consumed)
++    unaccounted = sorted(consumed - expected_keys)
++    print(f"streamed {report['expert_tensors']} tensors in {stream_seconds:.1f}s; "
++          f"missing={len(missing)} unaccounted={len(unaccounted)} "
++          f"out_of_scope={len(report['out_of_scope'])}")
++
++    # Per-layer settle: completeness + P1-04 integrity.
++    t_settle = time.perf_counter()
++    layer_status = {}
++    for layer_key, layer in layers.items():
++        method = layer.quant_method
++        method.process_weights_after_loading(layer)
++        summary = method.verify_expert_integrity(layer)
++        layer_status[layer_key] = summary
++    print(f"settled {len(layers)} layers in {time.perf_counter() - t_settle:.1f}s")
++
++    # -- artifacts ---------------------------------------------------------
++    csv_path = Path(args.csv_out)
++    csv_path.parent.mkdir(parents=True, exist_ok=True)
++    fields = [
++        "shard_index", "shard", "expert_tensors", "seconds", "rss_mib",
++        "xpu_allocated_mib", "xpu_reserved_mib", "xpu_free_mib", "xpu_total_mib",
++    ]
++    with csv_path.open("w", newline="") as f:
++        writer = csv.DictWriter(f, fieldnames=fields)
++        writer.writeheader()
++        for row in csv_rows:
++            writer.writerow({k: row.get(k) for k in fields})
++
++    audit = {
++        "task": "P1-05",
++        "model_dir": str(model_dir),
++        "device": device,
++        "device_name": torch.xpu.get_device_properties(0).name
++        if device == "xpu" else "cpu",
++        "shards": shard_files,
++        "shards_total": len(expected_by_shard),
++        "limit_shards": args.limit_shards,
++        "layers_selected": selected,
++        "expected_expert_keys": len(expected_keys),
++        "expected_in_scope": len(scope),
++        "consumed": len(consumed),
++        "expert_tensors_streamed": report["expert_tensors"],
++        "missing": missing,
++        "unaccounted": unaccounted,
++        "out_of_scope": len(report["out_of_scope"]),
++        "stream_seconds": stream_seconds,
++        "per_shard": report["shards"],
++        "peak": peak,
++        "final": {**xpu_stats(), "rss_mib": rss_mib()},
++        "layer_status": layer_status,
++        "pass": not missing and not unaccounted,
++    }
++    audit_path = Path(args.audit_out)
++    audit_path.parent.mkdir(parents=True, exist_ok=True)
++    audit_path.write_text(json.dumps(audit, indent=2) + "\n")
++
++    print(f"wrote {csv_path}")
++    print(f"wrote {audit_path}")
++    print(f"PASS={audit['pass']} peak xpu allocated {peak['xpu_allocated_mib']:.0f} MiB, "
++          f"peak rss {peak['rss_mib']:.0f} MiB")
++    return 0 if audit["pass"] else 1
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+
+## file: tests/test_expert_loader.py
+--- a/tests/test_expert_loader.py	2026-10-21 22:05:50.341775534 +0200
++++ b/tests/test_expert_loader.py	2026-10-23 22:29:27.779898848 +0200
+@@ -0,0 +1,683 @@
++#!/usr/bin/env python3
++"""P1-02 tests: compressed expert buffer registration and weight loading.
++
++Runs as a plain script (this venv has no pytest):
++
++    .venv/bin/python tests/test_expert_loader.py [--verbose] [--json-out PATH]
++
++The loader tests use *real* 3.09bpw checkpoint tensors from
++``fixtures/exl3-moe/moe-fixtures.safetensors`` (experts 0 and 255 of layer 0,
++fetched by ``scripts/fetch_exl3_fixtures.py``) and load them through the same
++paths vLLM uses: the per-layer expert loader and ``AutoWeightsLoader``.
++
++Covered contract (``docs/moe_api_audit.md`` §3.2):
++
++* one allocation per tensor kind per layer, all below 4 GiB;
++* no fp16/BF16 copy of any expert matrix;
++* bit-exact per-expert copies into ``[expert, slot]``;
++* fail-closed on incomplete loads, wrong shape/dtype/shard/name, and a
++  codebook id that disagrees with the config;
++* the stock 3-D "fused tensor" heuristic is not used.
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++import math
++import traceback
++import types
++from collections.abc import Callable
++from pathlib import Path
++
++import torch
++import torch.nn as nn
++from safetensors import safe_open
++from vllm.model_executor.layers.fused_moe.routed_experts import RoutedExperts
++from vllm.model_executor.models.utils import AutoWeightsLoader
++
++from exl3xpu.moe import (
++    CODEBOOK_IDS,
++    CODEBOOK_MULTIPLIERS,
++    DESCRIPTOR_FIELDS,
++    MAX_ALLOCATION_BYTES,
++    Exl3ExpertStore,
++    Exl3MoEMethod,
++    Exl3MoEUnsupported,
++)
++from exl3xpu.vllm_plugin import Exl3Config
++
++ROOT = Path(__file__).resolve().parents[1]
++FIXTURES = ROOT / "fixtures" / "exl3-moe" / "moe-fixtures.safetensors"
++CKPT_PREFIX = "model.language_model."
++LAYER_PREFIX = "layers.0.mlp.experts"
++LAYER_NAME = "model.language_model.layers.0.mlp.experts"
++NUM_EXPERTS = 256
++HIDDEN = 2048
++INTERMEDIATE = 512
++K = 3
++CODEBOOK = "mcg"
++
++EXPECTED_PARAMS = {
++    "w13_trellis": ((NUM_EXPERTS, 2, 128, 32, 48), torch.int16),
++    "w13_suh": ((NUM_EXPERTS, 2, HIDDEN), torch.float16),
++    "w13_svh": ((NUM_EXPERTS, 2, INTERMEDIATE), torch.float16),
++    "w2_trellis": ((NUM_EXPERTS, 1, 32, 128, 48), torch.int16),
++    "w2_suh": ((NUM_EXPERTS, 1, INTERMEDIATE), torch.float16),
++    "w2_svh": ((NUM_EXPERTS, 1, HIDDEN), torch.float16),
++    "w13_mcg": ((NUM_EXPERTS, 2), torch.int32),
++    "w2_mcg": ((NUM_EXPERTS, 1), torch.int32),
++}
++
++PROJECTIONS = (("gate_proj", "w1"), ("up_proj", "w3"), ("down_proj", "w2"))
++
++
++# ---------------------------------------------------------------------------
++# fixtures / helpers
++# ---------------------------------------------------------------------------
++
++_FIXTURES: dict[str, torch.Tensor] | None = None
++
++
++def fixtures() -> dict[str, torch.Tensor]:
++    global _FIXTURES
++    if _FIXTURES is None:
++        with safe_open(str(FIXTURES), framework="pt") as f:
++            _FIXTURES = {k: f.get_tensor(k) for k in f.keys()}
++    return _FIXTURES
++
++
++def expert_slices(expert_id: int) -> dict[str, torch.Tensor]:
++    """Layer-relative EXL3 tensors for one expert: ``<proj>.<suffix>``."""
++    out = {}
++    prefix = f"{CKPT_PREFIX}{LAYER_PREFIX}.{expert_id}."
++    for name, tensor in fixtures().items():
++        if name.startswith(prefix):
++            out[name[len(prefix):]] = tensor
++    assert len(out) == 12, (expert_id, sorted(out))
++    return out
++
++
++def expert_storage(num_experts: int = NUM_EXPERTS) -> dict[str, int]:
++    return {
++        f"{LAYER_PREFIX}.{e}.{proj}": K
++        for e in range(num_experts)
++        for proj in ("gate_proj", "up_proj", "down_proj")
++    }
++
++
++def make_config(num_experts: int = NUM_EXPERTS) -> Exl3Config:
++    cfg = Exl3Config(
++        bits=3, head_bits=6, codebook=CODEBOOK, storage=expert_storage(num_experts)
++    )
++    cfg.member_trellis = {f"{LAYER_PREFIX}.0.gate_proj": (INTERMEDIATE, K)}
++    return cfg
++
++
++def make_layer() -> RoutedExperts:
++    """Minimal but faithful ``RoutedExperts`` (the real ctor needs an engine)."""
++    layer = object.__new__(RoutedExperts)
++    nn.Module.__init__(layer)
++    layer.layer_name = LAYER_NAME
++    layer.ckpt_gate_proj_name = "gate_proj"
++    layer.ckpt_up_proj_name = "up_proj"
++    layer.ckpt_down_proj_name = "down_proj"
++    layer.lora_base_layer_prefix = ""
++    layer.is_fused_checkpoint_transposed = False
++    layer.moe_config = types.SimpleNamespace(
++        num_experts=NUM_EXPERTS,
++        num_local_experts=NUM_EXPERTS,
++        hidden_dim=HIDDEN,
++        intermediate_size_per_partition=INTERMEDIATE,
++        moe_parallel_config=types.SimpleNamespace(
++            tp_size=1, ep_size=1, use_ep=False, enable_eplb=False
++        ),
++    )
++    layer.expert_map_manager = types.SimpleNamespace(num_fused_shared_experts=0)
++    return layer
++
++
++def make_layer_with_weights() -> tuple[Exl3MoEMethod, RoutedExperts]:
++    layer = make_layer()
++    method = Exl3MoEMethod(make_config(), layer, LAYER_NAME)
++    with torch.device("cpu"):
++        method.create_weights(layer, NUM_EXPERTS, HIDDEN, INTERMEDIATE, torch.bfloat16)
++    return method, layer
++
++
++def synthetic_tensor(spec) -> torch.Tensor:
++    tensor = torch.zeros(spec.shape[2:], dtype=spec.dtype)
++    if spec.tensor == CODEBOOK:
++        tensor.fill_(CODEBOOK_MULTIPLIERS[CODEBOOK])
++    return tensor
++
++
++def all_checkpoint_tensors(method: Exl3MoEMethod) -> list[tuple[str, torch.Tensor]]:
++    """Synthetic full-layer stream (3072 tensors) for completeness tests."""
++    by_name = {spec.name: synthetic_tensor(spec) for spec in method.store.specs}
++    out: list[tuple[str, torch.Tensor]] = []
++    for expert_id in range(NUM_EXPERTS):
++        for proj, shard in PROJECTIONS:
++            family = "w13" if shard in ("w1", "w3") else "w2"
++            for spec in method.store.specs:
++                if spec.name.startswith(family + "_"):
++                    out.append(
++                        (f"{expert_id}.{proj}.{spec.tensor}", by_name[spec.name])
++                    )
++    return out
++
++
++def expect_unsupported(fn: Callable[[], object], contains: str, label: str) -> None:
++    try:
++        fn()
++    except Exl3MoEUnsupported as exc:
++        assert contains in str(exc), f"{label}: expected {contains!r} in {exc!s}"
++    else:
++        raise AssertionError(f"{label}: expected Exl3MoEUnsupported")
++
++
++# ---------------------------------------------------------------------------
++# shared state
++# ---------------------------------------------------------------------------
++
++_BASE: tuple[Exl3MoEMethod, RoutedExperts] | None = None
++
++
++def base() -> tuple[Exl3MoEMethod, RoutedExperts]:
++    global _BASE
++    if _BASE is None:
++        _BASE = make_layer_with_weights()
++    return _BASE
++
++
++# ---------------------------------------------------------------------------
++# cases
++# ---------------------------------------------------------------------------
++
++def case_plan_matches_checkpoint_schema() -> None:
++    store = Exl3ExpertStore(NUM_EXPERTS, HIDDEN, INTERMEDIATE, K, CODEBOOK)
++    assert {s.name for s in store.specs} == set(EXPECTED_PARAMS)
++    fixture = expert_slices(0)
++    for proj, shard in PROJECTIONS:
++        family = "w13" if shard in ("w1", "w3") else "w2"
++        for suffix in ("trellis", "suh", "svh", CODEBOOK):
++            name = f"{family}_{suffix}"
++            spec = store.get(name)
++            expected = tuple(fixture[f"{proj}.{suffix}"].shape)
++            assert spec.shape[2:] == expected, (name, spec.shape[2:], expected)
++            assert spec.dtype == fixture[f"{proj}.{suffix}"].dtype, (name, spec.dtype)
++            assert spec.slots == (2 if family == "w13" else 1), (name, spec.slots)
++
++
++def case_allocations_within_budget() -> None:
++    store = Exl3ExpertStore(NUM_EXPERTS, HIDDEN, INTERMEDIATE, K, CODEBOOK)
++    assert len(store.specs) == 8
++    for spec in store.specs:
++        assert spec.nbytes < MAX_ALLOCATION_BYTES, (spec.name, spec.nbytes)
++    assert store.total_bytes < MAX_ALLOCATION_BYTES, store.total_bytes
++    # 3.09 bpw reality check: ~292 MiB per routed layer.
++    assert 280 * 2**20 < store.total_bytes < 310 * 2**20, store.total_bytes
++
++
++def case_registration_has_no_fp16_experts() -> None:
++    method, layer = base()
++    params = dict(layer.named_parameters())
++    assert set(params) == set(EXPECTED_PARAMS), sorted(params)
++    for name, (shape, dtype) in EXPECTED_PARAMS.items():
++        p = params[name]
++        assert tuple(p.shape) == shape, (name, tuple(p.shape), shape)
++        assert p.dtype == dtype, (name, p.dtype, dtype)
++        assert not p.requires_grad
++    # No fp16 matrix of any expert projection exists (those are the ~64 GiB
++    # unquantized layout this method exists to avoid).
++    forbidden = {
++        (NUM_EXPERTS, 2 * INTERMEDIATE, HIDDEN),
++        (NUM_EXPERTS, HIDDEN, INTERMEDIATE),
++    }
++    for name, p in params.items():
++        assert tuple(p.shape) not in forbidden, name
++        if p.is_floating_point():
++            assert p.numel() < NUM_EXPERTS * HIDDEN * INTERMEDIATE, name
++    assert layer.exl3_moe_meta["prefix"] == LAYER_PREFIX
++    assert layer.exl3_moe_meta["K"] == K
++    assert layer.exl3_moe_meta["codebook"] == CODEBOOK
++    assert layer.exl3_moe_meta["allocations"] == 8
++
++
++def case_loader_override_bound() -> None:
++    _, layer = base()
++    assert isinstance(layer.load_weights, types.MethodType)
++    assert layer.load_weights.__func__ is not RoutedExperts.load_weights
++    assert layer.load_weights.__func__.__name__ == "_layer_load_weights"
++    # Why the override is required: the stock loader keys the "fused tensor"
++    # path off `loaded_weight.dim() == 3`, and a per-expert trellis is 3-D.
++    assert expert_slices(0)["gate_proj.trellis"].dim() == 3
++
++
++def case_real_experts_bit_exact() -> None:
++    _, layer = base()
++    stream = []
++    for expert_id in (0, 255):
++        slices = expert_slices(expert_id)
++        stream.extend(
++            (f"{expert_id}.{rel}", tensor) for rel, tensor in sorted(slices.items())
++        )
++    yielded = list(layer.load_weights(iter(stream)))
++    assert len(yielded) == 24, len(yielded)  # 12 tensors x 2 experts
++    for expert_id in (0, 255):
++        slices = expert_slices(expert_id)
++        for rel, tensor in slices.items():
++            proj, suffix = rel.split(".")
++            shard = dict(PROJECTIONS)[proj]
++            family = "w13" if shard in ("w1", "w3") else "w2"
++            slot = 0 if shard in ("w1", "w2") else 1
++            got = getattr(layer, f"{family}_{suffix}").data[expert_id, slot]
++            assert got.dtype == tensor.dtype, (rel, got.dtype, tensor.dtype)
++            assert torch.equal(got, tensor), f"expert {expert_id} {rel} not bit-exact"
++
++
++def case_autoweightsloader_end_to_end() -> None:
++    _, layer = base()
++
++    class Parent(nn.Module):
++        def __init__(self) -> None:
++            super().__init__()
++            self.experts = layer
++
++    parent = Parent()
++    slices = expert_slices(255)
++    weights = [(f"experts.255.{rel}", t) for rel, t in sorted(slices.items())]
++    loaded = AutoWeightsLoader(parent).load_weights(iter(weights))
++    assert {"experts.w13_trellis", "experts.w2_mcg"} <= loaded, sorted(loaded)
++    trellis = slices["gate_proj.trellis"]
++    assert torch.equal(layer.w13_trellis.data[255, 0], trellis)
++    assert torch.equal(layer.w2_svh.data[255, 0], slices["down_proj.svh"])
++
++
++def case_descriptors_packed() -> None:
++    method, layer = base()
++    d = layer.exl3_moe_descriptors
++    assert d.shape == (NUM_EXPERTS, len(PROJECTIONS), len(DESCRIPTOR_FIELDS)), d.shape
++    assert d.dtype == torch.int64
++    names = layer.exl3_moe_tensor_names
++    assert names == [s.name for s in method.store.specs], names
++    assert layer.exl3_moe_meta["descriptor_fields"] == list(DESCRIPTOR_FIELDS)
++    for expert_id in (0, 255):
++        for proj_index, (proj, shard) in enumerate(PROJECTIONS):
++            row = method.descriptor(layer, expert_id, proj)
++            family = "w13" if proj_index < 2 else "w2"
++            slot = 0 if shard == "w1" else 1 if shard == "w3" else 0
++            for kind in ("trellis", "suh", "svh", CODEBOOK):
++                spec = method.store.get(f"{family}_{kind}")
++                name = spec.name
++                field = "codebook" if kind == CODEBOOK else kind
++                per = math.prod(spec.shape[2:])
++                assert row[f"{field}_tensor"] == names.index(name), (kind, row)
++                assert row[f"{field}_offset"] == (expert_id * spec.slots + slot) * per, (
++                    kind,
++                    row,
++                )
++                param = getattr(layer, name)
++                assert 0 <= row[f"{field}_offset"] <= param.numel()
++                assert row[f"{field}_offset"] + per <= param.numel(), (kind, row)
++            assert row["k"] == (HIDDEN if proj_index < 2 else INTERMEDIATE), row
++            assert row["n"] == (INTERMEDIATE if proj_index < 2 else HIDDEN), row
++            assert row["K"] == K and row["cb"] == CODEBOOK_IDS[CODEBOOK], row
++            assert row["family"] == (0 if proj_index < 2 else 1), row
++            assert row["slot"] == slot, row
++    # gate and up share the w13 allocation but not the slot.
++    gate = method.descriptor(layer, 0, "gate_proj")
++    up = method.descriptor(layer, 0, "up_proj")
++    assert gate["trellis_tensor"] == up["trellis_tensor"]
++    assert (gate["slot"], up["slot"]) == (0, 1), (gate, up)
++
++
++def case_descriptor_views_bit_exact() -> None:
++    method, layer = base()
++    slices = expert_slices(255)
++    list(layer.load_weights(iter([(f"255.{rel}", t) for rel, t in sorted(slices.items())])))
++    views = method.expert_views(layer, 255)
++    for proj, shard in PROJECTIONS:
++        got = views[proj]
++        assert got["k"] == (HIDDEN if shard in ("w1", "w3") else INTERMEDIATE)
++        assert got["n"] == (INTERMEDIATE if shard in ("w1", "w3") else HIDDEN)
++        assert got["K"] == K and got["cb"] == CODEBOOK_IDS[CODEBOOK]
++        for kind in ("trellis", "suh", "svh"):
++            assert torch.equal(got[kind], slices[f"{proj}.{kind}"]), (proj, kind)
++            assert got[kind].dtype == slices[f"{proj}.{kind}"].dtype
++        assert got["codebook"].item() == CODEBOOK_MULTIPLIERS[CODEBOOK]
++
++
++def loaded_layer() -> tuple[Exl3MoEMethod, RoutedExperts]:
++    """A fresh layer with a complete synthetic load already settled."""
++    method, layer = make_layer_with_weights()
++    list(layer.load_weights(iter(all_checkpoint_tensors(method))))
++    method.process_weights_after_loading(layer)
++    return method, layer
++
++
++def _descriptor_offsets(
++    method: Exl3MoEMethod, layer: RoutedExperts, spec
++) -> set[int]:
++    """Descriptor offsets for one allocation, across all experts/projections."""
++    field = "codebook" if spec.tensor == CODEBOOK else spec.tensor
++    index = layer.exl3_moe_tensor_names.index(spec.name)
++    out: set[int] = set()
++    for expert_id in range(NUM_EXPERTS):
++        for projection in ("gate_proj", "up_proj", "down_proj"):
++            row = method.descriptor(layer, expert_id, projection)
++            if row[f"{field}_tensor"] == index:
++                out.add(row[f"{field}_offset"])
++    return out
++
++
++def case_integrity_arena_tiling() -> None:
++    method, layer = loaded_layer()
++    summary = method.verify_expert_integrity(layer)
++    assert summary["experts"] == NUM_EXPERTS
++    assert summary["projections"] == 3
++    assert summary["allocations"] == 8
++    assert summary["tiled_slices"] == 3072
++    assert summary["trellis_tile_w13"] == [HIDDEN // 16, INTERMEDIATE // 16, 16 * K]
++    assert summary["trellis_tile_w2"] == [INTERMEDIATE // 16, HIDDEN // 16, 16 * K]
++
++    # Trellis is tile-major [k/16, n/16, 16K], never a dense [k, n] row store.
++    w13 = tuple(layer.w13_trellis.shape[2:])
++    assert w13 == (128, 32, 48), w13
++    assert (w13[0] * 16, w13[1] * 16) == (HIDDEN, INTERMEDIATE)
++    assert w13 != (HIDDEN, INTERMEDIATE)
++    w2 = tuple(layer.w2_trellis.shape[2:])
++    assert w2 == (32, 128, 48), w2
++    assert (w2[0] * 16, w2[1] * 16) == (INTERMEDIATE, HIDDEN)
++
++    # Every (expert, slot) slice owns distinct storage, so per-expert scales /
++    # Hadamard vectors / codebooks are never aliased.
++    for name in (
++        "w13_trellis", "w13_suh", "w13_svh", "w13_mcg",
++        "w2_trellis", "w2_suh", "w2_svh", "w2_mcg",
++    ):
++        param = getattr(layer, name)
++        ptrs = {
++            param[e, s].data_ptr()
++            for e in range(NUM_EXPERTS)
++            for s in range(param.shape[1])
++        }
++        assert len(ptrs) == NUM_EXPERTS * param.shape[1], (name, len(ptrs))
++    # Gate and up keep independent input transforms (distinct suh rows).
++    assert layer.w13_suh[0, 0].data_ptr() != layer.w13_suh[0, 1].data_ptr()
++
++    # Descriptor offsets tile each arena exactly: a permutation of
++    # {0, per, 2*per, ...} ending at the allocation size.
++    for spec in method.store.specs:
++        per = math.prod(spec.shape[2:])
++        param = getattr(layer, spec.name)
++        assert param.numel() == NUM_EXPERTS * spec.slots * per
++        expected = {i * per for i in range(NUM_EXPERTS * spec.slots)}
++        assert _descriptor_offsets(method, layer, spec) == expected, spec.name
++
++
++def case_integrity_detects_corruption() -> None:
++    method, layer = loaded_layer()
++    d = layer.exl3_moe_descriptors
++
++    def restore(patch: tuple[int, int, str, int]) -> None:
++        e, p, field, value = patch
++        d[e, p, DESCRIPTOR_FIELDS.index(field)] = value
++
++    # A wrong stride/offset must be rejected (codes are never read as raw
++    # dense rows).
++    f = DESCRIPTOR_FIELDS.index("suh_offset")
++    saved = int(d[7, 1, f].item())
++    d[7, 1, f] = saved + 1
++    expect_unsupported(
++        lambda: method.verify_expert_integrity(layer),
++        "strided offset",
++        "offset corruption",
++    )
++    restore((7, 1, "suh_offset", saved))
++
++    # A wrong per-projection k must be rejected.
++    f = DESCRIPTOR_FIELDS.index("k")
++    saved = int(d[3, 0, f].item())
++    d[3, 0, f] = saved + 16
++    expect_unsupported(
++        lambda: method.verify_expert_integrity(layer), "k/n", "dim corruption"
++    )
++    restore((3, 0, "k", saved))
++
++    # A tensor-index that points at the wrong allocation must be rejected.
++    f = DESCRIPTOR_FIELDS.index("trellis_tensor")
++    saved = int(d[5, 2, f].item())
++    d[5, 2, f] = 1 if saved != 1 else 2
++    expect_unsupported(
++        lambda: method.verify_expert_integrity(layer),
++        "trellis_tensor",
++        "allocation-index corruption",
++    )
++    restore((5, 2, "trellis_tensor", saved))
++
++    # process_weights_after_loading must run the check too.
++    f = DESCRIPTOR_FIELDS.index("svh_offset")
++    saved = int(d[9, 0, f].item())
++    d[9, 0, f] = saved + 1
++    expect_unsupported(
++        lambda: method.process_weights_after_loading(layer),
++        "strided offset",
++        "integrity check in settle path",
++    )
++    restore((9, 0, "svh_offset", saved))
++    method.verify_expert_integrity(layer)
++
++
++def case_integrity_rejects_dense_layout() -> None:
++    method, layer = make_layer_with_weights()
++    try:
++        # A dense [E, 2, k, n] row store is exactly the packing P1-04 forbids.
++        dense = nn.Parameter(
++            torch.empty(NUM_EXPERTS, 2, HIDDEN, INTERMEDIATE, dtype=torch.int16),
++            requires_grad=False,
++        )
++        layer.register_parameter("w13_trellis", dense)
++        expect_unsupported(
++            lambda: method.verify_expert_integrity(layer),
++            "expected tiled",
++            "dense-row trellis",
++        )
++    finally:
++        del method, layer
++
++
++def case_incomplete_load_fails() -> None:
++    method, layer = make_layer_with_weights()
++    try:
++        slices = expert_slices(0)
++        list(
++            layer.load_weights(
++                iter([(f"0.{rel}", t) for rel, t in sorted(slices.items())])
++            )
++        )
++        total_slices = sum(
++            s.slots * NUM_EXPERTS for s in method.store.specs
++        )
++        expect_unsupported(
++            lambda: method.process_weights_after_loading(layer),
++            f"{total_slices - 12} expert tensor slice(s) were not loaded",
++            "incomplete load",
++        )
++    finally:
++        del method, layer
++
++
++def case_malformed_tensors_fail() -> None:
++    method, layer = make_layer_with_weights()
++    try:
++        good = expert_slices(0)
++        trellis = good["gate_proj.trellis"]
++
++        expect_unsupported(
++            lambda: list(layer.load_weights(iter([("0.gate_proj.trellis", trellis[1:])]))),
++            "has shape",
++            "bad shape",
++        )
++        expect_unsupported(
++            lambda: list(
++                layer.load_weights(iter([("0.gate_proj.trellis", trellis.int())]))
++            ),
++            "has dtype",
++            "bad dtype",
++        )
++        expect_unsupported(
++            lambda: list(layer.load_weights(iter([("0.gate_proj.scale", trellis)]))),
++            "unexpected tensor suffix",
++            "unknown suffix",
++        )
++        expect_unsupported(
++            lambda: list(layer.load_weights(iter([("0.gate_proj2.trellis", trellis)]))),
++            "unexpected projection",
++            "unknown projection",
++        )
++        expect_unsupported(
++            lambda: list(layer.load_weights(iter([("256.gate_proj.trellis", trellis)]))),
++            "out of range",
++            "expert out of range",
++        )
++        expect_unsupported(
++            lambda: list(layer.load_weights(iter([("gate_proj.trellis", trellis)]))),
++            "unexpected routed-expert tensor",
++            "unqualified name",
++        )
++        # Direct loader misuse: w2 param fed a w1 shard.
++        expect_unsupported(
++            lambda: layer.w2_suh.weight_loader(
++                param=layer.w2_suh,
++                loaded_weight=good["up_proj.suh"],
++                weight_name="0.up_proj.suh",
++                shard_id="w1",
++                expert_id=0,
++                return_success=True,
++            ),
++            "does not match parameter",
++            "shard mismatch",
++        )
++    finally:
++        del method, layer
++
++
++def case_complete_load_passes_and_codebook_checked() -> None:
++    method, layer = base()
++    list(layer.load_weights(iter(all_checkpoint_tensors(method))))
++    method.process_weights_after_loading(layer)
++
++    # A codebook multiplier that disagrees with the config must abort start-up.
++    try:
++        layer.w13_mcg.data.fill_(CODEBOOK_MULTIPLIERS[CODEBOOK] + 1)
++        expect_unsupported(
++            lambda: method.process_weights_after_loading(layer),
++            "checkpoint and config disagree",
++            "codebook mismatch",
++        )
++    finally:
++        layer.w13_mcg.data.fill_(CODEBOOK_MULTIPLIERS[CODEBOOK])
++
++
++def case_dummy_load_path_skips_completeness() -> None:
++    method, layer = make_layer_with_weights()
++    try:
++        assert method._load_attempted is False
++        # --load-format dummy never calls load_weights; skipping is explicit,
++        # not an accidental "empty set is complete".
++        method.process_weights_after_loading(layer)
++    finally:
++        del method, layer
++
++
++CASES: list[tuple[str, Callable[[], None]]] = [
++    ("plan shapes/dtypes match real checkpoint", case_plan_matches_checkpoint_schema),
++    ("allocations below 4 GiB / layer", case_allocations_within_budget),
++    ("registration has no fp16 expert matrices", case_registration_has_no_fp16_experts),
++    ("custom expert loader is bound", case_loader_override_bound),
++    ("real experts 0/255 load bit-exact", case_real_experts_bit_exact),
++    ("AutoWeightsLoader end-to-end", case_autoweightsloader_end_to_end),
++    ("packed expert descriptors", case_descriptors_packed),
++    ("descriptor views bit-exact", case_descriptor_views_bit_exact),
++    ("arena tiling + metadata integrity", case_integrity_arena_tiling),
++    ("integrity detects corruption", case_integrity_detects_corruption),
++    ("integrity rejects dense-row layout", case_integrity_rejects_dense_layout),
++    ("incomplete load fails closed", case_incomplete_load_fails),
++    ("malformed tensors fail closed", case_malformed_tensors_fail),
++    ("complete load passes; codebook checked", case_complete_load_passes_and_codebook_checked),
++    ("dummy-load path skips completeness", case_dummy_load_path_skips_completeness),
++]
++
++
++def main() -> int:
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--verbose", action="store_true")
++    ap.add_argument("--json-out", type=str, default=None)
++    args = ap.parse_args()
++
++    failures: list[str] = []
++    results: list[dict] = []
++    for name, fn in CASES:
++        try:
++            fn()
++        except Exception as exc:
++            failures.append(name)
++            results.append(
++                {"case": name, "ok": False, "error": f"{type(exc).__name__}: {exc}"}
++            )
++            print(f"FAIL {name}")
++            if args.verbose:
++                traceback.print_exc()
++        else:
++            results.append({"case": name, "ok": True})
++            print(f"OK   {name}")
++
++    print(f"\n{len(CASES) - len(failures)}/{len(CASES)} expert-loader cases pass")
++
++    if args.json_out:
++        import hashlib
++
++        def sha(path: str | Path) -> str:
++            return hashlib.sha256(Path(path).read_bytes()).hexdigest()
++
++        import exl3xpu.moe as moe_mod
++
++        method, layer = base()
++        summary = {
++            "task": "P1-02..P1-04",
++            "pass": not failures,
++            "cases": results,
++            "failures": failures,
++            "store": layer.exl3_moe_meta,
++            "descriptors": {
++                "shape": list(layer.exl3_moe_descriptors.shape),
++                "dtype": str(layer.exl3_moe_descriptors.dtype).removeprefix("torch."),
++                "fields": list(DESCRIPTOR_FIELDS),
++                "tensor_order": layer.exl3_moe_tensor_names,
++            },
++            "integrity": method.verify_expert_integrity(layer),
++            "per_layer_total_mib": layer.exl3_moe_meta["total_bytes"] / 2**20,
++            "max_allocation_bytes": MAX_ALLOCATION_BYTES,
++            "fixtures": {
++                "file": str(FIXTURES.relative_to(ROOT)),
++                "sha256": sha(FIXTURES),
++                "experts_checked": [0, 255],
++            },
++            "device": torch.xpu.get_device_properties(0).name,
++            "torch": torch.__version__,
++            "moe_module": moe_mod.__file__,
++            "moe_module_sha256": sha(moe_mod.__file__),
++            "test_sha256": sha(__file__),
++        }
++        Path(args.json_out).write_text(json.dumps(summary, indent=2) + "\n")
++        print(f"wrote {args.json_out}")
++
++    if failures:
++        print("failures:", failures)
++        return 1
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+
+## file: tests/test_dispatch.py
+--- a/tests/test_dispatch.py	2026-10-21 22:05:50.341775534 +0200
++++ b/tests/test_dispatch.py	2026-10-23 22:30:19.520026154 +0200
+@@ -0,0 +1,342 @@
++#!/usr/bin/env python3
++"""P1-01 dispatch tests: dense -> Exl3LinearMethod, experts -> Exl3MoEMethod.
++
++Runs as a plain script (this venv has no pytest):
++
++    .venv/bin/python tests/test_dispatch.py [--verbose]
++
++Every case exercises ``Exl3Config.get_quant_method`` through vLLM's real
++``resolve_quant_method`` helper, so the tests cover the exact seam that used to
++produce ``UnquantizedFusedMoEMethod`` (``routed_experts.py:219-220``).
++"""
++from __future__ import annotations
++
++import argparse
++import sys
++import traceback
++import types
++from collections.abc import Callable
++
++import torch
++from vllm.model_executor.layers.fused_moe.routed_experts import RoutedExperts
++from vllm.model_executor.layers.fused_moe.unquantized_fused_moe_method import (
++    UnquantizedFusedMoEMethod,
++)
++from vllm.model_executor.layers.linear import LinearBase, UnquantizedLinearMethod
++from vllm.model_executor.layers.quantization.base_config import resolve_quant_method
++
++from exl3xpu.moe import Exl3MoEMethod, Exl3MoEUnsupported
++from exl3xpu.vllm_plugin import Exl3Config, Exl3LinearMethod
++
++DENSE_PREFIX = "layers.0.mlp.gate_proj"
++UNQUANTIZED_DENSE_PREFIX = "layers.0.mlp.shared_expert_gate"
++EXPERTS_PREFIX = "layers.0.mlp.experts"
++
++
++# ---------------------------------------------------------------------------
++# fixtures
++# ---------------------------------------------------------------------------
++
++def expert_storage(
++    num_experts: int = 256,
++    K: int = 3,
++    skip: tuple[str, ...] = (),
++    overrides: dict[str, int] | None = None,
++) -> dict[str, int]:
++    """Checkpoint storage map for one routed-expert layer."""
++    st: dict[str, int] = {}
++    for e in range(num_experts):
++        for proj in ("gate_proj", "up_proj", "down_proj"):
++            st[f"{EXPERTS_PREFIX}.{e}.{proj}"] = K
++    for key in skip:
++        st.pop(key, None)
++    st.update(overrides or {})
++    return st
++
++
++def dense_storage() -> dict[str, int]:
++    # K=4 is what the real checkpoint uses for attention/shared-expert linears.
++    return {
++        DENSE_PREFIX: 4,
++        "layers.0.mlp.up_proj": 4,
++        "layers.0.mlp.down_proj": 4,
++        "lm_head": 6,
++    }
++
++
++def make_config(storage: dict[str, int], codebook: str = "mcg") -> Exl3Config:
++    cfg = Exl3Config(bits=3, head_bits=6, codebook=codebook, storage=dict(storage))
++    # One real-shaped entry exercises the member_trellis (n, K) path.
++    if f"{EXPERTS_PREFIX}.0.gate_proj" in cfg.storage:
++        cfg.member_trellis = {
++            f"{EXPERTS_PREFIX}.0.gate_proj": (512, cfg.storage[f"{EXPERTS_PREFIX}.0.gate_proj"]),
++        }
++    return cfg
++
++
++def dense_layer() -> LinearBase:
++    return object.__new__(LinearBase)
++
++
++def experts_layer(
++    num_experts: int = 256, tp_size: int = 1, ep_size: int = 1
++) -> RoutedExperts:
++    layer = object.__new__(RoutedExperts)
++    layer.layer_name = EXPERTS_PREFIX
++    layer.moe_config = types.SimpleNamespace(
++        num_experts=num_experts,
++        num_local_experts=num_experts,
++        hidden_dim=2048,
++        intermediate_size_per_partition=512,
++        activation="silu",
++        moe_parallel_config=types.SimpleNamespace(
++            tp_size=tp_size, ep_size=ep_size, use_ep=ep_size > 1
++        ),
++    )
++    layer.ckpt_gate_proj_name = "gate_proj"
++    layer.ckpt_up_proj_name = "up_proj"
++    layer.ckpt_down_proj_name = "down_proj"
++    return layer
++
++
++# ---------------------------------------------------------------------------
++# cases
++# ---------------------------------------------------------------------------
++
++def case_dense_resolves_to_exl3() -> None:
++    cfg = make_config(dense_storage())
++    method = resolve_quant_method(cfg, dense_layer(), DENSE_PREFIX)
++    assert isinstance(method, Exl3LinearMethod), type(method)
++    assert method.K == 4 and method.cb == 1, (method.K, method.cb)
++
++
++def case_unquantized_dense_still_unquantized() -> None:
++    cfg = make_config(dense_storage())
++    method = resolve_quant_method(cfg, dense_layer(), UNQUANTIZED_DENSE_PREFIX)
++    assert isinstance(method, UnquantizedLinearMethod), type(method)
++
++
++def case_experts_resolve_to_exl3_moe() -> None:
++    cfg = make_config(expert_storage())
++    layer = experts_layer()
++    method = resolve_quant_method(cfg, layer, EXPERTS_PREFIX)
++    assert isinstance(method, Exl3MoEMethod), type(method)
++    assert not isinstance(method, UnquantizedFusedMoEMethod)
++    assert method.K == 3 and method.cb == 1, (method.K, method.cb)
++    assert method.num_local_experts == 256
++    # Modular-kernel contract: no vLLM fused-MoE kernel, runner computes top-k
++    # and calls apply().
++    assert method.moe_kernel is None
++    assert method.supports_internal_mk is False
++    assert method.is_monolithic is False
++    assert method.get_fused_moe_quant_config(layer) is None
++
++
++def case_experts_direct_get_quant_method() -> None:
++    cfg = make_config(expert_storage())
++    method = cfg.get_quant_method(experts_layer(), EXPERTS_PREFIX)
++    assert isinstance(method, Exl3MoEMethod), type(method)
++
++
++def case_model_qualified_prefix_normalizes() -> None:
++    # vLLM passes the full model prefix; checkpoint keys are normalized.
++    cfg = make_config(expert_storage())
++    qualified = "model.language_model.layers.0.mlp.experts"
++    method = cfg.get_quant_method(experts_layer(), qualified)
++    assert isinstance(method, Exl3MoEMethod), type(method)
++    assert method.key_prefix == EXPERTS_PREFIX, method.key_prefix
++
++
++def case_apply_stub_fails_closed() -> None:
++    cfg = make_config(expert_storage())
++    layer = experts_layer()
++    method = cfg.get_quant_method(layer, EXPERTS_PREFIX)
++    # P1-02 is implemented; execution (P1-03) must still refuse silently-wrong
++    # output and there is no fallback path.
++    try:
++        method.apply(layer, torch.zeros(4, 2048), torch.zeros(4, 8), torch.zeros(4, 8, dtype=torch.int32), None, None)
++    except NotImplementedError as exc:
++        assert "P1-06" in str(exc), exc
++    else:
++        raise AssertionError("apply must not silently succeed before P1-06")
++
++
++def expect_unsupported(
++    fn: Callable[[], object], contains: str, label: str
++) -> None:
++    try:
++        fn()
++    except Exl3MoEUnsupported as exc:
++        assert contains in str(exc), f"{label}: expected {contains!r} in {exc!s}"
++    else:
++        raise AssertionError(f"{label}: expected Exl3MoEUnsupported, got a method")
++
++
++def case_no_expert_tensors_raise() -> None:
++    cfg = make_config(dense_storage())
++    layer = experts_layer()
++    expect_unsupported(
++        lambda: cfg.get_quant_method(layer, EXPERTS_PREFIX),
++        "no EXL3 expert tensors",
++        "unquantized MoE",
++    )
++
++
++def case_partial_expert_raises() -> None:
++    st = expert_storage(skip=(f"{EXPERTS_PREFIX}.7.down_proj",))
++    cfg = make_config(st)
++    expect_unsupported(
++        lambda: cfg.get_quant_method(experts_layer(), EXPERTS_PREFIX),
++        "expert 7 is missing quantized projections ['down_proj']",
++        "partial expert",
++    )
++
++
++def case_expert_count_mismatch_raises() -> None:
++    cfg = make_config(expert_storage(num_experts=255))
++    expect_unsupported(
++        lambda: cfg.get_quant_method(experts_layer(), EXPERTS_PREFIX),
++        "checkpoint has 255 experts",
++        "expert count",
++    )
++
++
++def case_mixed_K_raises() -> None:
++    st = expert_storage(overrides={f"{EXPERTS_PREFIX}.0.gate_proj": 4})
++    cfg = make_config(st)
++    expect_unsupported(
++        lambda: cfg.get_quant_method(experts_layer(), EXPERTS_PREFIX),
++        "mixed trellis K",
++        "mixed K",
++    )
++
++
++def case_unsupported_K_raises() -> None:
++    cfg = make_config(expert_storage(K=5))
++    expect_unsupported(
++        lambda: cfg.get_quant_method(experts_layer(), EXPERTS_PREFIX),
++        "no ESIMD kernel for K=5",
++        "unsupported K",
++    )
++
++
++def case_empty_storage_raises() -> None:
++    cfg = make_config({})
++    expect_unsupported(
++        lambda: cfg.get_quant_method(experts_layer(), EXPERTS_PREFIX),
++        "storage map is empty",
++        "empty storage",
++    )
++
++
++def case_tp_ep_raise() -> None:
++    cfg = make_config(expert_storage())
++    for kwargs, label in (
++        ({"tp_size": 2}, "tp>1"),
++        ({"ep_size": 2}, "ep>1"),
++    ):
++        expect_unsupported(
++            lambda kw=kwargs: cfg.get_quant_method(experts_layer(**kw), EXPERTS_PREFIX),
++            "parallelism is not supported",
++            label,
++        )
++
++
++def case_unknown_codebook_raises() -> None:
++    cfg = make_config(expert_storage(), codebook="mul2")
++    expect_unsupported(
++        lambda: cfg.get_quant_method(experts_layer(), EXPERTS_PREFIX),
++        "unknown codebook",
++        "unknown codebook",
++    )
++
++
++def case_no_unquantized_symbol_in_moe_module() -> None:
++    import exl3xpu.moe as moe_mod
++
++    src = open(moe_mod.__file__).read()
++    # The MoE adapter must not import or construct the forbidden fallback. The
++    # class name may appear in prose (docstrings explain why), so key off code
++    # constructs only.
++    assert "import UnquantizedFusedMoEMethod" not in src
++    assert "UnquantizedFusedMoEMethod(" not in src
++
++
++CASES: list[tuple[str, Callable[[], None]]] = [
++    ("dense linear -> Exl3LinearMethod", case_dense_resolves_to_exl3),
++    ("unquantized dense stays unquantized", case_unquantized_dense_still_unquantized),
++    ("routed experts -> Exl3MoEMethod", case_experts_resolve_to_exl3_moe),
++    ("direct get_quant_method -> Exl3MoEMethod", case_experts_direct_get_quant_method),
++    ("model-qualified prefix normalizes", case_model_qualified_prefix_normalizes),
++    ("apply stub fails closed", case_apply_stub_fails_closed),
++    ("unquantized MoE raises", case_no_expert_tensors_raise),
++    ("partially-quantized expert raises", case_partial_expert_raises),
++    ("expert-count mismatch raises", case_expert_count_mismatch_raises),
++    ("mixed-K experts raise", case_mixed_K_raises),
++    ("unsupported K raises", case_unsupported_K_raises),
++    ("empty storage raises", case_empty_storage_raises),
++    ("TP/EP raise", case_tp_ep_raise),
++    ("unknown codebook raises", case_unknown_codebook_raises),
++    ("moe.py has no unquantized fallback", case_no_unquantized_symbol_in_moe_module),
++]
++
++
++def main() -> int:
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--verbose", action="store_true")
++    ap.add_argument("--json-out", type=str, default=None,
++                    help="write a machine-readable summary (evidence artifact)")
++    args = ap.parse_args()
++
++    failures: list[str] = []
++    results: list[dict] = []
++    for name, fn in CASES:
++        try:
++            fn()
++        except Exception as exc:
++            failures.append(name)
++            results.append({"case": name, "ok": False, "error": f"{type(exc).__name__}: {exc}"})
++            print(f"FAIL {name}")
++            if args.verbose:
++                traceback.print_exc()
++        else:
++            results.append({"case": name, "ok": True})
++            print(f"OK   {name}")
++
++    print(f"\n{len(CASES) - len(failures)}/{len(CASES)} dispatch cases pass")
++
++    if args.json_out:
++        import hashlib
++        import json
++        from pathlib import Path
++
++        import exl3xpu.moe as moe_mod
++        from exl3xpu import ops
++
++        def sha(path: str) -> str:
++            return hashlib.sha256(Path(path).read_bytes()).hexdigest()
++
++        summary = {
++            "task": "P1-01",
++            "pass": not failures,
++            "cases": results,
++            "failures": failures,
++            "device": torch.xpu.get_device_properties(0).name,
++            "torch": torch.__version__,
++            "requested_backend": __import__("os").environ.get("EXL3_BACKEND", "auto"),
++            "small_m_max_k3_cb1": ops.small_m_max(3, 1),
++            "moe_method_module": moe_mod.__file__,
++            "moe_method_sha256": sha(moe_mod.__file__),
++            "test_sha256": sha(__file__),
++        }
++        Path(args.json_out).write_text(json.dumps(summary, indent=2) + "\n")
++        print(f"wrote {args.json_out}")
++
++    if failures:
++        print("failures:", failures)
++        return 1
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+
+## file: tests/test_expert_mlp.py
+--- a/tests/test_expert_mlp.py	2026-10-21 22:05:50.341775534 +0200
++++ b/tests/test_expert_mlp.py	2026-10-24 09:50:05.629020187 +0200
+@@ -0,0 +1,373 @@
++#!/usr/bin/env python3
++"""P1-07: single-expert MLP forward pass on XPU.
++
++Runs the full routed-expert MLP for one expert through the production fused op
++(``exl3xpu.ops.exl3_linear``):
++
++    x -> gate = linear(x)          # FWHT(x*su) -> GEMV -> FWHT(.)*sv
++       -> up   = linear(x)
++       -> h    = SiLU(gate) * up   # activation strictly post-Hadamard
++       -> y    = linear(h)         # down projection, same transforms
++
++and compares it with the CPU dequantized reference MLP built from
++``exl3xpu.ref.weight_orig`` (fp32), gating on the P0-09 tolerances:
++
++* T-2  ``max_abs <= 0.08`` for M in {1,2,4,8};
++* T-5  repeat run is bit-identical;
++* T-6  zero NaN/Inf.
++
++It also replays the P0-08 oracle trace inputs for experts 0/255 and checks the
++end-to-end MLP output against ``expert/{id}/down_proj/y``.
++
++    .venv/bin/python tests/test_expert_mlp.py
++
++Evidence: ``logs/moe-p1/single-expert-eval.log`` (+ ``--json-out``).
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++import math
++import traceback
++from collections.abc import Callable
++from pathlib import Path
++
++import numpy as np
++import torch
++import torch.nn.functional as F
++from safetensors import safe_open
++
++from exl3xpu import ops
++from exl3xpu import ref
++
++ROOT = Path(__file__).resolve().parents[1]
++FIXTURES = ROOT / "fixtures" / "exl3-moe" / "moe-fixtures.safetensors"
++TRACES = ROOT / "fixtures" / "reference_moe_traces.npz"
++DEFAULT_MODEL = "/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw"
++PROJECTIONS = ("gate_proj", "up_proj", "down_proj")
++T2_MAX_ABS = 0.08
++M_VALUES = (1, 2, 4, 8)
++
++
++class ShardSource:
++    def __init__(self, model_dir: Path, layer: int):
++        self.model_dir = model_dir
++        self.layer = layer
++        self.prefix = f"model.language_model.layers.{layer}.mlp.experts"
++        self.weight_map = json.loads(
++            (model_dir / "model.safetensors.index.json").read_text()
++        )["weight_map"]
++        self._handles: dict[str, object] = {}
++
++    def _handle(self, shard: str):
++        if shard not in self._handles:
++            self._handles[shard] = safe_open(str(self.model_dir / shard), framework="pt")
++        return self._handles[shard]
++
++    def has(self, expert: int) -> bool:
++        key = f"{self.prefix}.{expert}.gate_proj.trellis"
++        shard = self.weight_map.get(key)
++        return shard is not None and (self.model_dir / shard).is_file()
++
++    def get(self, expert: int, proj: str, suffix: str) -> torch.Tensor:
++        key = f"{self.prefix}.{expert}.{proj}.{suffix}"
++        return self._handle(self.weight_map[key]).get_tensor(key)
++
++    def codebook(self, expert: int, proj: str) -> int:
++        for suffix, cb in (("mcg", ref.CB_MCG), ("mul1", ref.CB_MUL1)):
++            if f"{self.prefix}.{expert}.{proj}.{suffix}" in self.weight_map:
++                return cb
++        return ref.CB_3INST
++
++
++class FixtureSource:
++    def __init__(self, layer: int):
++        self.layer = layer
++        self.prefix = f"model.language_model.layers.{layer}.mlp.experts"
++        self._f = safe_open(str(FIXTURES), framework="pt")
++        self._keys = set(self._f.keys())
++
++    def has(self, expert: int) -> bool:
++        return f"{self.prefix}.{expert}.gate_proj.trellis" in self._keys
++
++    def get(self, expert: int, proj: str, suffix: str) -> torch.Tensor:
++        return self._f.get_tensor(f"{self.prefix}.{expert}.{proj}.{suffix}")
++
++    def codebook(self, expert: int, proj: str) -> int:
++        if f"{self.prefix}.{expert}.{proj}.mcg" in self._keys:
++            return ref.CB_MCG
++        if f"{self.prefix}.{expert}.{proj}.mul1" in self._keys:
++            return ref.CB_MUL1
++        return ref.CB_3INST
++
++
++# ---------------------------------------------------------------------------
++# helpers
++# ---------------------------------------------------------------------------
++
++def load_modules(source, expert: int) -> dict[str, dict]:
++    out = {}
++    for proj in PROJECTIONS:
++        trellis = source.get(expert, proj, "trellis")
++        suh = source.get(expert, proj, "suh")
++        svh = source.get(expert, proj, "svh")
++        out[proj] = {
++            "trellis": trellis,
++            "suh": suh,
++            "svh": svh,
++            "K": trellis.shape[-1] // 16,
++            "cb": source.codebook(expert, proj),
++            "k": trellis.shape[0] * 16,
++            "n": trellis.shape[1] * 16,
++        }
++    return out
++
++
++def reference_mlp(x: torch.Tensor, modules: dict[str, dict]) -> tuple[torch.Tensor, dict]:
++    """Literal fp32 dequantized MLP in the original basis (CPU)."""
++    w = {
++        proj: ref.weight_orig(
++            m["trellis"].cpu(), m["suh"].cpu(), m["svh"].cpu(), m["K"], m["cb"]
++        )
++        for proj, m in modules.items()
++    }
++    g = x.float() @ w["gate_proj"]
++    u = x.float() @ w["up_proj"]
++    h = F.silu(g) * u
++    y = h @ w["down_proj"]
++    return y, {"gate": g, "up": u, "act": h}
++
++
++def kernel_mlp(x: torch.Tensor, modules: dict[str, dict]) -> tuple[torch.Tensor, dict]:
++    """Production fused path (all transforms inside ``ops.exl3_linear``)."""
++    def lin(t: torch.Tensor, m: dict) -> torch.Tensor:
++        n = m["n"]
++        nb = torch.zeros(n // 128, dtype=torch.int32, device=t.device)
++        return ops.exl3_linear(
++            t, m["trellis"], m["suh"], m["svh"], nb, [0, n], m["K"], m["cb"]
++        )
++
++    g = lin(x, modules["gate_proj"])
++    u = lin(x, modules["up_proj"])
++    h = F.silu(g) * u
++    y = lin(h, modules["down_proj"])
++    return y, {"gate": g, "up": u, "act": h}
++
++
++def metrics(got: torch.Tensor, want: torch.Tensor) -> dict[str, float]:
++    a = got.float()
++    b = want.float()
++    diff = (a - b).abs()
++    denom = b.abs().clamp_min(1e-3)
++    return {
++        "max_abs": float(diff.max().item()) if diff.numel() else 0.0,
++        "p99_abs": float(torch.quantile(diff.flatten(), 0.99).item())
++        if diff.numel() else 0.0,
++        "max_rel": float((diff / denom).max().item()) if diff.numel() else 0.0,
++        "nan_inf": int(torch.isnan(a).sum().item() + torch.isinf(a).sum().item()),
++    }
++
++
++def make_x(m: int, k: int, dtype: torch.dtype, seed: int) -> torch.Tensor:
++    g = torch.Generator(device="cpu").manual_seed(seed + m)
++    x = (torch.randn((m, k), generator=g, dtype=torch.float32) * 0.05).to(dtype)
++    return x
++
++
++# ---------------------------------------------------------------------------
++# cases
++# ---------------------------------------------------------------------------
++
++def case_mlp_vs_dequantized(source, expert: int, dtype_name: str,
++                            records: list[dict]) -> None:
++    dtype = {"float16": torch.float16, "bfloat16": torch.bfloat16}[dtype_name]
++    modules = load_modules(source, expert)
++    device = "xpu"
++    mods = {
++        proj: {
++            **m,
++            "trellis": m["trellis"].to(device),
++            "suh": m["suh"].to(device),
++            "svh": m["svh"].to(device),
++        }
++        for proj, m in modules.items()
++    }
++    k = modules["gate_proj"]["k"]
++    for m_tokens in M_VALUES:
++        x = make_x(m_tokens, k, dtype, seed=1234).to(device)
++        y_k, parts_k = kernel_mlp(x, mods)
++        y_k2, _ = kernel_mlp(x, mods)
++        y_ref, parts_ref = reference_mlp(x.cpu(), modules)
++
++        stat = metrics(y_k.cpu(), y_ref)
++        stat_gate = metrics(parts_k["gate"].cpu(), parts_ref["gate"])
++        stat_up = metrics(parts_k["up"].cpu(), parts_ref["up"])
++        stat_down = metrics(y_k.cpu(), y_ref)
++        det = bool(torch.equal(y_k, y_k2))
++        ok = (
++            stat["max_abs"] <= T2_MAX_ABS
++            and stat["nan_inf"] == 0
++            and det
++            and all(s["nan_inf"] == 0 for s in (stat_gate, stat_up, stat_down))
++        )
++        records.append({
++            "case": "mlp_vs_dequantized",
++            "expert": expert,
++            "dtype": dtype_name,
++            "M": m_tokens,
++            "K": modules["gate_proj"]["K"],
++            "cb": modules["gate_proj"]["cb"],
++            "down_max_abs": stat["max_abs"],
++            "down_p99_abs": stat["p99_abs"],
++            "down_max_rel": stat["max_rel"],
++            "gate_max_abs": stat_gate["max_abs"],
++            "up_max_abs": stat_up["max_abs"],
++            "deterministic": det,
++            "nan_inf": stat["nan_inf"],
++            "T2_pass": stat["max_abs"] <= T2_MAX_ABS,
++            "pass": ok,
++        })
++        assert ok, (expert, dtype_name, m_tokens, stat, det)
++
++
++def case_trace_mlp(source, expert: int, records: list[dict]) -> None:
++    """Replay the P0-08 trace input through the real MLP for one expert."""
++    if not TRACES.is_file():
++        records.append({"case": "trace_mlp", "expert": expert, "status": "missing"})
++        return
++    data = np.load(TRACES)
++    key = f"expert/{expert}/down_proj/y"
++    if key not in data or not source.has(expert):
++        records.append({"case": "trace_mlp", "expert": expert, "status": "missing"})
++        return
++    modules = load_modules(source, expert)
++    mods = {
++        proj: {
++            **m,
++            "trellis": m["trellis"].to("xpu"),
++            "suh": m["suh"].to("xpu"),
++            "svh": m["svh"].to("xpu"),
++        }
++        for proj, m in modules.items()
++    }
++    x = torch.from_numpy(data["inputs/x"].copy()).to(torch.float16).to("xpu")
++    y_k, _ = kernel_mlp(x, mods)
++    want = torch.from_numpy(data[key].copy()).float()
++    stat = metrics(y_k.cpu(), want)
++    ok = stat["max_abs"] <= T2_MAX_ABS and stat["nan_inf"] == 0
++    records.append({
++        "case": "trace_mlp",
++        "expert": expert,
++        "M": int(x.shape[0]),
++        "max_abs": stat["max_abs"],
++        "p99_abs": stat["p99_abs"],
++        "max_rel": stat["max_rel"],
++        "nan_inf": stat["nan_inf"],
++        "T2_pass": stat["max_abs"] <= T2_MAX_ABS,
++        "pass": ok,
++    })
++    assert ok, (expert, stat)
++
++
++# ---------------------------------------------------------------------------
++# runner
++# ---------------------------------------------------------------------------
++
++def make_source(model_dir: Path, layer: int):
++    index = model_dir / "model.safetensors.index.json"
++    if index.is_file():
++        src = ShardSource(model_dir, layer)
++        if any(src.has(e) for e in (0, 255)):
++            return src, "checkpoint"
++    if layer == 0:
++        src = FixtureSource(layer)
++        if any(src.has(e) for e in (0, 255)):
++            return src, "fixtures"
++    raise SystemExit(f"no EXL3 expert tensors available ({model_dir}, layer {layer})")
++
++
++def main() -> int:
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--model-dir", default=DEFAULT_MODEL)
++    ap.add_argument("--layer", type=int, default=0)
++    ap.add_argument("--expert", type=int, default=0)
++    ap.add_argument("--dtypes", nargs="*", default=["float16", "bfloat16"])
++    ap.add_argument("--log-out", default=str(ROOT / "logs/moe-p1/single-expert-eval.log"))
++    ap.add_argument("--json-out", default=str(ROOT / "logs/moe-p1/single-expert-eval.json"))
++    ap.add_argument("--verbose", action="store_true")
++    args = ap.parse_args()
++
++    if not torch.xpu.is_available():
++        raise SystemExit("P1-07 needs the XPU; none available")
++    assert bool(ops._get_esimd().exl3_supported(3, 1)), "no (K=3, cb=1) kernel"
++
++    source, source_kind = make_source(Path(args.model_dir), args.layer)
++    records: list[dict] = []
++    failures: list[str] = []
++
++    cases: list[tuple[str, Callable[[], None]]] = []
++    for dtype_name in args.dtypes:
++        cases.append((
++            f"MLP vs dequantized ({dtype_name}, expert {args.expert})",
++            lambda d=dtype_name: case_mlp_vs_dequantized(source, args.expert, d, records),
++        ))
++    for expert in (0, 255):
++        if source.has(expert):
++            cases.append((
++                f"P0-08 trace MLP (expert {expert})",
++                lambda e=expert: case_trace_mlp(source, e, records),
++            ))
++
++    results = []
++    for label, fn in cases:
++        try:
++            fn()
++            results.append({"case": label, "pass": True})
++            print(f"OK   {label}")
++        except Exception as exc:  # noqa: BLE001
++            failures.append(f"{label}: {exc}")
++            results.append({"case": label, "pass": False, "error": str(exc)})
++            print(f"FAIL {label}: {exc}")
++            if args.verbose:
++                traceback.print_exc()
++
++    passes = [r for r in records if r.get("pass") is not None]
++    summary = {
++        "task": "P1-07",
++        "pass": not failures and all(r["pass"] for r in passes),
++        "source": source_kind,
++        "model_dir": str(args.model_dir),
++        "layer": args.layer,
++        "device": torch.xpu.get_device_properties(0).name,
++        "tolerance": {"T2_max_abs": T2_MAX_ABS},
++        "cases": results,
++        "failures": failures,
++        "records": records,
++        "worst_max_abs": max((r.get("down_max_abs", r.get("max_abs", 0.0))
++                              for r in records), default=0.0),
++    }
++
++    log_path = Path(args.log_out)
++    log_path.parent.mkdir(parents=True, exist_ok=True)
++    lines = [
++        f"P1-07 single-expert MLP  source={source_kind} layer={args.layer}",
++        f"T2_max_abs={T2_MAX_ABS} worst={summary['worst_max_abs']:.6g}",
++    ]
++    for r in records:
++        lines.append("  " + json.dumps(r, sort_keys=True))
++    lines.append(f"pass={summary['pass']} failures={failures}")
++    log_path.write_text("\n".join(lines) + "\n")
++
++    if args.json_out:
++        out = Path(args.json_out)
++        out.parent.mkdir(parents=True, exist_ok=True)
++        out.write_text(json.dumps(summary, indent=2) + "\n")
++
++    print(f"\nworst max_abs={summary['worst_max_abs']:.6g} (T-2 <= {T2_MAX_ABS}); "
++          f"wrote {log_path}")
++    return 0 if summary["pass"] else 1
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+

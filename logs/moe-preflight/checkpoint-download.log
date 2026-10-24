@@ -1,0 +1,6 @@
+/home/yanchun/.local/share/uv/tools/huggingface-hub/lib/python3.12/site-packages/huggingface_hub/constants.py:302: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Hint: A new version of huggingface_hub (2.3.0) is available! You are using version 2.2.0.
+Hint: The `hf-cli` skill is not installed. Run `hf skills add -g` to teach your AI agents how to use the `hf` CLI.
+path=/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw
+DOWNLOAD_EXIT=0

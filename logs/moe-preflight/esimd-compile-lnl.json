@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "exit_code": 0,
+  "device": "lnl-a1",
+  "spill_reports_real_kernels": [],
+  "k3_mcg_gemv_instantiations": [
+    "GemvKernel<3,1,MR=1,NT=8>",
+    "GemvKernel<3,1,MR=2,NT=4>",
+    "GemvKernel<3,1,MR=4,NT=4>",
+    "GemvKernel<3,1,MR=8,NT=4>"
+  ],
+  "k3_mcg_reconstruct_present": true,
+  "diagnostic": "IGC 'Spill memory used' report on AOT spir64_gen build",
+  "negative_control": "spill_negative_control.cpp",
+  "rejected_flags": {
+    "-Rpass-analysis=kernel-resource-usage": "not implemented in ICPX 2026.0",
+    "-cl-fail-on-spill": "accepted but inert in IGC 2026.0 (negative control still builds)"
+  }
+}

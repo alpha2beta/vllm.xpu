@@ -1,0 +1,28 @@
+{
+  "probe": "l0_caps",
+  "relaxed_allocation_env": "1",
+  "driver_count": 1,
+  "driver_0": {
+    "driver_version_raw": 17013582,
+    "device_count": 1,
+    "relaxed_allocation_extension": true,
+    "extensions": ["ZE_extension_device_cache_line_size", "ZE_extension_device_memory_properties", "ZE_extension_device_usablemem_size_properties", "ZE_extension_eu_count", "ZE_extension_external_memmap_sysmem", "ZE_extension_memory_compression_hints", "ZE_extension_memory_free_policies", "ZE_experimental_relaxed_allocation_limits", "ZE_intel_experimental_xe_device_properties"]
+  },
+  "device_0": {
+    "name": "Intel(R) Arc(TM) Graphics",
+    "type": 1,
+    "vendor_id": "0x8086",
+    "device_id": "0x64a0",
+    "total_memory_bytes": 30692810752,
+    "max_mem_alloc_bytes": 30692810752,
+    "max_hardware_contexts": 65536,
+    "core_clock_mhz": 1600,
+    "timer_resolution_ns": 52,
+    "topology": {"slices": 2, "subslices": 4, "eus": 8, "threads_per_eu": 8, "simd_width": 16},
+    "compute": {"max_total_group": 1024, "max_group": [1024,1024,1024], "max_count": [4294967295,4294967295,4294967295], "max_slm_bytes": 131072, "subgroup_sizes": [16,32]},
+    "module": {"spirv": "1.5", "fp16": 63, "fp32": 127, "fp64": 127, "max_args_bytes": 2048},
+    "memory": [{"name": "DDR", "total_bytes": 30692810752, "max_clock_mhz": 0, "bus_width_bits": 64}],
+    "caches": [8388608],
+    "allocation_ladder": [{"bytes": 268435456, "gib": 0.25, "result": "ZE_RESULT_SUCCESS", "ok": true}, {"bytes": 536870912, "gib": 0.50, "result": "ZE_RESULT_SUCCESS", "ok": true}, {"bytes": 1073741824, "gib": 1.00, "result": "ZE_RESULT_SUCCESS", "ok": true}, {"bytes": 2147483648, "gib": 2.00, "result": "ZE_RESULT_SUCCESS", "ok": true}, {"bytes": 4294967296, "gib": 4.00, "result": "ZE_RESULT_SUCCESS", "ok": true}]
+  }
+}

@@ -1,0 +1,251 @@
+{
+  "task": "P1-02..P1-04",
+  "pass": true,
+  "cases": [
+    {
+      "case": "plan shapes/dtypes match real checkpoint",
+      "ok": true
+    },
+    {
+      "case": "allocations below 4 GiB / layer",
+      "ok": true
+    },
+    {
+      "case": "registration has no fp16 expert matrices",
+      "ok": true
+    },
+    {
+      "case": "custom expert loader is bound",
+      "ok": true
+    },
+    {
+      "case": "real experts 0/255 load bit-exact",
+      "ok": true
+    },
+    {
+      "case": "AutoWeightsLoader end-to-end",
+      "ok": true
+    },
+    {
+      "case": "packed expert descriptors",
+      "ok": true
+    },
+    {
+      "case": "descriptor views bit-exact",
+      "ok": true
+    },
+    {
+      "case": "arena tiling + metadata integrity",
+      "ok": true
+    },
+    {
+      "case": "integrity detects corruption",
+      "ok": true
+    },
+    {
+      "case": "integrity rejects dense-row layout",
+      "ok": true
+    },
+    {
+      "case": "incomplete load fails closed",
+      "ok": true
+    },
+    {
+      "case": "malformed tensors fail closed",
+      "ok": true
+    },
+    {
+      "case": "complete load passes; codebook checked",
+      "ok": true
+    },
+    {
+      "case": "dummy-load path skips completeness",
+      "ok": true
+    }
+  ],
+  "failures": [],
+  "store": {
+    "num_experts": 256,
+    "hidden_size": 2048,
+    "intermediate_size": 512,
+    "K": 3,
+    "total_bytes": 305925120,
+    "max_allocation_bytes": 4294967296,
+    "tensors": {
+      "w13_trellis": {
+        "shape": [
+          256,
+          2,
+          128,
+          32,
+          48
+        ],
+        "dtype": "int16",
+        "bytes": 201326592
+      },
+      "w13_suh": {
+        "shape": [
+          256,
+          2,
+          2048
+        ],
+        "dtype": "float16",
+        "bytes": 2097152
+      },
+      "w13_svh": {
+        "shape": [
+          256,
+          2,
+          512
+        ],
+        "dtype": "float16",
+        "bytes": 524288
+      },
+      "w2_trellis": {
+        "shape": [
+          256,
+          1,
+          32,
+          128,
+          48
+        ],
+        "dtype": "int16",
+        "bytes": 100663296
+      },
+      "w2_suh": {
+        "shape": [
+          256,
+          1,
+          512
+        ],
+        "dtype": "float16",
+        "bytes": 262144
+      },
+      "w2_svh": {
+        "shape": [
+          256,
+          1,
+          2048
+        ],
+        "dtype": "float16",
+        "bytes": 1048576
+      },
+      "w13_mcg": {
+        "shape": [
+          256,
+          2
+        ],
+        "dtype": "int32",
+        "bytes": 2048
+      },
+      "w2_mcg": {
+        "shape": [
+          256,
+          1
+        ],
+        "dtype": "int32",
+        "bytes": 1024
+      }
+    },
+    "prefix": "layers.0.mlp.experts",
+    "codebook": "mcg",
+    "codebook_id": 1,
+    "allocations": 8,
+    "tensor_order": [
+      "w13_trellis",
+      "w13_suh",
+      "w13_svh",
+      "w2_trellis",
+      "w2_suh",
+      "w2_svh",
+      "w13_mcg",
+      "w2_mcg"
+    ],
+    "descriptor_fields": [
+      "trellis_tensor",
+      "trellis_offset",
+      "suh_tensor",
+      "suh_offset",
+      "svh_tensor",
+      "svh_offset",
+      "codebook_tensor",
+      "codebook_offset",
+      "k",
+      "n",
+      "K",
+      "cb",
+      "family",
+      "slot"
+    ],
+    "descriptor_shape": [
+      256,
+      3,
+      14
+    ]
+  },
+  "descriptors": {
+    "shape": [
+      256,
+      3,
+      14
+    ],
+    "dtype": "int64",
+    "fields": [
+      "trellis_tensor",
+      "trellis_offset",
+      "suh_tensor",
+      "suh_offset",
+      "svh_tensor",
+      "svh_offset",
+      "codebook_tensor",
+      "codebook_offset",
+      "k",
+      "n",
+      "K",
+      "cb",
+      "family",
+      "slot"
+    ],
+    "tensor_order": [
+      "w13_trellis",
+      "w13_suh",
+      "w13_svh",
+      "w2_trellis",
+      "w2_suh",
+      "w2_svh",
+      "w13_mcg",
+      "w2_mcg"
+    ]
+  },
+  "integrity": {
+    "experts": 256,
+    "projections": 3,
+    "allocations": 8,
+    "tiled_slices": 3072,
+    "trellis_tile_w13": [
+      128,
+      32,
+      48
+    ],
+    "trellis_tile_w2": [
+      32,
+      128,
+      48
+    ]
+  },
+  "per_layer_total_mib": 291.7529296875,
+  "max_allocation_bytes": 4294967296,
+  "fixtures": {
+    "file": "fixtures/exl3-moe/moe-fixtures.safetensors",
+    "sha256": "a9ed86c0266a6010f4e424787f9c70d7bc541970b4602fc4cfb67b751df2993e",
+    "experts_checked": [
+      0,
+      255
+    ]
+  },
+  "device": "Intel(R) Arc(TM) Graphics",
+  "torch": "2.14.0+xpu",
+  "moe_module": "/home/yanchun/Projects/exl3xpu/exl3xpu/moe.py",
+  "moe_module_sha256": "2671ef4136be9d5334d1422cb17034b84da5ce4309b12a9d0eadb400b7f608b5",
+  "test_sha256": "f8b70f7fdf337f5bdd6e388bb336ad51bc510fe113d6bc5a57d6b6271ca79132"
+}

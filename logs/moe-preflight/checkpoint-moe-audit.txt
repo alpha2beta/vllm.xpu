@@ -1,0 +1,269 @@
+# EXL3 MoE checkpoint audit (P0-03)
+checkpoint: turboderp/Qwen3.5-35B-A3B-exl3 @ 3.09bpw
+shards: model-00001-of-00002.safetensors, model-00002-of-00002.safetensors
+tensors: 124579
+layers: 40
+routed experts/layer: [256]
+quantized modules: 30971
+Trellis K histogram: {3: 30720, 4: 250, 6: 1}
+codebooks: {'mcg': 30971}
+vision tensors: True, MTP tensors: False
+
+## Routed experts (layer 0)
+{
+  "expert_count": 256,
+  "projections": {
+    "gate_proj": [
+      {
+        "k": 2048,
+        "n": 512,
+        "K": 3,
+        "codebook": "mcg"
+      }
+    ],
+    "up_proj": [
+      {
+        "k": 2048,
+        "n": 512,
+        "K": 3,
+        "codebook": "mcg"
+      }
+    ],
+    "down_proj": [
+      {
+        "k": 512,
+        "n": 2048,
+        "K": 3,
+        "codebook": "mcg"
+      }
+    ]
+  }
+}
+
+## Shared expert
+{
+  "module_count": 120,
+  "example": "layers.0.mlp.shared_expert.down_proj",
+  "projections": {
+    "down_proj": {
+      "module_count": 40,
+      "variants": [
+        {
+          "count": 40,
+          "k": 512,
+          "n": 2048,
+          "K": 4,
+          "codebook": "mcg"
+        }
+      ]
+    },
+    "gate_proj": {
+      "module_count": 40,
+      "variants": [
+        {
+          "count": 40,
+          "k": 2048,
+          "n": 512,
+          "K": 4,
+          "codebook": "mcg"
+        }
+      ]
+    },
+    "up_proj": {
+      "module_count": 40,
+      "variants": [
+        {
+          "count": 40,
+          "k": 2048,
+          "n": 512,
+          "K": 4,
+          "codebook": "mcg"
+        }
+      ]
+    }
+  },
+  "shape_variants_across_projections": 2,
+  "note": "shape_variants_across_projections counts the fused-projection shape spread; variants within one projection are listed above.",
+  "first_module": {
+    "k": 512,
+    "n": 2048,
+    "K": 4,
+    "codebook": "mcg"
+  }
+}
+
+## Linear attention (GDN)
+{
+  "module_count": 90,
+  "example": "layers.0.linear_attn.in_proj_qkv",
+  "projections": {
+    "in_proj_qkv": {
+      "module_count": 30,
+      "variants": [
+        {
+          "count": 30,
+          "k": 2048,
+          "n": 8192,
+          "K": 4,
+          "codebook": "mcg"
+        }
+      ]
+    },
+    "in_proj_z": {
+      "module_count": 30,
+      "variants": [
+        {
+          "count": 30,
+          "k": 2048,
+          "n": 4096,
+          "K": 4,
+          "codebook": "mcg"
+        }
+      ]
+    },
+    "out_proj": {
+      "module_count": 30,
+      "variants": [
+        {
+          "count": 30,
+          "k": 4096,
+          "n": 2048,
+          "K": 4,
+          "codebook": "mcg"
+        }
+      ]
+    }
+  },
+  "shape_variants_across_projections": 3,
+  "note": "shape_variants_across_projections counts the fused-projection shape spread; variants within one projection are listed above.",
+  "first_module": {
+    "k": 2048,
+    "n": 8192,
+    "K": 4,
+    "codebook": "mcg"
+  }
+}
+
+## lm_head
+{
+  "k": 2048,
+  "n": 248320,
+  "K": 6,
+  "bits_per_weight": 6,
+  "codebook": "mcg",
+  "trellis_shape": [
+    128,
+    15520,
+    96
+  ]
+}
+
+## Unquantized tensors
+{
+  "kind_histogram": {
+    "embedding": 1,
+    "shared_expert_gate": 40,
+    "router_gate": 40,
+    "gdn_in_proj_ab": 60,
+    "gdn_state_param": 60,
+    "gdn_conv1d": 30,
+    "rmsnorm": 132,
+    "vision": 332
+  },
+  "examples": {
+    "embedding": {
+      "name": "embed_tokens.weight",
+      "dtype": "F16",
+      "shape": [
+        248320,
+        2048
+      ]
+    },
+    "shared_expert_gate": {
+      "name": "layers.0.mlp.shared_expert_gate.weight",
+      "dtype": "F16",
+      "shape": [
+        1,
+        2048
+      ]
+    },
+    "router_gate": {
+      "name": "layers.0.mlp.gate.weight",
+      "dtype": "F16",
+      "shape": [
+        256,
+        2048
+      ]
+    },
+    "gdn_in_proj_ab": {
+      "name": "layers.0.linear_attn.in_proj_a.weight",
+      "dtype": "F16",
+      "shape": [
+        32,
+        2048
+      ]
+    },
+    "gdn_state_param": {
+      "name": "layers.0.linear_attn.A_log",
+      "dtype": "F32",
+      "shape": [
+        32
+      ]
+    },
+    "gdn_conv1d": {
+      "name": "layers.0.linear_attn.conv1d.weight",
+      "dtype": "BF16",
+      "shape": [
+        8192,
+        1,
+        4
+      ]
+    },
+    "rmsnorm": {
+      "name": "layers.0.linear_attn.norm.weight",
+      "dtype": "F32",
+      "shape": [
+        128
+      ]
+    },
+    "vision": {
+      "name": "visual.blocks.1.attn.proj.bias",
+      "dtype": "BF16",
+      "shape": [
+        1152
+      ]
+    }
+  },
+  "tensor_count": 695
+}
+
+## Hadamard gate/up suh equality
+{
+  "checked_pairs": 120,
+  "identical": 0,
+  "differing_examples": [
+    {
+      "layer": 0,
+      "expert": 0
+    },
+    {
+      "layer": 0,
+      "expert": 127
+    },
+    {
+      "layer": 0,
+      "expert": 255
+    },
+    {
+      "layer": 1,
+      "expert": 0
+    },
+    {
+      "layer": 1,
+      "expert": 127
+    }
+  ]
+}
+
+## Anomalies (0)
+

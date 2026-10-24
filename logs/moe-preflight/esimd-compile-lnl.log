@@ -1,0 +1,52 @@
+ 
+:: initializing oneAPI environment ...
+   esimd_aot_diag.sh: BASH_VERSION = 5.3.20(1)-release
+   args: Using "$@" for setvars.sh arguments: --force
+:: compiler -- latest
+:: debugger -- latest
+:: mkl -- latest
+:: tbb -- latest
+:: tcm -- latest
+:: umf -- latest
+:: oneAPI environment initialized ::
+ 
+=== AOT ESIMD diagnostic: real EXL3 kernels -> lnl-a1 ===
+date:    2026-10-23T20:04:40Z
+host:    Linux 7.2.11-1-cachyos-deckify x86_64
+source:  /home/yanchun/Projects/exl3xpu/csrc/exl3_ops.sycl @ 15ded2f
+icpx:    /opt/intel/oneapi/compiler/2026.0/bin/icpx / Intel(R) oneAPI DPC++/C++ Compiler 2026.0.0 (2026.0.0.20260331)
+target:  -fsycl-targets=spir64_gen -Xsycl-target-backend "-device lnl-a1"
+torch:   /home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/torch (CXX11 ABI 1)
+
+=== 0. negative control (must report spills) ===
+  Spill memory used = 31296 bytes for kernel _ZTSZ11spill_heavyRN4sycl3_V15queueEPfiEUlvE_
+   Compiling kernel with spill code may degrade performance. Please consider rewriting the kernel to use less registers.
+  exit=0 spill_reports=1
+  detector verified live.
+
+=== 0b. why -cl-fail-on-spill is not used ===
+  exit=0 (expected 0: the flag is a no-op here; the kernel demonstrably spills)
+  spill reports still emitted: 1
+
+=== 1. real kernels: exl3_ops.sycl ===
+  flags: -fsycl-targets=spir64_gen -O3 -ffast-math -std=c++20
+         -DEXL3_ALL_CODEBOOKS -DEXL3_NO_DNNL=1 -fsycl-device-code-split=per_kernel
+
+  exit=0  elapsed=43 s  log=/tmp/opencode/esimd-diag/real-kernels.log
+  spill reports: 0
+
+=== 2. routed-expert (K=3, mcg) instantiations present in the AOT image ===
+  GemvKernel<3,1,MR=1,NT=8>
+  GemvKernel<3,1,MR=2,NT=4>
+  GemvKernel<3,1,MR=4,NT=4>
+  GemvKernel<3,1,MR=8,NT=4>
+  ReconstructKernel<3,1,NT=8,half>
+
+RESULT: PASS
+  - all instantiated kernels compiled AOT for lnl-a1
+  - zero 'Spill memory used' reports (no register spills under 128/256-GRF modes)
+  - K=3/mcg GemvKernel and ReconstructKernel present in the image
+
+note: the shipped _C.so still targets spir64 (IGC JIT at first use); this
+      object is diagnostic only and is not published.
+-rw-r--r-- 1 yanchun yanchun 12569360 Oct 23 22:05 /tmp/opencode/esimd-diag/exl3_ops_lnl.o

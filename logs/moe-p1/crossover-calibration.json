@@ -1,0 +1,81 @@
+{
+  "task": "P1-08",
+  "device": "Intel(R) Arc(TM) Graphics",
+  "has_xmx_dpas": false,
+  "note": "Arc 140V has no XMX/DPAS, so the large-M path is exl3_reconstruct + oneDNN fp16 GEMM (not int8 XMX).",
+  "small_m_max": 8,
+  "fused_M_tested": [
+    1,
+    2,
+    4,
+    8
+  ],
+  "shape": {
+    "k": 2048,
+    "n": 512
+  },
+  "tolerance_T2_max_abs": 0.08,
+  "rows": [
+    {
+      "M": 1,
+      "fused_ms": 0.08013099431991577,
+      "fused_us_per_token": 80.13099431991577,
+      "recon_gemm_ms": 0.12104248162358999,
+      "recon_gemm_us_per_token": 121.04248162358999,
+      "speedup_fused_over_recon": 1.510557589493259,
+      "path_max_abs": 3.0517578125e-05
+    },
+    {
+      "M": 2,
+      "fused_ms": 0.07963101961649954,
+      "fused_us_per_token": 39.81550980824977,
+      "recon_gemm_ms": 0.1204655272886157,
+      "recon_gemm_us_per_token": 60.23276364430785,
+      "speedup_fused_over_recon": 1.5127964939890743,
+      "path_max_abs": 3.0517578125e-05
+    },
+    {
+      "M": 4,
+      "fused_ms": 0.09227398550137877,
+      "fused_us_per_token": 23.068496375344694,
+      "recon_gemm_ms": 0.09355548536404967,
+      "recon_gemm_us_per_token": 23.38887134101242,
+      "speedup_fused_over_recon": 1.013887986475362,
+      "path_max_abs": 4.57763671875e-05
+    },
+    {
+      "M": 8,
+      "fused_ms": 0.09539301390759647,
+      "fused_us_per_token": 11.924126738449559,
+      "recon_gemm_ms": 0.09189051343128085,
+      "recon_gemm_us_per_token": 11.486314178910106,
+      "speedup_fused_over_recon": 0.9632834697967678,
+      "path_max_abs": 6.103515625e-05
+    },
+    {
+      "M": 16,
+      "recon_gemm_ms": 0.09566597873345017,
+      "recon_gemm_us_per_token": 5.979123670840636
+    },
+    {
+      "M": 32,
+      "recon_gemm_ms": 0.13176948414184153,
+      "recon_gemm_us_per_token": 4.117796379432548
+    },
+    {
+      "M": 64,
+      "recon_gemm_ms": 0.18779499805532396,
+      "recon_gemm_us_per_token": 2.934296844614437
+    },
+    {
+      "M": 128,
+      "recon_gemm_ms": 0.16501147183589637,
+      "recon_gemm_us_per_token": 1.2891521237179404
+    },
+    {
+      "M": 256,
+      "recon_gemm_ms": 0.21257653133943677,
+      "recon_gemm_us_per_token": 0.8303770755446749
+    }
+  ]
+}

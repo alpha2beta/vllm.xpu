@@ -1,0 +1,155 @@
+=== HumanEval & HumanEval+ Benchmark for Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP Started: Mon Oct 19 12:38:48 PM CEST 2026 ===
+Target Endpoint: http://127.0.0.1:8080/v1 (Raw Model: /home/yanchun/llama.cpp/models/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP.gguf)
+Settings: EVALPLUS_TIMEOUT_PER_TASK=1200s, EVALPLUS_MAX_NEW_TOKENS=2048
+--- Generating 164 solutions via evalplus.codegen ---
+Initializing a decoder model: Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP ...
+Sanitized code outputs will be saved to evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP_openai_temp_0.0.jsonl
+Raw outputs will be saved to evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP_openai_temp_0.0.raw.jsonl
+Codegen: HumanEval/0 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/1 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/2 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/3 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/4 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/5 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/6 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/7 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/8 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/9 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/10 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/11 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/12 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/13 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/14 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/15 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/16 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/17 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/18 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/19 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/20 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/21 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/22 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/23 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/24 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/25 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/26 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/27 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/28 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/29 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/30 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/31 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/32 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/33 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/34 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/35 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/36 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/37 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/38 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/39 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/40 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/41 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+=== Resuming HumanEval & HumanEval+ Benchmark for Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP at Mon Oct 19 03:30:48 PM CEST 2026 ===
+Target Endpoint: http://127.0.0.1:8080/v1 (Raw Model: /home/yanchun/llama.cpp/models/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP.gguf)
+Settings: EVALPLUS_TIMEOUT_PER_TASK=1200s, EVALPLUS_MAX_NEW_TOKENS=2048
+--- Generating remaining solutions via evalplus.codegen (resuming from existing samples) ---
+Initializing a decoder model: Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP ...
+Sanitized code outputs will be saved to evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP_openai_temp_0.0.jsonl
+Raw outputs will be saved to evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP_openai_temp_0.0.raw.jsonl
+Codegen: HumanEval/0 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/1 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/2 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/3 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/4 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/5 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/6 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/7 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/8 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/9 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/10 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/11 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/12 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/13 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/14 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/15 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/16 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/17 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/18 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/19 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/20 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/21 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/22 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/23 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/24 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/25 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/26 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/27 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/28 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/29 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/30 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/31 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/32 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/33 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/34 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/35 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/36 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/37 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/38 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/39 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/40 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP (resuming 
+from 1)
+Codegen: HumanEval/41 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/42 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/43 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/44 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/45 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/46 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/47 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/48 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/49 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/50 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/51 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/52 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/53 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/54 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/55 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/56 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP
+Codegen: HumanEval/57 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP

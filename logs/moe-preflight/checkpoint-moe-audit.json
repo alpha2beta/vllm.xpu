@@ -1,0 +1,1584 @@
+{
+  "checkpoint": {
+    "repo": "turboderp/Qwen3.5-35B-A3B-exl3",
+    "revision": "3.09bpw",
+    "path": null,
+    "quantization_config": {
+      "quant_method": "exl3",
+      "version": "0.0.22",
+      "bits": 3.09,
+      "head_bits": 6,
+      "codebook": "mcg",
+      "out_scales": "always",
+      "calibration": {
+        "rows": 250,
+        "cols": 2048
+      }
+    },
+    "shards": [
+      "model-00001-of-00002.safetensors",
+      "model-00002-of-00002.safetensors"
+    ],
+    "tensor_count": 124579,
+    "weight_index_entries": 124579
+  },
+  "integrity": {
+    "index_entries_missing_from_headers": [],
+    "header_tensors_missing_from_index": [],
+    "header_tensor_count": 124579
+  },
+  "structure": {
+    "layer_count": 40,
+    "layer_ids": [
+      0,
+      39
+    ],
+    "routed_experts_per_layer": [
+      256
+    ],
+    "has_vision_tensors": true,
+    "has_mtp_tensors": false,
+    "payload_bytes_by_family": {
+      "routed_experts": {
+        "bytes": 12237004800,
+        "gib": 11.397
+      },
+      "embedding": {
+        "bytes": 1017118720,
+        "gib": 0.947
+      },
+      "vision": {
+        "bytes": 893142496,
+        "gib": 0.832
+      },
+      "attention": {
+        "bytes": 651275400,
+        "gib": 0.607
+      },
+      "lm_head": {
+        "bytes": 381920260,
+        "gib": 0.356
+      },
+      "shared_expert": {
+        "bytes": 63693280,
+        "gib": 0.059
+      },
+      "router": {
+        "bytes": 41943040,
+        "gib": 0.039
+      },
+      "norms_and_misc": {
+        "bytes": 331776,
+        "gib": 0.0
+      }
+    },
+    "payload_bytes_total": 15286429772
+  },
+  "quantization": {
+    "quantized_module_count": 30971,
+    "K_histogram": {
+      "3": 30720,
+      "4": 250,
+      "6": 1
+    },
+    "codebook_histogram": {
+      "mcg": 30971
+    },
+    "bitrate_mismatches": [],
+    "routed_expert_modules": {
+      "module_count": 30720,
+      "example": "layers.0.mlp.experts.0.down_proj",
+      "projections": {
+        "down_proj": {
+          "module_count": 10240,
+          "variants": [
+            {
+              "count": 10240,
+              "k": 512,
+              "n": 2048,
+              "K": 3,
+              "codebook": "mcg"
+            }
+          ]
+        },
+        "gate_proj": {
+          "module_count": 10240,
+          "variants": [
+            {
+              "count": 10240,
+              "k": 2048,
+              "n": 512,
+              "K": 3,
+              "codebook": "mcg"
+            }
+          ]
+        },
+        "up_proj": {
+          "module_count": 10240,
+          "variants": [
+            {
+              "count": 10240,
+              "k": 2048,
+              "n": 512,
+              "K": 3,
+              "codebook": "mcg"
+            }
+          ]
+        }
+      },
+      "shape_variants_across_projections": 2,
+      "note": "shape_variants_across_projections counts the fused-projection shape spread; variants within one projection are listed above.",
+      "first_module": {
+        "k": 512,
+        "n": 2048,
+        "K": 3,
+        "codebook": "mcg"
+      }
+    },
+    "shared_expert_modules": {
+      "module_count": 120,
+      "example": "layers.0.mlp.shared_expert.down_proj",
+      "projections": {
+        "down_proj": {
+          "module_count": 40,
+          "variants": [
+            {
+              "count": 40,
+              "k": 512,
+              "n": 2048,
+              "K": 4,
+              "codebook": "mcg"
+            }
+          ]
+        },
+        "gate_proj": {
+          "module_count": 40,
+          "variants": [
+            {
+              "count": 40,
+              "k": 2048,
+              "n": 512,
+              "K": 4,
+              "codebook": "mcg"
+            }
+          ]
+        },
+        "up_proj": {
+          "module_count": 40,
+          "variants": [
+            {
+              "count": 40,
+              "k": 2048,
+              "n": 512,
+              "K": 4,
+              "codebook": "mcg"
+            }
+          ]
+        }
+      },
+      "shape_variants_across_projections": 2,
+      "note": "shape_variants_across_projections counts the fused-projection shape spread; variants within one projection are listed above.",
+      "first_module": {
+        "k": 512,
+        "n": 2048,
+        "K": 4,
+        "codebook": "mcg"
+      }
+    },
+    "linear_attention_modules": {
+      "module_count": 90,
+      "example": "layers.0.linear_attn.in_proj_qkv",
+      "projections": {
+        "in_proj_qkv": {
+          "module_count": 30,
+          "variants": [
+            {
+              "count": 30,
+              "k": 2048,
+              "n": 8192,
+              "K": 4,
+              "codebook": "mcg"
+            }
+          ]
+        },
+        "in_proj_z": {
+          "module_count": 30,
+          "variants": [
+            {
+              "count": 30,
+              "k": 2048,
+              "n": 4096,
+              "K": 4,
+              "codebook": "mcg"
+            }
+          ]
+        },
+        "out_proj": {
+          "module_count": 30,
+          "variants": [
+            {
+              "count": 30,
+              "k": 4096,
+              "n": 2048,
+              "K": 4,
+              "codebook": "mcg"
+            }
+          ]
+        }
+      },
+      "shape_variants_across_projections": 3,
+      "note": "shape_variants_across_projections counts the fused-projection shape spread; variants within one projection are listed above.",
+      "first_module": {
+        "k": 2048,
+        "n": 8192,
+        "K": 4,
+        "codebook": "mcg"
+      }
+    },
+    "full_attention_modules": {
+      "module_count": 40,
+      "example": "layers.11.self_attn.k_proj",
+      "projections": {
+        "k_proj": {
+          "module_count": 10,
+          "variants": [
+            {
+              "count": 10,
+              "k": 2048,
+              "n": 512,
+              "K": 4,
+              "codebook": "mcg"
+            }
+          ]
+        },
+        "o_proj": {
+          "module_count": 10,
+          "variants": [
+            {
+              "count": 10,
+              "k": 4096,
+              "n": 2048,
+              "K": 4,
+              "codebook": "mcg"
+            }
+          ]
+        },
+        "q_proj": {
+          "module_count": 10,
+          "variants": [
+            {
+              "count": 10,
+              "k": 2048,
+              "n": 8192,
+              "K": 4,
+              "codebook": "mcg"
+            }
+          ]
+        },
+        "v_proj": {
+          "module_count": 10,
+          "variants": [
+            {
+              "count": 10,
+              "k": 2048,
+              "n": 512,
+              "K": 4,
+              "codebook": "mcg"
+            }
+          ]
+        }
+      },
+      "shape_variants_across_projections": 3,
+      "note": "shape_variants_across_projections counts the fused-projection shape spread; variants within one projection are listed above.",
+      "first_module": {
+        "k": 2048,
+        "n": 512,
+        "K": 4,
+        "codebook": "mcg"
+      }
+    },
+    "lm_head": {
+      "k": 2048,
+      "n": 248320,
+      "K": 6,
+      "bits_per_weight": 6,
+      "codebook": "mcg",
+      "trellis_shape": [
+        128,
+        15520,
+        96
+      ]
+    }
+  },
+  "hadamard": {
+    "all_quantized_modules_have_suh_svh": true,
+    "gate_up_suh": {
+      "checked_pairs": 120,
+      "identical": 0,
+      "differing_examples": [
+        {
+          "layer": 0,
+          "expert": 0
+        },
+        {
+          "layer": 0,
+          "expert": 127
+        },
+        {
+          "layer": 0,
+          "expert": 255
+        },
+        {
+          "layer": 1,
+          "expert": 0
+        },
+        {
+          "layer": 1,
+          "expert": 127
+        }
+      ]
+    },
+    "blocked_fwht_width": 128,
+    "note": "EXL3 applies H128 in 128-wide blocks to input and output of every linear; suh/svh are full k/n-length vectors (see exl3xpu/ref.py)."
+  },
+  "unquantized": {
+    "kind_histogram": {
+      "embedding": 1,
+      "shared_expert_gate": 40,
+      "router_gate": 40,
+      "gdn_in_proj_ab": 60,
+      "gdn_state_param": 60,
+      "gdn_conv1d": 30,
+      "rmsnorm": 132,
+      "vision": 332
+    },
+    "examples": {
+      "embedding": {
+        "name": "embed_tokens.weight",
+        "dtype": "F16",
+        "shape": [
+          248320,
+          2048
+        ]
+      },
+      "shared_expert_gate": {
+        "name": "layers.0.mlp.shared_expert_gate.weight",
+        "dtype": "F16",
+        "shape": [
+          1,
+          2048
+        ]
+      },
+      "router_gate": {
+        "name": "layers.0.mlp.gate.weight",
+        "dtype": "F16",
+        "shape": [
+          256,
+          2048
+        ]
+      },
+      "gdn_in_proj_ab": {
+        "name": "layers.0.linear_attn.in_proj_a.weight",
+        "dtype": "F16",
+        "shape": [
+          32,
+          2048
+        ]
+      },
+      "gdn_state_param": {
+        "name": "layers.0.linear_attn.A_log",
+        "dtype": "F32",
+        "shape": [
+          32
+        ]
+      },
+      "gdn_conv1d": {
+        "name": "layers.0.linear_attn.conv1d.weight",
+        "dtype": "BF16",
+        "shape": [
+          8192,
+          1,
+          4
+        ]
+      },
+      "rmsnorm": {
+        "name": "layers.0.linear_attn.norm.weight",
+        "dtype": "F32",
+        "shape": [
+          128
+        ]
+      },
+      "vision": {
+        "name": "visual.blocks.1.attn.proj.bias",
+        "dtype": "BF16",
+        "shape": [
+          1152
+        ]
+      }
+    },
+    "tensor_count": 695
+  },
+  "layers": {
+    "0": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "1": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "2": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "3": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "4": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "5": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "6": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "7": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "8": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "9": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "10": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "11": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "12": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "13": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "14": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "15": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "16": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "17": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "18": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "19": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "20": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "21": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "22": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "23": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "24": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "25": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "26": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "27": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "28": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "29": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "30": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "31": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "32": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "33": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "34": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "35": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "36": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "37": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "38": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    },
+    "39": {
+      "expert_count": 256,
+      "projections": {
+        "gate_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "up_proj": [
+          {
+            "k": 2048,
+            "n": 512,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ],
+        "down_proj": [
+          {
+            "k": 512,
+            "n": 2048,
+            "K": 3,
+            "codebook": "mcg"
+          }
+        ]
+      }
+    }
+  },
+  "anomalies": []
+}

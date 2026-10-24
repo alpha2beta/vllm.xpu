@@ -1,0 +1,14 @@
+P1-08 batch sweep  source=checkpoint layer=0 expert=0
+small_m_max=8 T2_max_abs=0.08
+  {"M": 0, "dtype": "float16", "empty": true, "nan_inf": 0, "out_shape": [0, 2048], "pass": true, "zero_sized": true}
+  {"M": 1, "T2_pass": true, "dtype": "float16", "max_abs": 2.8632748581003398e-06, "nan_inf": 0, "out_shape": [1, 2048], "p99_abs": 2.0569384560076287e-06, "pass": true}
+  {"M": 2, "T2_pass": true, "dtype": "float16", "max_abs": 3.5886960176867433e-06, "nan_inf": 0, "out_shape": [2, 2048], "p99_abs": 1.9703948055393994e-06, "pass": true}
+  {"M": 4, "T2_pass": true, "dtype": "float16", "max_abs": 3.6240107874618843e-06, "nan_inf": 0, "out_shape": [4, 2048], "p99_abs": 2.0245824998710304e-06, "pass": true}
+  {"M": 8, "T2_pass": true, "dtype": "float16", "max_abs": 3.577206371119246e-06, "nan_inf": 0, "out_shape": [8, 2048], "p99_abs": 1.9444180452410365e-06, "pass": true}
+  {"M": 16, "T2_pass": true, "dtype": "float16", "max_abs": 3.1065719667822123e-06, "nan_inf": 0, "out_shape": [16, 2048], "p99_abs": 1.68220628893323e-06, "pass": true}
+  {"M": 32, "T2_pass": true, "dtype": "float16", "max_abs": 3.1452473194804043e-06, "nan_inf": 0, "out_shape": [32, 2048], "p99_abs": 1.7011336694849888e-06, "pass": true}
+  {"M": 64, "T2_pass": true, "dtype": "float16", "max_abs": 3.842802470899187e-06, "nan_inf": 0, "out_shape": [64, 2048], "p99_abs": 1.6880118209883221e-06, "pass": true}
+  {"M": 128, "T2_pass": true, "dtype": "float16", "max_abs": 3.1973904697224498e-06, "nan_inf": 0, "out_shape": [128, 2048], "p99_abs": 1.6830629192554625e-06, "pass": true}
+  {"M": 256, "T2_pass": true, "dtype": "float16", "max_abs": 4.278757842257619e-06, "nan_inf": 0, "out_shape": [256, 2048], "p99_abs": 1.7008545682983822e-06, "pass": true}
+  {"M": 0, "exl3_linear_device_us": 0, "exl3_linear_kernels": 0, "full_mlp_device_us": 0, "full_mlp_kernels": 0, "pass": true}
+pass=True failures=[]

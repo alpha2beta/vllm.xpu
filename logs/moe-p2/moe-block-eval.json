@@ -1,0 +1,93 @@
+{
+  "task": "P2-01/P2-04/P2-07",
+  "pass": true,
+  "model_dir": "/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw",
+  "layer": 0,
+  "device": "Intel(R) Arc(TM) Graphics",
+  "tolerance": {
+    "T2_max_abs": 0.08
+  },
+  "cases": [
+    {
+      "case": "router alignment",
+      "pass": true
+    },
+    {
+      "case": "restricted-routing block vs oracle",
+      "pass": true
+    },
+    {
+      "case": "routed + shared block vs oracle",
+      "pass": true
+    },
+    {
+      "case": "free top-8 routing vs reference",
+      "pass": true
+    },
+    {
+      "case": "shared ownership (no double compute)",
+      "pass": true
+    },
+    {
+      "case": "token accounting (all 8 slots)",
+      "pass": true
+    }
+  ],
+  "failures": [],
+  "records": [
+    {
+      "case": "router_alignment",
+      "cos_min": 0.9999999403953552,
+      "top8_agreement": 1.0,
+      "weight_max_abs": 2.9802322387695312e-08,
+      "pass": true
+    },
+    {
+      "case": "restricted_block_routed",
+      "max_abs": 2.4937326088547707e-06,
+      "p99_abs": 1.3701651369046886e-06,
+      "nan_inf": 0,
+      "pass": true
+    },
+    {
+      "case": "full_block_routed_plus_shared",
+      "max_abs": 2.587323251646012e-06,
+      "p99_abs": 1.687131430117006e-06,
+      "nan_inf": 0,
+      "pass": true
+    },
+    {
+      "case": "free_routing_vs_reference",
+      "unique_experts": 27,
+      "assignments": 32,
+      "max_abs": 9.363184290123172e-07,
+      "p99_abs": 6.840182891210134e-07,
+      "nan_inf": 0,
+      "pass": true
+    },
+    {
+      "case": "shared_ownership",
+      "apply_ignores_shared_argument": true,
+      "pass": true
+    },
+    {
+      "case": "token_accounting",
+      "assignments": 32,
+      "tokens": 4,
+      "topk": 8,
+      "zero_weights_max_abs": 0.0,
+      "per_slot_contribution_max_abs": [
+        2.0682811737060547e-05,
+        2.300739288330078e-05,
+        2.3484230041503906e-05,
+        2.2172927856445312e-05,
+        2.0265579223632812e-05,
+        2.288818359375e-05,
+        3.081560134887695e-05,
+        3.266334533691406e-05
+      ],
+      "all_slots_contribute": true,
+      "pass": true
+    }
+  ]
+}

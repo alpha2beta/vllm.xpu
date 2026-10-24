@@ -1,0 +1,74 @@
+{
+  "task": "P1-01",
+  "pass": true,
+  "cases": [
+    {
+      "case": "dense linear -> Exl3LinearMethod",
+      "ok": true
+    },
+    {
+      "case": "unquantized dense stays unquantized",
+      "ok": true
+    },
+    {
+      "case": "routed experts -> Exl3MoEMethod",
+      "ok": true
+    },
+    {
+      "case": "direct get_quant_method -> Exl3MoEMethod",
+      "ok": true
+    },
+    {
+      "case": "model-qualified prefix normalizes",
+      "ok": true
+    },
+    {
+      "case": "apply stub fails closed",
+      "ok": true
+    },
+    {
+      "case": "unquantized MoE raises",
+      "ok": true
+    },
+    {
+      "case": "partially-quantized expert raises",
+      "ok": true
+    },
+    {
+      "case": "expert-count mismatch raises",
+      "ok": true
+    },
+    {
+      "case": "mixed-K experts raise",
+      "ok": true
+    },
+    {
+      "case": "unsupported K raises",
+      "ok": true
+    },
+    {
+      "case": "empty storage raises",
+      "ok": true
+    },
+    {
+      "case": "TP/EP raise",
+      "ok": true
+    },
+    {
+      "case": "unknown codebook raises",
+      "ok": true
+    },
+    {
+      "case": "moe.py has no unquantized fallback",
+      "ok": true
+    }
+  ],
+  "failures": [],
+  "device": "Intel(R) Arc(TM) Graphics",
+  "torch": "2.14.0+xpu",
+  "requested_backend": "auto",
+  "small_m_max_k3_cb1": 8,
+  "moe_method_module": "/home/yanchun/Projects/exl3xpu/exl3xpu/moe.py",
+  "moe_method_sha256": "2671ef4136be9d5334d1422cb17034b84da5ce4309b12a9d0eadb400b7f608b5",
+  "test_sha256": "013bcad2e2b7b9f26bb2ce7c5dea15417eefad26a56bfc883d361027d1f310ef"
+}

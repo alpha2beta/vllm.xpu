@@ -1,0 +1,172 @@
+{
+  "device": "Intel(R) Arc(TM) Graphics",
+  "platform": "Intel(R) oneAPI Unified Runtime over Level-Zero V2",
+  "driver_version": "1.17.39758",
+  "torch": "2.14.0+xpu",
+  "kernel": "7.2.11-1-cachyos-deckify",
+  "l2_bytes": 8388608,
+  "eu_count": 64,
+  "spec": {
+    "bandwidth_gbps": 136.0,
+    "fp16_tflops": 3.9
+  },
+  "notes": [
+    "copy_gbps counts read+write (2 * bytes / time).",
+    "GoW/s = 10^9 original (post-dequant) weights per second.",
+    "ESIMD is the production fast path; Triton is the K-generic reference/fallback. Both are measured here so the gap is visible.",
+    "K=3/mcg decode requires the (K=3, cb=1) ESIMD instantiation; on a build without it the linear rows report esimd_path=false."
+  ],
+  "memory": [
+    {
+      "working_set_mib": 1,
+      "bytes": 1048576,
+      "read_gbps": 5.446426577258597,
+      "copy_gbps": 24.35900503522333,
+      "read_seconds": 0.00019252549999999998,
+      "copy_seconds": 8.60935e-05
+    },
+    {
+      "working_set_mib": 4,
+      "bytes": 4194304,
+      "read_gbps": 29.875875234167427,
+      "copy_gbps": 65.69922150342256,
+      "read_seconds": 0.00014039100000000002,
+      "copy_seconds": 0.000127682
+    },
+    {
+      "working_set_mib": 8,
+      "bytes": 8388608,
+      "read_gbps": 53.366889860834995,
+      "copy_gbps": 130.38746580452624,
+      "read_seconds": 0.0001571875,
+      "copy_seconds": 0.00012867199999999998
+    },
+    {
+      "working_set_mib": 16,
+      "bytes": 16777216,
+      "read_gbps": 80.97600482654602,
+      "copy_gbps": 117.03959287460806,
+      "read_seconds": 0.00020718749999999996,
+      "copy_seconds": 0.000286693
+    },
+    {
+      "working_set_mib": 64,
+      "bytes": 67108864,
+      "read_gbps": 98.03999094235982,
+      "copy_gbps": 113.16940664314481,
+      "read_seconds": 0.000684505,
+      "copy_seconds": 0.0011859894999999999
+    },
+    {
+      "working_set_mib": 256,
+      "bytes": 268435456,
+      "read_gbps": 104.39142703365283,
+      "copy_gbps": 110.71879799354872,
+      "read_seconds": 0.0025714320000000002,
+      "copy_seconds": 0.004848959
+    },
+    {
+      "working_set_mib": 1024,
+      "bytes": 1073741824,
+      "read_gbps": 105.4766987796339,
+      "copy_gbps": 107.06914775151334,
+      "read_seconds": 0.010179895999999999,
+      "copy_seconds": 0.020056978999999996
+    }
+  ],
+  "decode": [
+    {
+      "case": "routed gate/up 2048x512 K3/mcg",
+      "k": 2048,
+      "n": 512,
+      "K": 3,
+      "codebook": "mcg",
+      "weights": 1048576,
+      "trellis_bytes": 393216,
+      "esimd_supported": true,
+      "triton_seconds": 0.0001473955,
+      "triton_gow_per_s": 7.114029939855695,
+      "triton_gbps": 2.6677612274458857,
+      "esimd_seconds": 8.53645e-05,
+      "esimd_gow_per_s": 12.283513638573412,
+      "esimd_gbps": 4.60631761446503
+    },
+    {
+      "case": "routed down 512x2048 K3/mcg",
+      "k": 512,
+      "n": 2048,
+      "K": 3,
+      "codebook": "mcg",
+      "weights": 1048576,
+      "trellis_bytes": 393216,
+      "esimd_supported": true,
+      "triton_seconds": 0.00013901099999999997,
+      "triton_gow_per_s": 7.543115293034366,
+      "triton_gbps": 2.828668234887887,
+      "esimd_seconds": 9.809899999999998e-05,
+      "esimd_gow_per_s": 10.688957073976292,
+      "esimd_gbps": 4.00835890274111
+    },
+    {
+      "case": "shared expert 2048x512 K4/mcg",
+      "k": 2048,
+      "n": 512,
+      "K": 4,
+      "codebook": "mcg",
+      "weights": 1048576,
+      "trellis_bytes": 524288,
+      "esimd_supported": true,
+      "triton_seconds": 0.00012039099999999999,
+      "triton_gow_per_s": 8.70975405138258,
+      "triton_gbps": 4.35487702569129,
+      "esimd_seconds": 8.679699999999999e-05,
+      "esimd_gow_per_s": 12.080786202288099,
+      "esimd_gbps": 6.0403931011440495
+    },
+    {
+      "case": "shared expert 2048x512 K4/mul1",
+      "k": 2048,
+      "n": 512,
+      "K": 4,
+      "codebook": "mul1",
+      "weights": 1048576,
+      "trellis_bytes": 524288,
+      "esimd_supported": true,
+      "triton_seconds": 0.0001275005,
+      "triton_gow_per_s": 8.224093238850044,
+      "triton_gbps": 4.112046619425022,
+      "esimd_seconds": 9.2552e-05,
+      "esimd_gow_per_s": 11.329587691243841,
+      "esimd_gbps": 5.6647938456219205
+    }
+  ],
+  "linear": [
+    {
+      "case": "routed gate/up 2048x512 K3/mcg",
+      "k": 2048,
+      "n": 512,
+      "K": 3,
+      "codebook": "mcg",
+      "esimd_path": true,
+      "seconds_per_gemv": 0.0001302605,
+      "effective_gbps": 3.018689472249838,
+      "weights_per_second": 8049838592.666234
+    },
+    {
+      "case": "routed down 512x2048 K3/mcg",
+      "k": 512,
+      "n": 2048,
+      "K": 3,
+      "codebook": "mcg",
+      "esimd_path": true,
+      "seconds_per_gemv": 0.00013572949999999997,
+      "effective_gbps": 2.897056277375221,
+      "weights_per_second": 7725483406.333923
+    }
+  ],
+  "achieved": {
+    "peak_read_gbps": 105.4766987796339,
+    "peak_copy_gbps": 130.38746580452624,
+    "peak_copy_pct_of_spec": 95.87313662097517
+  }
+}

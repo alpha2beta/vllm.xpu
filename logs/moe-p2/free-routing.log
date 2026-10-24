@@ -1,0 +1,6 @@
+P2-05b free routing T2=0.08
+{"case": "oracle_input_top8", "max_abs": 9.363129720441066e-07, "nan_inf": 0, "p99_abs": 6.840181185907568e-07, "pass": true, "top8_agreement": 1.0}
+{"assignments": 8, "case": "free_routing", "max_abs": 1.1459851521067321e-06, "nan_inf": 0, "p99_abs": 7.257082188516506e-07, "pass": true, "tokens": 1, "unique_experts": 8}
+{"assignments": 32, "case": "free_routing", "max_abs": 1.009068000712432e-06, "nan_inf": 0, "p99_abs": 6.776348300263635e-07, "pass": true, "tokens": 4, "unique_experts": 30}
+{"assignments": 128, "case": "free_routing", "max_abs": 1.1757001630030572e-06, "nan_inf": 0, "p99_abs": 6.938536216694047e-07, "pass": true, "tokens": 16, "unique_experts": 91}
+pass=True

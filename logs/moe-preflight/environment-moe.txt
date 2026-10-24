@@ -1,0 +1,58 @@
+# EXL3 MoE preflight environment (P0-01)
+generated_at_utc: 2026-10-23T18:44:53.408975+00:00
+json_sidecar: /home/yanchun/Projects/vllm.xpu/logs/moe-preflight/environment-moe.json
+
+## Host
+hostname: cachyos-x8664
+kernel: 7.2.11-1-cachyos-deckify
+os: CachyOS
+cpu: Intel(R) Core(TM) Ultra 7 258V
+logical_cpus: 8
+
+## Memory (binary units, /proc/meminfo)
+MemTotal: 30.88 GiB
+MemAvailable: 23.18 GiB
+SwapTotal: 30.88 GiB
+SwapInUse: 6.49 GiB
+ttm.pages_limit: 4047107
+
+## GPU (torch.xpu)
+name: Intel(R) Arc(TM) Graphics
+platform: Intel(R) oneAPI Unified Runtime over Level-Zero V2
+driver_version: 1.17.39758
+total_memory: 28.58 GiB
+max_compute_units: 64
+L2 cache: 8192 KiB
+memory_bus_width: 64 bits
+sub_group_sizes: [16, 32]
+is_integrated_gpu: True
+level_zero_loader: {'soname_path': '/usr/lib/libze_loader.so.1', 'resolved': '/usr/lib/libze_loader.so.1.32.0', 'version_suffix': 'libze_loader.so.1.32.0', 'size_bytes': 760000}
+
+## Software pins
+vllm: 0.31.0+xpu
+torch: 2.14.0+xpu
+transformers: 5.17.0
+triton: 3.8.0+xpu
+tokenizers: 0.23.2
+safetensors: 0.8.0
+huggingface-hub: 1.33.0
+numpy: 2.3.5
+exl3xpu: 0.1.0
+python: 3.12.14
+icpx: Intel(R) oneAPI DPC++/C++ Compiler 2026.0.0 (2026.0.0.20260331)
+
+## Repositories
+vllm_xpu: c93c5f317057fc16c3f3c7df512805f9218ee423 (Qwen35B_MoE, c93c5f3-dirty)
+exl3xpu: 15ded2f3add148c4db3c900cba7de878238f53bc (main, 15ded2f-dirty)
+
+## Runtime environment
+EXL3_VLLM_PATCHES=None
+EXL3_BACKEND=None
+EXL3_SMALL_M_MAX=None
+EXL3_INT8_PREFILL=None
+EXL3_RECON_SLICE_N=None
+UR_L0_ENABLE_RELAXED_ALLOCATION_LIMITS=None
+ZE_AFFINITY_MASK=None
+VLLM_LOGGING_LEVEL=None
+OMP_NUM_THREADS=None
+HF_HOME=None

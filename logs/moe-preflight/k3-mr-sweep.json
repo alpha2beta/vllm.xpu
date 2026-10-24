@@ -1,0 +1,333 @@
+{
+  "device": "Intel(R) Arc(TM) Graphics",
+  "small_m_max": 128,
+  "small_m_max_k3_cb1": 8,
+  "tolerance": {
+    "max_abs": 0.08,
+    "cosine": 0.999
+  },
+  "cases": [
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 1,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "esimd",
+      "max_abs": 1.7042417312040925e-05,
+      "cosine": 0.9999997615814209,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 2,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "esimd",
+      "max_abs": 1.7739832401275635e-05,
+      "cosine": 0.9999995827674866,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 3,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "esimd",
+      "max_abs": 2.0362436771392822e-05,
+      "cosine": 0.9999992847442627,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 4,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "esimd",
+      "max_abs": 1.841410994529724e-05,
+      "cosine": 0.9999994039535522,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 8,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "esimd",
+      "max_abs": 1.952424645423889e-05,
+      "cosine": 0.9999992847442627,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 9,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 1.9723549485206604e-05,
+      "cosine": 0.999999463558197,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 16,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 1.480989158153534e-05,
+      "cosine": 0.9999988079071045,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 17,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 1.5789642930030823e-05,
+      "cosine": 0.9999986290931702,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 24,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 1.971796154975891e-05,
+      "cosine": 0.9999988675117493,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 32,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 1.7356127500534058e-05,
+      "cosine": 0.9999982714653015,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 33,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 1.8483493477106094e-05,
+      "cosine": 0.9999990463256836,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 40,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 1.934915781021118e-05,
+      "cosine": 0.9999983906745911,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 48,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 1.9181519746780396e-05,
+      "cosine": 0.9999985098838806,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 64,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 1.901388168334961e-05,
+      "cosine": 0.9999983310699463,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 96,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 1.910654827952385e-05,
+      "cosine": 0.9999986886978149,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.down_proj",
+      "M": 128,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 2.2130087018013e-05,
+      "cosine": 0.999999463558197,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 1,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "esimd",
+      "max_abs": 3.818795084953308e-05,
+      "cosine": 0.9999997019767761,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 2,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "esimd",
+      "max_abs": 3.7614256143569946e-05,
+      "cosine": 0.9999997615814209,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 3,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "esimd",
+      "max_abs": 3.419443964958191e-05,
+      "cosine": 0.9999998807907104,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 4,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "esimd",
+      "max_abs": 4.93563711643219e-05,
+      "cosine": 0.9999998807907104,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 8,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "esimd",
+      "max_abs": 5.338946357369423e-05,
+      "cosine": 0.9999997019767761,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 9,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 3.659352660179138e-05,
+      "cosine": 0.9999998807907104,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 16,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 4.46513295173645e-05,
+      "cosine": 0.9999997019767761,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 17,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 3.7219375371932983e-05,
+      "cosine": 0.9999999403953552,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 24,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 3.948807716369629e-05,
+      "cosine": 0.9999997019767761,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 32,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 4.941225051879883e-05,
+      "cosine": 0.9999997019767761,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 33,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 3.761798143386841e-05,
+      "cosine": 0.9999996423721313,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 40,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 4.801526665687561e-05,
+      "cosine": 0.9999996423721313,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 48,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 5.567818880081177e-05,
+      "cosine": 0.9999992251396179,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 64,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 5.322694778442383e-05,
+      "cosine": 0.9999993443489075,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 96,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 4.597753286361694e-05,
+      "cosine": 0.9999989867210388,
+      "ok": true
+    },
+    {
+      "module": "layers.0.mlp.experts.0.gate_proj",
+      "M": 128,
+      "K": 3,
+      "codebook": "mcg",
+      "path": "recon+gemm",
+      "max_abs": 5.564838647842407e-05,
+      "cosine": 0.9999992251396179,
+      "ok": true
+    }
+  ],
+  "failures": [],
+  "pass": true
+}
