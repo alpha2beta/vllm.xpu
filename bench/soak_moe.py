@@ -94,8 +94,8 @@ def main() -> int:
                        "total": round(r["total"], 3),
                        "decode_tps": round(r["decode_tps"], 2),
                        "gpu_gib": round(g.get("GPUActive", 0) / 2**30, 2),
-                       "memavail_gib": round(m["MemAvailable"] / 2**30, 2),
-                       "swap_gib": round((m["SwapTotal"] - m["SwapFree"]) / 2**30, 2),
+                       "memavail_gib": round(m["MemAvailable"] / 2**20, 2),
+                       "swap_gib": round((m["SwapTotal"] - m["SwapFree"]) / 2**20, 2),
                        "temp_c": round(th / 1000.0, 1) if th else None}
                 n_ok += 1
             except Exception as exc:  # noqa: BLE001 — soak records, never dies
@@ -103,7 +103,7 @@ def main() -> int:
                 rec = {"t": t0, "status": "error", "pattern": pattern,
                        "in": in_tok, "out": out_tok, "error": msg,
                        "gpu_gib": round(g.get("GPUActive", 0) / 2**30, 2),
-                       "memavail_gib": round(m["MemAvailable"] / 2**30, 2),
+                       "memavail_gib": round(m["MemAvailable"] / 2**20, 2),
                        "temp_c": round(th / 1000.0, 1) if th else None}
                 n_err += 1
                 errors.append(f"{time.strftime('%H:%M:%S')} {msg}")

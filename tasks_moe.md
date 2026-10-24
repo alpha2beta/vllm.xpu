@@ -970,7 +970,7 @@ Comprehensive certification documented in `docs/gate3_serving_report.md`.
   Provide formal Torch custom operator schemas and fake-tensor shape implementations for the new MoE kernels. Test compatibility with PyTorch Inductor and graph capture where supported on Intel XPU, ensuring output equivalence with eager execution.  
   *Evidence:* `tests/test_torch_compile_moe.py`, graph execution log.
 
-- [ ] **P4-07 — Execute comprehensive benchmark sweep.**  
+- [x] **P4-07 — Execute comprehensive benchmark sweep.**  
   Implement `bench/bench_moe_envelope.py` and execute the full evaluation matrix:
   - Input lengths: 128, 512, 2048 tokens.
   - Output lengths: 128, 512 tokens.
@@ -978,6 +978,15 @@ Comprehensive certification documented in `docs/gate3_serving_report.md`.
   - Measure and record: TTFT, sustained decode throughput (tok/s), end-to-end latency, memory bandwidth efficiency (% of measured roofline), peak resident memory, and thermal behavior.
   - Publish results to `results_moe.csv` and author `docs/gate4_perf_report.md`.  
   *Evidence:* `bench/bench_moe_envelope.py`, `results_moe.csv`, `docs/gate4_perf_report.md`.
+  *Result:* 18/18 cells OK on artifact `b627e3a4` (r7 grouped):
+  decode 17.22/22.02/26.30 tok/s (min/median/max), TTFT 1.49/4.53/15.24 s,
+  bandwidth 19.1–29.2 GB/s = 14.7–22.4 % of the P0-12 roofline, peak GPU
+  18.36 GiB, thermal 44–68 °C (no throttling). Nominal-2048 input cells are
+  context-capped (`2048 − output − 8`, noted per row) because the server
+  hard-rejects prompt+output > 2048. Companion Gate 4 C1 rows (same matrix
+  as Gate 3) are in `results.csv` at git `fae3379`: decode 25.27/27.90/26.19
+  tok/s = 4.9–5.4× the eager baseline. C5 soak harness `bench/soak_moe.py`
+  runs against the same server (`logs/moe-p4/soak-r7.jsonl`).
 
 ---
 
@@ -989,6 +998,16 @@ Comprehensive certification documented in `docs/gate3_serving_report.md`.
 > 3. Zero DRAM writeout of intermediate FP16 expert weights.
 > 4. Numerical outputs match Gate 2/Gate 3 baselines within tolerance.
 > 5. System remains completely stable across multi-hour stress benchmarking.
+
+**Status 2026-10-25 (artifact r7 `b627e3a4`, exl3xpu `306192e`, vllm.xpu `fae3379`):**
+
+| # | criterion | status | evidence |
+|---|---|---|---|
+| 1 | substantial decode speedup | **MET** — 4.9–5.4× server (25.27/27.90/26.19 vs Gate 3 4.69/5.66/4.83 tok/s), 9.8× layer profiler (8.186 → 0.835 ms/token) | `results.csv` git `fae3379`, `logs/moe-p4/moe-profile-r7-p402.json` |
+| 2 | zero host-device syncs | **MET** — 0.0 syncs/token (all 5 audited primitives at 0 over 50 steps) | `logs/moe-p4/moe-profile-r7-p402.json` |
+| 3 | zero FP16 weight writeout | **MET** — 0 `_reconstruct_kernel`, 0 D2H/H2D in the r7 decode profile | `logs/moe-p4/moe-profile-r7-p402.json`, `logs/moe-p4/bandwidth-efficiency.log` |
+| 4 | numerics match Gate 2/3 | **MET** — WikiText-2 PPL bit-identical per chunk (7.439027596 both), grouped parity 3/3 + 1920/1920 bit-exact, Phase 2 6/6 (worst 0.00244 unchanged), dense 91/91 | `logs/moe-p4/gate4-c4-ppl-parity.log`, `tests/test_grouped_gemv.py`, `logs/moe-p2/phase2-summary.json`, `logs/moe-p4/dense-regression-r7.log` |
+| 5 | multi-hour stress stability | **IN PROGRESS** — 3 h soak (`bench/soak_moe.py`) started 2026-10-25 00:01 CEST | `logs/moe-p4/soak-r7.jsonl` |
 
 ---
 
