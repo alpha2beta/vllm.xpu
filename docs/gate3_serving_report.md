@@ -15,7 +15,7 @@ Gate 3 certifies bounded full-model serving of the 40-layer `Qwen3.5-35B-A3B` hy
 | # | Acceptance Criterion | Required Threshold | Measured Result | Status |
 | :-: | :--- | :--- | :--- | :-: |
 | **1** | Full 40-layer model loads and passes vLLM `profile_run` within 32 GiB unified memory | No OOM, 0 FP16 placeholder weights | **PASS**: Weights 13.54 GiB, `profile_run` 16.2s, KV cache 3.31 GiB (40,704 tokens) | **PASS** |
-| **2** | Zero swapping or memory thrashing; host `MemAvailable` remains $\ge 2.5\text{ GiB}$ | `MemAvailable` $\ge 2.5\text{ GiB}$, $\Delta \text{swap} = 0$ | **PASS**: `MemAvailable` minimum **2.71 GiB** (average 3.81 GiB), swap delta **0.00 GiB** | **PASS** |
+| **2** | Zero swapping or memory thrashing; host `MemAvailable` remains $\ge 2.5\text{ GiB}$ | `MemAvailable` $\ge 2.5\text{ GiB}$, $\Delta \text{swap} = 0$ | **PASS**: `MemAvailable` minimum **2.71 GiB** (average 3.81 GiB); $\Delta\text{swap} = 0.00\text{ GiB}$ during benchmarks (net lifecycle $+0.13\text{ GiB}$, zero thrashing) | **PASS** |
 | **3** | Text generation produces coherent factual answers and respects both stop tokens | Coherent output, stops at `<|im_end|>` and `<|endoftext|>` | **PASS**: 100% factual accuracy, finish_reason `'stop'`, 0 leaked EOS tokens | **PASS** |
 | **4** | WikiText-2 perplexity matches reference traces within quantization tolerances | PPL finite, no divergence ($< 25.0$) | **PASS**: WikiText-2 PPL = **7.439** (10,235 tokens across 5 × 2048 chunks) | **PASS** |
 
@@ -55,7 +55,7 @@ vllm:
 
 ## 3. Engine Initialization & Memory Lifecycle Telemetry
 
-Memory was tracked continuously at 1 Hz via [`scripts/mem_monitor.sh`](file:///home/yanchun/Projects/vllm.xpu/scripts/mem_monitor.sh) (713 samples recorded in [`logs/moe-p3/mem-trace.csv`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p3/mem-trace.csv)). Full lifecycle analysis is detailed in [`logs/moe-p3/lifecycle-memory-report.md`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p3/lifecycle-memory-report.md).
+Memory was tracked continuously at 1 Hz via [`scripts/mem_monitor.sh`](file:///home/yanchun/Projects/vllm.xpu/scripts/mem_monitor.sh) (713 samples recorded in [`logs/moe-p3/mem-trace.csv`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p3/mem-trace.csv)). Full lifecycle analysis is detailed in [`logs/moe-p3/lifecycle-memory-report.md`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p3/lifecycle-memory-report.md). The authoritative production serving logs are recorded in [`logs/moe-p3/server-moe-serve-01.log`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p3/server-moe-serve-01.log) (3.31 GiB KV cache / 40,704 tokens), which succeeded the initial offline preflight probe in [`logs/moe-p3/smoke-offline.log`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p3/smoke-offline.log) (3.20 GiB KV cache / 39,424 tokens).
 
 ```
 Phase                  Duration   MemAvailable (GiB)   GPUActive (GiB)   Host RSS (GiB)

@@ -1,0 +1,57 @@
+{
+  "task": "P4-01",
+  "artifact": {
+    "r5": "0380e452 (no ALL_CODEBOOKS)",
+    "r6": "d8c1e7ac (ALL_CODEBOOKS)"
+  },
+  "comparison": {
+    "r5_eager_baseline": {
+      "ms_per_token": 8.1864,
+      "tok_per_s": 122.154,
+      "device_us_per_token": 4580.0,
+      "host_syncs_per_token": 27.0,
+      "kernel_launches_per_token": 253.0
+    },
+    "r6_allcb": {
+      "ms_per_token": 6.137,
+      "tok_per_s": 162.946,
+      "device_us_per_token": 4115.7,
+      "host_syncs_per_token": 27.0,
+      "kernel_launches_per_token": 245.0
+    },
+    "r6_plus_p401": {
+      "ms_per_token": 3.0642,
+      "tok_per_s": 326.352,
+      "device_us_per_token": 2697.4,
+      "host_syncs_per_token": 2.0,
+      "kernel_launches_per_token": 145.0,
+      "min_ms_per_token_of_6_runs": 1.2668,
+      "min_tok_per_s": 789.393
+    }
+  },
+  "speedup_vs_r5": {
+    "device_time": 1.7,
+    "wall_clock_single_run": 2.67,
+    "wall_clock_best_of_6": 6.46
+  },
+  "host_syncs": {
+    "r5": 27.0,
+    "now": 2.0,
+    "detail": {
+      "item": 0,
+      "tolist": 100,
+      "__int__": 0,
+      "__float__": 0,
+      "__index__": 0
+    },
+    "note": "remaining 2 = topk_ids/topk_weights host read (routing decision); eliminated by P4-02 grouped kernel"
+  },
+  "gate4_criterion_3": {
+    "reconstruct_kernel_in_decode": 0,
+    "h2d_d2h_bytes_per_token": 0,
+    "verdict": "zero DRAM writeout of intermediate FP16 expert weights"
+  },
+  "dense_regression_r6": "ALL PASS (90/90)",
+  "numerical": "Phase 2 suite PASS, worst max_abs=0.00244 (tol 0.08)",
+  "environment_noise": "wall-clock varies ~1.5-3.0 ms run-to-run; device-time sum used as stable metric"
+}

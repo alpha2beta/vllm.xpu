@@ -1,0 +1,150 @@
+{
+  "task": "P4-01",
+  "label": "tt=0",
+  "device": "Intel(R) Arc(TM) Graphics",
+  "decode_steps": 200,
+  "gpu_ms_total": 601.459,
+  "per_token_ms": 3.0073,
+  "tok_per_s": 332.525,
+  "host_syncs_per_token": 2.0,
+  "host_syncs": {
+    "item": 0,
+    "tolist": 400,
+    "__int__": 0,
+    "__float__": 0,
+    "__index__": 0
+  },
+  "kernel_launches_per_token": 145.0,
+  "stages": {
+    "Memcpy D2D ": {
+      "calls": 10,
+      "device_us_total": 31.2,
+      "device_us_per_token": 3.12
+    },
+    "at::native::xpu::VectorizedElementwiseKernel<4, at::native::xpu::FillFunctor<int>, at::detail::Array<char*, 1>, TrivialOffsetCalculator<0, unsigned int> >": {
+      "calls": 10,
+      "device_us_total": 43.2,
+      "device_us_per_token": 4.32
+    },
+    "vllm::rms_norm_kernel<sycl::_V1::ext::oneapi::bfloat16, 2, 8, true>": {
+      "calls": 10,
+      "device_us_total": 59.1,
+      "device_us_per_token": 5.91
+    },
+    "exl3::HadInKernel<sycl::_V1::ext::oneapi::bfloat16>": {
+      "calls": 280,
+      "device_us_total": 1619.9,
+      "device_us_per_token": 161.99
+    },
+    "exl3::GemvKernel<4, 1, 1, 8, false>": {
+      "calls": 40,
+      "device_us_total": 3263.8,
+      "device_us_per_token": 326.38
+    },
+    "exl3::HadOutKernel<sycl::_V1::ext::oneapi::bfloat16, float>": {
+      "calls": 280,
+      "device_us_total": 13083.6,
+      "device_us_per_token": 1308.36
+    },
+    "gemm_kernel": {
+      "calls": 30,
+      "device_us_total": 384.5,
+      "device_us_per_token": 38.45
+    },
+    "at::native::xpu::VectorizedElementwiseKernel<8, at::native::xpu::FillFunctor<c10::BFloat16>, at::detail::Array<char*, 1>, TrivialOffsetCalculator<0, unsigned int> >": {
+      "calls": 10,
+      "device_us_total": 50.1,
+      "device_us_per_token": 5.01
+    },
+    "gdn::causal_conv1d_kernel<sycl::_V1::ext::oneapi::bfloat16, 4, true>": {
+      "calls": 10,
+      "device_us_total": 123.0,
+      "device_us_per_token": 12.3
+    },
+    "gdn::gated_delta_rule_kernel<sycl::_V1::ext::oneapi::bfloat16, float, 4>": {
+      "calls": 10,
+      "device_us_total": 741.9,
+      "device_us_per_token": 74.19
+    },
+    "layer_norm_fwd_kernel": {
+      "calls": 10,
+      "device_us_total": 49.0,
+      "device_us_per_token": 4.9
+    },
+    "vllm::fused_add_rms_norm_kernel<sycl::_V1::ext::oneapi::bfloat16, 8, true>": {
+      "calls": 10,
+      "device_us_total": 66.7,
+      "device_us_per_token": 6.67
+    },
+    "vllm::act_and_mul_vec_kernel<sycl::_V1::ext::oneapi::bfloat16, &": {
+      "calls": 10,
+      "device_us_total": 61.2,
+      "device_us_per_token": 6.12
+    },
+    "at::native::xpu::VectorizedElementwiseKernel<8, at::native::xpu::SigmoidFunctor<c10::BFloat16>, at::detail::Array<char*, 2>, TrivialOffsetCalculator<1, unsigned int> >": {
+      "calls": 10,
+      "device_us_total": 56.4,
+      "device_us_per_token": 5.64
+    },
+    "at::native::xpu::ElementwiseGlobalRangeKernel<at::native::xpu::LegacyKernelScalarFunctor<c10::BFloat16, 3, OffsetCalculator<3, unsigned int, false>, at::native::xpu::BinaryFunctor<c10::BFloat16, c10::BFloat16, c10::BFloat16, at::native::xpu::MulFunctor<float> > > >": {
+      "calls": 10,
+      "device_us_total": 55.0,
+      "device_us_per_token": 5.5
+    },
+    "vllm::moe::TopKGating<8, 256, 4, 16, 32, sycl::_V1::ext::oneapi::bfloat16, int, ": {
+      "calls": 10,
+      "device_us_total": 162.7,
+      "device_us_per_token": 16.27
+    },
+    "at::native::xpu::VectorizedElementwiseKernel<4, at::native::xpu::FillFunctor<float>, at::detail::Array<char*, 1>, TrivialOffsetCalculator<0, unsigned int> >": {
+      "calls": 10,
+      "device_us_total": 48.2,
+      "device_us_per_token": 4.82
+    },
+    "Memcpy D2M ": {
+      "calls": 20,
+      "device_us_total": 57.6,
+      "device_us_per_token": 5.76
+    },
+    "exl3::GemvKernel<3, 1, 1, 8, false>": {
+      "calls": 240,
+      "device_us_total": 4077.6,
+      "device_us_per_token": 407.76
+    },
+    "at::native::xpu::VectorizedElementwiseKernel<8, at::native::xpu::SiluFunctor<c10::BFloat16>, at::detail::Array<char*, 2>, TrivialOffsetCalculator<1, unsigned int> >": {
+      "calls": 80,
+      "device_us_total": 573.2,
+      "device_us_per_token": 57.32
+    },
+    "at::native::xpu::VectorizedElementwiseKernel<8, at::native::xpu::BinaryFunctor<c10::BFloat16, c10::BFloat16, c10::BFloat16, at::native::xpu::MulFunctor<float> >, at::detail::Array<char*, 3>, TrivialOffsetCalculator<2, unsigned int> >": {
+      "calls": 80,
+      "device_us_total": 516.6,
+      "device_us_per_token": 51.66
+    },
+    "at::native::xpu::UnrolledElementwiseKernel<at::native::xpu::CopyScalarFunc<c10::BFloat16>, at::detail::Array<char*, 2>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >": {
+      "calls": 80,
+      "device_us_total": 962.7,
+      "device_us_per_token": 96.27
+    },
+    "at::native::xpu::VectorizedElementwiseKernel<4, at::native::xpu::AUnaryFunctor<float, float, float, at::native::xpu::MulFunctor<float> >, at::detail::Array<char*, 2>, TrivialOffsetCalculator<1, unsigned int> >": {
+      "calls": 80,
+      "device_us_total": 328.8,
+      "device_us_per_token": 32.88
+    },
+    "at::native::xpu::VectorizedElementwiseKernel<4, at::native::xpu::BinaryFunctor<float, float, float, at::native::xpu::AddFunctor<float> >, at::detail::Array<char*, 3>, TrivialOffsetCalculator<2, unsigned int> >": {
+      "calls": 80,
+      "device_us_total": 340.6,
+      "device_us_per_token": 34.06
+    },
+    "at::native::xpu::UnrolledElementwiseKernel<at::native::xpu::CopyScalarFunc<float>, at::detail::Array<char*, 2>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >": {
+      "calls": 10,
+      "device_us_total": 118.1,
+      "device_us_per_token": 11.81
+    },
+    "at::native::xpu::VectorizedElementwiseKernel<8, at::native::xpu::BinaryFunctor<c10::BFloat16, c10::BFloat16, c10::BFloat16, at::native::xpu::AddFunctor<float> >, at::detail::Array<char*, 3>, TrivialOffsetCalculator<2, unsigned int> >": {
+      "calls": 20,
+      "device_us_total": 99.9,
+      "device_us_per_token": 9.99
+    }
+  }
+}

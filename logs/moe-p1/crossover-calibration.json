@@ -18,64 +18,64 @@
   "rows": [
     {
       "M": 1,
-      "fused_ms": 0.08013099431991577,
-      "fused_us_per_token": 80.13099431991577,
-      "recon_gemm_ms": 0.12104248162358999,
-      "recon_gemm_us_per_token": 121.04248162358999,
-      "speedup_fused_over_recon": 1.510557589493259,
+      "fused_ms": 0.07594149792566895,
+      "fused_us_per_token": 75.94149792566895,
+      "recon_gemm_ms": 0.11572701623663306,
+      "recon_gemm_us_per_token": 115.72701623663306,
+      "speedup_fused_over_recon": 1.5238969390609851,
       "path_max_abs": 3.0517578125e-05
     },
     {
       "M": 2,
-      "fused_ms": 0.07963101961649954,
-      "fused_us_per_token": 39.81550980824977,
-      "recon_gemm_ms": 0.1204655272886157,
-      "recon_gemm_us_per_token": 60.23276364430785,
-      "speedup_fused_over_recon": 1.5127964939890743,
+      "fused_ms": 0.07506046677008271,
+      "fused_us_per_token": 37.530233385041356,
+      "recon_gemm_ms": 0.11436353088356555,
+      "recon_gemm_us_per_token": 57.18176544178277,
+      "speedup_fused_over_recon": 1.5236187010916389,
       "path_max_abs": 3.0517578125e-05
     },
     {
       "M": 4,
-      "fused_ms": 0.09227398550137877,
-      "fused_us_per_token": 23.068496375344694,
-      "recon_gemm_ms": 0.09355548536404967,
-      "recon_gemm_us_per_token": 23.38887134101242,
-      "speedup_fused_over_recon": 1.013887986475362,
+      "fused_ms": 0.08785098907537758,
+      "fused_us_per_token": 21.962747268844396,
+      "recon_gemm_ms": 0.08343899389728904,
+      "recon_gemm_us_per_token": 20.85974847432226,
+      "speedup_fused_over_recon": 0.9497786510485047,
       "path_max_abs": 4.57763671875e-05
     },
     {
       "M": 8,
-      "fused_ms": 0.09539301390759647,
-      "fused_us_per_token": 11.924126738449559,
-      "recon_gemm_ms": 0.09189051343128085,
-      "recon_gemm_us_per_token": 11.486314178910106,
-      "speedup_fused_over_recon": 0.9632834697967678,
+      "fused_ms": 0.0844114983920008,
+      "fused_us_per_token": 10.5514372990001,
+      "recon_gemm_ms": 0.08330799755640328,
+      "recon_gemm_us_per_token": 10.41349969455041,
+      "speedup_fused_over_recon": 0.986927126557179,
       "path_max_abs": 6.103515625e-05
     },
     {
       "M": 16,
-      "recon_gemm_ms": 0.09566597873345017,
-      "recon_gemm_us_per_token": 5.979123670840636
+      "recon_gemm_ms": 0.08577448897995055,
+      "recon_gemm_us_per_token": 5.360905561246909
     },
     {
       "M": 32,
-      "recon_gemm_ms": 0.13176948414184153,
-      "recon_gemm_us_per_token": 4.117796379432548
+      "recon_gemm_ms": 0.0906329951249063,
+      "recon_gemm_us_per_token": 2.832281097653322
     },
     {
       "M": 64,
-      "recon_gemm_ms": 0.18779499805532396,
-      "recon_gemm_us_per_token": 2.934296844614437
+      "recon_gemm_ms": 0.10272697545588017,
+      "recon_gemm_us_per_token": 1.6051089914981276
     },
     {
       "M": 128,
-      "recon_gemm_ms": 0.16501147183589637,
-      "recon_gemm_us_per_token": 1.2891521237179404
+      "recon_gemm_ms": 0.12352401972748339,
+      "recon_gemm_us_per_token": 0.965031404120964
     },
     {
       "M": 256,
-      "recon_gemm_ms": 0.21257653133943677,
-      "recon_gemm_us_per_token": 0.8303770755446749
+      "recon_gemm_ms": 0.15063100727275014,
+      "recon_gemm_us_per_token": 0.5884023721591802
     }
   ]
 }

@@ -234,9 +234,18 @@ Two readings matter for Phase 1/4:
 
 ## 5. Routed-expert fast path status
 
-**Resolved in `_C.so` sha256 `4003cc2b…` (r3, K=3 instantiation) and carried
-into the current artifact `7642ee7f…` (r4, per-stream reconstruction
-workspace): `exl3_supported(K=3, cb=1) == true`.**
+**Resolved in `_C.so` sha256 `4003cc2b…` (r3, K=3 instantiation), carried into
+`7642ee7f…` (r4, per-stream workspace) and the current `d8c1e7ac…`
+(r6, `-DEXL3_ALL_CODEBOOKS`): `exl3_supported(K=3, cb=1) == true`.**
+
+> **Artifact lineage / P4 finding.** A Phase 3 rebuild (`0380e452…`, r5) was
+> produced with `EXL3_FLAGS` **unset**, which silently dropped
+> `exl3_supported(4,1)` and `exl3_supported(6,1)` — the shared expert and all
+> three GDN projections — forcing them onto the Triton `reconstruct+GEMM`
+> fallback (measured: +2000 µs/token of `_reconstruct_kernel`/`gemm_kernel`,
+> −33 % decode throughput). Phase 4 rebuilt as **r6 with
+> `-DEXL3_ALL_CODEBOOKS`**, restoring ESIMD for `(4,1)`/`(6,1)` and reclaiming
+> that loss. Gate 3 serving numbers were produced on r5; Gate 4 targets use r6.
 The build in use at the start of Gate 0 had ESIMD instantiations for
 `(K=4, mcg)` and the `mul1` variants only, so all 30 720 routed expert modules
 fell back to the K-generic Triton path at ≈ 1.3 GB/s effective.
@@ -251,7 +260,8 @@ Acceptance evidence:
 | Item | Artifact | Result |
 | --- | --- | --- |
 | Build | `logs/moe-preflight/esimd-build-k3cb1-r3/` | BUILD OK, load-validated |
-| Build (reentrancy, current) | `logs/moe-preflight/esimd-build-reentrancy-r4/` | BUILD OK, `exl3_supported(3,1)=true`, `small_m_max(3,1)=8`; sha256 `7642ee7f…` |
+| Build (per-stream workspace) | `logs/moe-preflight/esimd-build-reentrancy-r4/` | BUILD OK, `exl3_supported(3,1)=true`, `small_m_max(3,1)=8`; sha256 `7642ee7f…` |
+| Build (ALL_CODEBOOKS, **current**) | `logs/moe-preflight/esimd-build-allcb-r6/` | BUILD OK, restores `(4,1)`/`(6,1)` for shared + GDN linears; sha256 `d8c1e7ac…` |
 | Bit-exact reconstruction, T-1 | `parity-esimd-forced/exl3-backend-parity.{log,json}` | 18/18 modules `recon_diff=0` |
 | Linear accuracy, T-2 (M ≤ 8) | same | worst max abs 1.2e-4 ≤ 0.08, cosine 1.000000 |
 | M-bucket routing (9…128) | `logs/moe-preflight/k3-mr-sweep.{log,json}` | 32/32 pass; M > 8 → reconstruct+GEMM |
@@ -323,3 +333,6 @@ experiment must record its overrides alongside its logs.
 | Intermediate-stage probe (P2-08) | `logs/moe-p2/intermediate-stage-validation.{json,log}`, `tests/test_intermediate_probe.py` |
 | Full hybrid decoder layer (P2-09) | `logs/moe-p2/full-layer-eval.{log,json}`, `tests/test_hybrid_layer.py`, `tests/_dense_gdn_ref.py` |
 | Phase 2 consolidated suite (P2-10) | `logs/moe-p2/phase2-summary.json`, `scripts/run_phase2_tests.py` |
+| Dispatch profiler + host-sync audit (P4-01) | `bench/moe_profile.py`, `logs/moe-p4/moe-profile-{r5-baseline,r6-allcb,r6-p401}.json`, `logs/moe-p4/phase4-dispatch-summary.json` |
+| Bandwidth / weight-writeout discipline (P4-05) | `logs/moe-p4/bandwidth-efficiency.log` |
+| Dense regression on r6 | `logs/moe-p4/dense-regression-r6.{log,json}` (90/90 ALL PASS) |
