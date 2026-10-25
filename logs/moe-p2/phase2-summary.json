@@ -1,0 +1,82 @@
+{
+  "task": "P2-10",
+  "pass": true,
+  "suites_run": 6,
+  "total_seconds": 105.02,
+  "worst_max_abs": 0.00244140625,
+  "tolerance_T2_max_abs": 0.08,
+  "results": [
+    {
+      "suite": "P2-01/04/07 MoE block",
+      "script": "tests/test_moe_block.py",
+      "artifact": "logs/moe-p2/moe-block-eval.json",
+      "exit_code": 0,
+      "seconds": 20.31,
+      "pass": true,
+      "available": true,
+      "task": "P2-01/P2-04/P2-07",
+      "worst_max_abs": 2.587323251646012e-06,
+      "case_records": 12
+    },
+    {
+      "suite": "P2-02/03/06 routing + edge cases",
+      "script": "tests/test_moe_routing.py",
+      "artifact": "logs/moe-p2/routing-eval.json",
+      "exit_code": 0,
+      "seconds": 11.76,
+      "pass": true,
+      "available": true,
+      "task": "P2-02/P2-03/P2-06",
+      "worst_max_abs": 3.4492331906221807e-06,
+      "case_records": 20
+    },
+    {
+      "suite": "P2-05a fixed routing",
+      "script": "tests/test_fixed_routing.py",
+      "artifact": "logs/moe-p2/fixed-routing.json",
+      "exit_code": 0,
+      "seconds": 9.49,
+      "pass": true,
+      "available": true,
+      "task": "P2-05a",
+      "worst_max_abs": 1.3490825949702412e-06,
+      "case_records": 3
+    },
+    {
+      "suite": "P2-05b free routing",
+      "script": "tests/test_free_routing.py",
+      "artifact": "logs/moe-p2/free-routing.json",
+      "exit_code": 0,
+      "seconds": 20.42,
+      "pass": true,
+      "available": true,
+      "task": "P2-05b",
+      "worst_max_abs": 1.1757001630030572e-06,
+      "case_records": 4
+    },
+    {
+      "suite": "P2-08 intermediate stages",
+      "script": "tests/test_intermediate_probe.py",
+      "artifact": "logs/moe-p2/intermediate-stage-validation.json",
+      "exit_code": 0,
+      "seconds": 14.72,
+      "pass": true,
+      "available": true,
+      "task": "P2-08",
+      "worst_max_abs": 5.2471645176410675e-05,
+      "case_records": 0
+    },
+    {
+      "suite": "P2-09 hybrid decoder layer",
+      "script": "tests/test_hybrid_layer.py",
+      "artifact": "logs/moe-p2/full-layer-eval.json",
+      "exit_code": 0,
+      "seconds": 28.32,
+      "pass": true,
+      "available": true,
+      "task": "P2-09",
+      "worst_max_abs": 0.00244140625,
+      "case_records": 0
+    }
+  ]
+}

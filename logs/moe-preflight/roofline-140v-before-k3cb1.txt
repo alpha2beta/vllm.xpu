@@ -1,0 +1,37 @@
+# Arc 140V empirical roofline (P0-12)
+device: Intel(R) Arc(TM) Graphics (Intel(R) oneAPI Unified Runtime over Level-Zero V2, driver 1.17.39758)
+torch: 2.14.0+xpu  kernel: 7.2.11-1-cachyos-deckify
+L2: 8 MiB   EU: 64
+spec bandwidth: 136 GB/s
+
+## Memory bandwidth vs working set
+| MiB | read GB/s | copy GB/s (r+w) |
+| --- | --- | --- |
+| 1 | 6.48 | 23.07 |
+| 4 | 28.47 | 60.96 |
+| 8 | 39.99 | 123.54 |
+| 16 | 81.57 | 117.62 |
+| 64 | 93.70 | 112.62 |
+| 256 | 105.02 | 110.15 |
+| 1024 | 105.48 | 106.56 |
+
+peak read 105.48 GB/s, peak copy 123.54 GB/s (90.8% of the 136 GB/s spec)
+
+## Trellis decode throughput
+| case | K | codebook | triton GoW/s | esimd GoW/s |
+| --- | --- | --- | --- | --- |
+| routed gate/up 2048x512 K3/mcg | 3 | mcg | 7.9 | unsupported |
+| routed down 512x2048 K3/mcg | 3 | mcg | 8.8 | unsupported |
+| shared expert 2048x512 K4/mcg | 4 | mcg | 8.4 | 8.9 |
+| shared expert 2048x512 K4/mul1 | 4 | mul1 | 6.9 | 11.3 |
+
+## EXL3 linear at M=1 (routed-expert shapes)
+| case | us/gemv | effective GB/s | path |
+| --- | --- | --- | --- |
+| routed gate/up 2048x512 K3/mcg | 311.0 | 1.26 | triton |
+| routed down 512x2048 K3/mcg | 277.0 | 1.42 | triton |
+
+## Notes
+- copy_gbps counts read+write (2 * bytes / time).
+- GoW/s = 10^9 original (post-dequant) weights per second.
+- Only the ESIMD path is the production fast path; Triton is the K-generic fallback used for K=3/mcg routed experts.

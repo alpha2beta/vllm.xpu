@@ -1,0 +1,6 @@
+P2-09 hybrid layer 0 T2=0.08
+  attention_vs_dense: {"max_abs": 0.00244140625, "nan_inf": 0, "p99_abs": 0.0009765625}
+  norm2: {"max_abs": 0.001953125, "nan_inf": 0, "p99_abs": 0.0}
+  moe: {"max_abs": 0.000984393060207367, "nan_inf": 0, "p99_abs": 0.00037259465898387134}
+  full_layer: {"max_abs": 0.0023229122161865234, "nan_inf": 0, "p99_abs": 0.0005913210334256291}
+pass=True failures=[]

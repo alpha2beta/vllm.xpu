@@ -1,0 +1,37 @@
+{
+  "total_tests": 4,
+  "passed": 4,
+  "status": "PASS",
+  "results": [
+    {
+      "name": "sequential_decode",
+      "elapsed_s": 1.9562861919403076,
+      "output": " Paris.\nThe capital of France is",
+      "status": "PASS"
+    },
+    {
+      "name": "request_isolation",
+      "prompt_a": "The capital city of Germany is",
+      "text_a1": " Berlin. Berlin is located in the northeastern part of",
+      "prompt_b": "The chemical element with atomic number 79 is",
+      "text_b": " gold. What is its chemical symbol?\n\n<think>",
+      "text_a2": " Berlin. Berlin is located in the northeastern part of",
+      "identical": true,
+      "status": "PASS"
+    },
+    {
+      "name": "chunked_prefill",
+      "prompt_tokens": 366,
+      "output": "\n\n<think>\n\n</think>\n\nFox",
+      "elapsed_s": 7.7226996421813965,
+      "status": "PASS"
+    },
+    {
+      "name": "stop_token_behavior",
+      "content": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Question: \"What is 2 + 2?\"\n    *   Constraint: \"Answer with only the number and nothing else.\"\n\n2.  **Calculate the Answer:**\n    *   2 + 2 = 4\n\n3.  **Format the Output:**\n    *   The user wants *only* the number.\n    *   No text, no punctuation, no explanations.\n    *   Output should be: 4\n\n4.  **Final Verification:**\n    *   Does \"4\" meet the constraint \"only the number and nothing else\"? Yes.\n\n5.  **Construct Final Response:**\n    *   4\n</think>\n\n4",
+      "finish_reason": "stop",
+      "elapsed_s": 35.03563141822815,
+      "status": "PASS"
+    }
+  ]
+}

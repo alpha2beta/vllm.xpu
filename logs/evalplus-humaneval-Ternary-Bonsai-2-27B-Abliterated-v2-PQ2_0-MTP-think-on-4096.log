@@ -1,0 +1,15 @@
+Initializing a decoder model: Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096 ...
+Sanitized code outputs will be saved to evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096_openai_temp_0.0.jsonl
+Raw outputs will be saved to evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096_openai_temp_0.0.raw.jsonl
+Codegen: HumanEval/0 @ 
+Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096
+Codegen: HumanEval/1 @ 
+Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096
+Codegen: HumanEval/2 @ 
+Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096
+Codegen: HumanEval/3 @ 
+Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096
+Codegen: HumanEval/4 @ 
+Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096
+Codegen: HumanEval/5 @ 
+Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096

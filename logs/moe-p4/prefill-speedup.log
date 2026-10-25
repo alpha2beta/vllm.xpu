@@ -1,0 +1,13 @@
+=== P4-03 Prefill Speedup Benchmark (Layer 0) ===
+Device: Intel(R) Arc(TM) Graphics
+   T | Active Exp | <=8 Exp |  >8 Exp |  Eager (ms) | Grouped (ms) |  Speedup |   Max Diff
+-------------------------------------------------------------------------------------
+  16 |        105 |     105 |       0 |       30.85 |         3.78 |    8.16x |   1.16e-10
+  64 |        219 |     219 |       0 |       65.81 |         8.13 |    8.09x |   7.63e-06
+ 128 |        252 |     251 |       1 |       78.54 |        10.39 |    7.56x |   3.05e-05
+ 256 |        256 |     150 |     106 |      117.84 |        16.20 |    7.27x |   1.22e-04
+-------------------------------------------------------------------------------------
+T= 16: 40-layer prefill projected eager=1234.0 ms, grouped=151.2 ms (saving 1082.8 ms)
+T= 64: 40-layer prefill projected eager=2632.2 ms, grouped=325.3 ms (saving 2306.9 ms)
+T=128: 40-layer prefill projected eager=3141.8 ms, grouped=415.6 ms (saving 2726.2 ms)
+T=256: 40-layer prefill projected eager=4713.8 ms, grouped=648.1 ms (saving 4065.7 ms)

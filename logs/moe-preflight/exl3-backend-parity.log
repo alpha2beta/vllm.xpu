@@ -1,0 +1,86 @@
+# EXL3 backend parity on Qwen3.5-35B-A3B 3.09bpw fixtures (P0-04 / P0-06)
+fixtures: /home/yanchun/Projects/vllm.xpu/fixtures/exl3-moe/moe-fixtures.safetensors
+device: Intel(R) Arc(TM) Graphics
+torch: 2.14.0+xpu
+modules checked: 18
+result: PASS
+
+## ESIMD support matrix (as-built _C.so)
+ K  codebook esimd  modules
+ 3  mcg      yes    12
+ 4  mcg      yes    6
+
+## Per-module results
+module,K,codebook,esimd_path,recon_diff,worst_max_abs_err,M
+layers.0.mlp.experts.0.down_proj,3,mcg,esimd,0,0.000014,1
+layers.0.mlp.experts.0.down_proj,3,mcg,esimd,0,0.000018,2
+layers.0.mlp.experts.0.down_proj,3,mcg,esimd,0,0.000017,4
+layers.0.mlp.experts.0.down_proj,3,mcg,esimd,0,0.000018,8
+layers.0.mlp.experts.0.gate_proj,3,mcg,esimd,0,0.000046,1
+layers.0.mlp.experts.0.gate_proj,3,mcg,esimd,0,0.000046,2
+layers.0.mlp.experts.0.gate_proj,3,mcg,esimd,0,0.000040,4
+layers.0.mlp.experts.0.gate_proj,3,mcg,esimd,0,0.000042,8
+layers.0.mlp.experts.0.up_proj,3,mcg,esimd,0,0.000041,1
+layers.0.mlp.experts.0.up_proj,3,mcg,esimd,0,0.000035,2
+layers.0.mlp.experts.0.up_proj,3,mcg,esimd,0,0.000042,4
+layers.0.mlp.experts.0.up_proj,3,mcg,esimd,0,0.000042,8
+layers.0.mlp.experts.255.down_proj,3,mcg,esimd,0,0.000016,1
+layers.0.mlp.experts.255.down_proj,3,mcg,esimd,0,0.000015,2
+layers.0.mlp.experts.255.down_proj,3,mcg,esimd,0,0.000018,4
+layers.0.mlp.experts.255.down_proj,3,mcg,esimd,0,0.000017,8
+layers.0.mlp.experts.255.gate_proj,3,mcg,esimd,0,0.000039,1
+layers.0.mlp.experts.255.gate_proj,3,mcg,esimd,0,0.000046,2
+layers.0.mlp.experts.255.gate_proj,3,mcg,esimd,0,0.000033,4
+layers.0.mlp.experts.255.gate_proj,3,mcg,esimd,0,0.000038,8
+layers.0.mlp.experts.255.up_proj,3,mcg,esimd,0,0.000036,1
+layers.0.mlp.experts.255.up_proj,3,mcg,esimd,0,0.000036,2
+layers.0.mlp.experts.255.up_proj,3,mcg,esimd,0,0.000037,4
+layers.0.mlp.experts.255.up_proj,3,mcg,esimd,0,0.000046,8
+layers.0.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000022,1
+layers.0.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000087,2
+layers.0.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000116,4
+layers.0.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000076,8
+layers.0.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000057,1
+layers.0.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000059,2
+layers.0.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000085,4
+layers.0.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000088,8
+layers.0.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000035,1
+layers.0.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000042,2
+layers.0.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000050,4
+layers.0.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000057,8
+layers.3.mlp.experts.0.down_proj,3,mcg,esimd,0,0.000033,1
+layers.3.mlp.experts.0.down_proj,3,mcg,esimd,0,0.000029,2
+layers.3.mlp.experts.0.down_proj,3,mcg,esimd,0,0.000038,4
+layers.3.mlp.experts.0.down_proj,3,mcg,esimd,0,0.000033,8
+layers.3.mlp.experts.0.gate_proj,3,mcg,esimd,0,0.000054,1
+layers.3.mlp.experts.0.gate_proj,3,mcg,esimd,0,0.000059,2
+layers.3.mlp.experts.0.gate_proj,3,mcg,esimd,0,0.000056,4
+layers.3.mlp.experts.0.gate_proj,3,mcg,esimd,0,0.000070,8
+layers.3.mlp.experts.0.up_proj,3,mcg,esimd,0,0.000045,1
+layers.3.mlp.experts.0.up_proj,3,mcg,esimd,0,0.000054,2
+layers.3.mlp.experts.0.up_proj,3,mcg,esimd,0,0.000059,4
+layers.3.mlp.experts.0.up_proj,3,mcg,esimd,0,0.000056,8
+layers.3.mlp.experts.255.down_proj,3,mcg,esimd,0,0.000034,1
+layers.3.mlp.experts.255.down_proj,3,mcg,esimd,0,0.000028,2
+layers.3.mlp.experts.255.down_proj,3,mcg,esimd,0,0.000032,4
+layers.3.mlp.experts.255.down_proj,3,mcg,esimd,0,0.000034,8
+layers.3.mlp.experts.255.gate_proj,3,mcg,esimd,0,0.000052,1
+layers.3.mlp.experts.255.gate_proj,3,mcg,esimd,0,0.000055,2
+layers.3.mlp.experts.255.gate_proj,3,mcg,esimd,0,0.000053,4
+layers.3.mlp.experts.255.gate_proj,3,mcg,esimd,0,0.000066,8
+layers.3.mlp.experts.255.up_proj,3,mcg,esimd,0,0.000044,1
+layers.3.mlp.experts.255.up_proj,3,mcg,esimd,0,0.000058,2
+layers.3.mlp.experts.255.up_proj,3,mcg,esimd,0,0.000060,4
+layers.3.mlp.experts.255.up_proj,3,mcg,esimd,0,0.000060,8
+layers.3.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000052,1
+layers.3.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000092,2
+layers.3.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000047,4
+layers.3.mlp.shared_expert.down_proj,4,mcg,esimd,0,0.000093,8
+layers.3.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000046,1
+layers.3.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000049,2
+layers.3.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000051,4
+layers.3.mlp.shared_expert.gate_proj,4,mcg,esimd,0,0.000051,8
+layers.3.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000046,1
+layers.3.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000045,2
+layers.3.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000051,4
+layers.3.mlp.shared_expert.up_proj,4,mcg,esimd,0,0.000061,8

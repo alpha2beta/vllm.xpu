@@ -1,0 +1,177 @@
+{
+  "generated_at_utc": "2026-10-23T18:44:53.408975+00:00",
+  "host": {
+    "hostname": "cachyos-x8664",
+    "kernel": "7.2.11-1-cachyos-deckify",
+    "os": "CachyOS",
+    "cpu": "Intel(R) Core(TM) Ultra 7 258V",
+    "logical_cpus": 8,
+    "page_size": 4096
+  },
+  "memory": {
+    "MemTotal": 33153904640,
+    "MemFree": 7381200896,
+    "MemAvailable": 24893599744,
+    "Buffers": 778043392,
+    "Cached": 16321548288,
+    "SwapCached": 712704,
+    "Active": 694243328,
+    "Inactive": 17103159296,
+    "Unevictable": 144252928,
+    "Mlocked": 86016,
+    "SwapTotal": 33153871872,
+    "SwapFree": 26188484608,
+    "Zswap": 0,
+    "Zswapped": 0,
+    "Dirty": 688128,
+    "Writeback": 249856,
+    "AnonPages": 827715584,
+    "Mapped": 382222336,
+    "Shmem": 98361344,
+    "KReclaimable": 1065508864,
+    "Slab": 1343471616,
+    "SReclaimable": 1065508864,
+    "SUnreclaim": 277962752,
+    "KernelStack": 12464128,
+    "PageTables": 96370688,
+    "SecPageTables": 3411968,
+    "NFS_Unstable": 0,
+    "Bounce": 0,
+    "WritebackTmp": 0,
+    "CommitLimit": 49730822144,
+    "Committed_AS": 11602268160,
+    "VmallocTotal": 35184372087808,
+    "VmallocUsed": 186687488,
+    "VmallocChunk": 0,
+    "Percpu": 7602176,
+    "HardwareCorrupted": 0,
+    "AnonHugePages": 230686720,
+    "ShmemHugePages": 0,
+    "ShmemPmdMapped": 0,
+    "FileHugePages": 0,
+    "FilePmdMapped": 0,
+    "CmaTotal": 0,
+    "CmaFree": 0,
+    "Unaccepted": 0,
+    "Balloon": 0,
+    "GPUActive": 299454464,
+    "GPUReclaim": 431247360,
+    "Hugepagesize": 2097152,
+    "Hugetlb": 0,
+    "DirectMap4k": 32807993344,
+    "DirectMap2M": 1059061760,
+    "DirectMap1G": 0,
+    "swap_in_use_bytes": 6965387264
+  },
+  "gpu": {
+    "torch_xpu": {
+      "available": true,
+      "device_count": 1,
+      "properties": {
+        "architecture": 21491614720,
+        "device_id": 25760,
+        "driver_version": "1.17.39758",
+        "gpu_eu_count": 64,
+        "gpu_subslice_count": 8,
+        "has_atomic64": true,
+        "has_bfloat16_conversions": true,
+        "has_fp16": true,
+        "has_fp64": true,
+        "has_subgroup_2d_block_io": true,
+        "has_subgroup_matrix_multiply_accumulate": true,
+        "has_subgroup_matrix_multiply_accumulate_tensor_float32": false,
+        "is_integrated_gpu": true,
+        "last_level_cache_size": 8388608,
+        "local_mem_size": 131072,
+        "max_compute_units": 64,
+        "max_num_sub_groups": 64,
+        "max_work_group_size": 1024,
+        "memory_bus_width": 64,
+        "memory_clock_rate": 0,
+        "name": "Intel(R) Arc(TM) Graphics",
+        "platform_name": "Intel(R) oneAPI Unified Runtime over Level-Zero V2",
+        "sub_group_sizes": [
+          16,
+          32
+        ],
+        "total_memory": 30692810752,
+        "type": "gpu",
+        "vendor": "Intel(R) Corporation",
+        "version": "20.4.4"
+      },
+      "mem_info": {
+        "free_bytes": 6978764800,
+        "total_bytes": 30692810752
+      },
+      "torch_xpu": "torch.xpu"
+    },
+    "driver": {
+      "card": "card0",
+      "pci_id": "0x64a0",
+      "vendor_id": "0x8086",
+      "driver": "xe",
+      "xe_max_mem": null,
+      "ttm_pages_limit": "4047107",
+      "ttm_page_pool_size": "0"
+    },
+    "level_zero_loader": {
+      "soname_path": "/usr/lib/libze_loader.so.1",
+      "resolved": "/usr/lib/libze_loader.so.1.32.0",
+      "version_suffix": "libze_loader.so.1.32.0",
+      "size_bytes": 760000
+    },
+    "sycl_ls": "Platforms: 0\ndefault_selector()      : No device of requested type available. Please chec...\naccelerator_selector()  : No device of requested type available. Please chec...\ncpu_selector()          : No device of requested type available. Please chec...\ngpu_selector()          : No device of requested type available. Please chec...\ncustom_selector(gpu)    : No device of requested type available. Please chec...\ncustom_selector(cpu)    : No device of requested type available. Please chec...\ncustom_selector(acc)    : No device of requested type available. Please chec...",
+    "xpu_smi": "<unavailable: FileNotFoundError: [Errno 2] No such file or directory: 'xpu-smi'>"
+  },
+  "software": {
+    "python": "3.12.14",
+    "python_executable": "/home/yanchun/Projects/vllm.xpu/.venv/bin/python",
+    "packages": {
+      "vllm": "0.31.0+xpu",
+      "torch": "2.14.0+xpu",
+      "transformers": "5.17.0",
+      "triton": "3.8.0+xpu",
+      "tokenizers": "0.23.2",
+      "safetensors": "0.8.0",
+      "huggingface-hub": "1.33.0",
+      "numpy": "2.3.5",
+      "exl3xpu": "0.1.0"
+    },
+    "oneapi_icpx": "Intel(R) oneAPI DPC++/C++ Compiler 2026.0.0 (2026.0.0.20260331)\nTarget: x86_64-unknown-linux-gnu\nThread model: posix\nInstalledDir: /opt/intel/oneapi/compiler/2026.0/bin/compiler\nConfiguration file: /opt/intel/oneapi/compiler/2026.0/bin/compiler/../icpx.cfg",
+    "oneapi_env_script": true
+  },
+  "repositories": {
+    "vllm_xpu": {
+      "path": "/home/yanchun/Projects/vllm.xpu",
+      "commit": "c93c5f317057fc16c3f3c7df512805f9218ee423",
+      "branch": "Qwen35B_MoE",
+      "describe": "c93c5f3-dirty"
+    },
+    "exl3xpu": {
+      "path": "/home/yanchun/Projects/exl3xpu",
+      "commit": "15ded2f3add148c4db3c900cba7de878238f53bc",
+      "branch": "main",
+      "describe": "15ded2f-dirty"
+    }
+  },
+  "runtime_env": {
+    "EXL3_VLLM_PATCHES": null,
+    "EXL3_BACKEND": null,
+    "EXL3_SMALL_M_MAX": null,
+    "EXL3_INT8_PREFILL": null,
+    "EXL3_RECON_SLICE_N": null,
+    "UR_L0_ENABLE_RELAXED_ALLOCATION_LIMITS": null,
+    "ZE_AFFINITY_MASK": null,
+    "VLLM_LOGGING_LEVEL": null,
+    "OMP_NUM_THREADS": null,
+    "HF_HOME": null
+  },
+  "disk": {
+    "vllm_xpu_root": {
+      "total": 507067236352,
+      "used": 445217816576,
+      "free": 60161605632
+    },
+    "models_dir_exists": true
+  }
+}

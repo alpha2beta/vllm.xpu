@@ -1,0 +1,26 @@
+diff --git a/csrc/exl3_ops.sycl b/csrc/exl3_ops.sycl
+index 0bb1a11..48fe61f 100644
+--- a/csrc/exl3_ops.sycl
++++ b/csrc/exl3_ops.sycl
+@@ -564,16 +564,16 @@ void exl3_reconstruct(at::Tensor trellis, at::Tensor w, int64_t n0, int64_t K, i
+     bool ok = true;
+     if (K == 4 && cb == 2) launch_reconstruct<4, 2>(trellis, w, n0, q);
+     else if (K == 6 && cb == 2) launch_reconstruct<6, 2>(trellis, w, n0, q);
+-    // K=3 / MCG: the routed-expert format of Qwen3.5-35B-A3B (and a CUDA
+-    // instantiation exllamav3 already ships as exl3_moe_inst_k3_cb1). Kept out
+-    // of the ALL_CODEBOOKS block so the default build can always dequantize
+-    // this checkpoint on the prefill (reconstruct + GEMM) path.
++    // K=3, K=4, K=6 / MCG (cb=1): the routed-expert, shared-expert, and LM-head
++    // formats of Qwen3.5-35B-A3B. Kept out of the ALL_CODEBOOKS block so the default
++    // build can always dequantize this checkpoint on the prefill (reconstruct + GEMM) path.
+     else if (K == 3 && cb == 1) launch_reconstruct<3, 1>(trellis, w, n0, q);
++    else if (K == 4 && cb == 1) launch_reconstruct<4, 1>(trellis, w, n0, q);
++    else if (K == 6 && cb == 1) launch_reconstruct<6, 1>(trellis, w, n0, q);
+ #ifdef EXL3_ALL_CODEBOOKS
+     else if (K == 2 && cb == 2) launch_reconstruct<2, 2>(trellis, w, n0, q);
+     else if (K == 3 && cb == 2) launch_reconstruct<3, 2>(trellis, w, n0, q);
+     else if (K == 5 && cb == 2) launch_reconstruct<5, 2>(trellis, w, n0, q);
+-    else if (K == 4 && cb == 1) launch_reconstruct<4, 1>(trellis, w, n0, q);
+     else if (K == 4 && cb == 0) launch_reconstruct<4, 0>(trellis, w, n0, q);
+ #endif
+     else ok = false;

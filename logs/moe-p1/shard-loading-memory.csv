@@ -1,0 +1,3 @@
+shard_index,shard,expert_tensors,seconds,rss_mib,xpu_allocated_mib,xpu_reserved_mib,xpu_free_mib,xpu_total_mib
+0,/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw/model-00001-of-00002.safetensors,70656,5.326724594982807,1260.65625,11673.3984375,11674.0,3182.9375,29270.9453125
+1,/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw/model-00002-of-00002.safetensors,52224,4.416576062969398,1252.6875,11673.3984375,11674.0,3041.046875,29270.9453125

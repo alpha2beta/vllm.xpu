@@ -1,0 +1,79 @@
+{
+  "timestamp": 1792860958.3971746,
+  "model": "qwen3.5-35b-a3b-exl3",
+  "endpoint": "http://127.0.0.1:8002/v1/chat/completions",
+  "chat_response": {
+    "id": "chatcmpl-b548bd1b69b9b0d3",
+    "object": "chat.completion",
+    "created": 1792860909,
+    "model": "qwen3.5-35b-a3b-exl3",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Question: \"What is the capital of Japan?\"\n    *   Constraint: \"Answer in one sentence.\"\n\n2.  **Identify the Fact:**\n    *   The capital of Japan is Tokyo.\n\n3.  **Draft the Answer:**\n    *   Draft 1: The capital of Japan is Tokyo.\n    *   Draft 2: Tokyo is the capital city of Japan.\n    *   Draft 3: Japan's capital is Tokyo.\n\n4.  **Check Constraints:**\n    *   Is it one sentence? Yes.\n    *   Is it accurate? Yes.\n    *   Is it helpful? Yes.\n\n5.  **Select the Best Option:**\n    *   Draft 1 is direct and clear.\n\n6.  **Final Output Formulation:**\n    *   \"The capital of Japan is Tokyo.\"\n\n7.  **Final Review:** Does this meet all criteria? Yes.cw\n</think>\n\nThe capital of Japan is Tokyo.",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": null
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.31.0-8f4d94f0",
+    "usage": {
+      "prompt_tokens": 35,
+      "total_tokens": 260,
+      "completion_tokens": 225,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": null
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "completion_response": {
+    "id": "cmpl-aee1ece7a4193309",
+    "object": "text_completion",
+    "created": 1792860954,
+    "model": "qwen3.5-35b-a3b-exl3",
+    "choices": [
+      {
+        "index": 0,
+        "text": " Jupiter. It is a gas giant with a diameter of about 142",
+        "logprobs": null,
+        "finish_reason": "length",
+        "stop_reason": null,
+        "token_ids": null,
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.31.0-8f4d94f0",
+    "usage": {
+      "prompt_tokens": 8,
+      "total_tokens": 24,
+      "completion_tokens": 16,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": null
+    },
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "chat_time_s": 45.10896062850952,
+  "comp_time_s": 4.073047161102295,
+  "status": "PASS"
+}

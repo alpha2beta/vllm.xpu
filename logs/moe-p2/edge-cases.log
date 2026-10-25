@@ -1,0 +1,8 @@
+P2-06 edge cases T2=0.08
+  {"case": "extreme_skew_single_expert", "max_abs": 3.143193680443801e-06, "nan_inf": 0, "p99_abs": 1.9501055703585735e-06, "pass": true, "tokens": 16, "unique_experts": 1}
+  {"case": "uniform_256", "finite": true, "pass": true, "sample_max_abs": 3.1628660508431494e-06, "sampled_experts": [0, 1, 2, 63, 127, 128, 254, 255], "tokens": 256, "unique_experts": 256}
+  {"active": [0, 5, 100], "case": "zero_token_experts", "inactive_experts": 253, "max_abs": 3.4492331906221807e-06, "nan_inf": 0, "p99_abs": 1.9971539586549625e-06, "pass": true}
+  {"case": "logit_near_ties", "ids": [0, 1, 2, 3, 4, 5, 6, 7], "ids_are_first_topk_set": true, "ids_stable_across_calls": true, "logits_max_abs": 0.0, "pass": true, "weights_uniform": true}
+  {"case": "empty_m0", "kernels": 0, "pass": true, "shape": [0, 2048]}
+  {"case": "single_token_decode", "max_abs": 1.0716985343606211e-06, "nan_inf": 0, "p99_abs": 6.996181127760792e-07, "pass": true}
+pass=True

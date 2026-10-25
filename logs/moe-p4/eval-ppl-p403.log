@@ -1,0 +1,91 @@
+W1025 08:27:12.325000 220688 torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1025 08:27:12.325000 220688 torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1025 08:27:12.326000 220688 torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+Loading model /home/yanchun/Projects/vllm.xpu/models/turboderp-Qwen3.5-35B-A3B-exl3-3.09bpw for PPL eval (max_model_len=2064)...
+(MainProcess pid=220688) INFO 10-25 08:27:17 [api_utils.py:286] non-default args: {'trust_remote_code': True, 'max_model_len': 2064, 'gpu_memory_utilization': 0.62, 'max_num_batched_tokens': 256, 'max_num_seqs': 1, 'disable_log_stats': True, 'enforce_eager': True, 'language_model_only': True, 'limit_mm_per_prompt': {'image': 0, 'video': 0}, 'model': '/home/yanchun/Projects/vllm.xpu/models/turboderp-Qwen3.5-35B-A3B-exl3-3.09bpw'}
+(MainProcess pid=220688) INFO 10-25 08:27:17 [model.py:699] Resolved architecture: Qwen3_5MoeForConditionalGeneration
+(MainProcess pid=220688) INFO 10-25 08:27:17 [model.py:2109] Using max model len 2064
+(MainProcess pid=220688) WARNING 10-25 08:27:17 [model.py:1069] Model does not support mm_device_do_normalize, forcing mm_device_do_normalize = False.
+(MainProcess pid=220688) INFO 10-25 08:27:18 [model.py:917] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+(MainProcess pid=220688) INFO 10-25 08:27:18 [model.py:974] Disabled mm_prefix attention mode because multimodal inputs are configuration-disabled. Attention backends without mm_prefix support may now be selected.
+(MainProcess pid=220688) WARNING 10-25 08:27:18 [indexer_topk.py:35] Failed to import the DeepSelect extension (vllm._deepselect_C): No module named 'vllm._deepselect_C'
+(MainProcess pid=220688) INFO 10-25 08:27:18 [scheduler.py:308] Chunked prefill is enabled with max_num_batched_tokens=256.
+(MainProcess pid=220688) INFO 10-25 08:27:18 [config.py:643] Mamba cache mode is set to 'align' for Qwen3_5MoeForConditionalGeneration by default when prefix caching is enabled
+(MainProcess pid=220688) INFO 10-25 08:27:19 [vllm_plugin.py:121] exl3: 30971 EXL3 modules (0 in MTP head)
+(MainProcess pid=220688) WARNING 10-25 08:27:19 [vllm.py:1706] Enforce eager set, disabling torch.compile, CUDAGraphs, and JIT kernel warmup. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none and --kernel_config.enable_jit_warmup=False
+(MainProcess pid=220688) WARNING 10-25 08:27:19 [vllm.py:1750] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(MainProcess pid=220688) INFO 10-25 08:27:19 [kernel.py:408] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'], gelu_and_mul_sparse=['native'])
+(MainProcess pid=220688) INFO 10-25 08:27:19 [vllm.py:1968] Cudagraph is disabled under eager mode
+(MainProcess pid=220688) INFO 10-25 08:27:19 [xpu.py:419] XPU platform: set server shutdown_timeout=5.
+(MainProcess pid=220688) INFO 10-25 08:27:19 [compilation.py:331] Enabled custom fusions: norm_quant, act_quant
+W1025 08:27:24.476000 220723 torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1025 08:27:24.477000 220723 torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1025 08:27:24.477000 220723 torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+(EngineCore pid=220723) INFO 10-25 08:27:29 [core.py:129] Initializing a V1 LLM engine (v0.31.0) with config: model='/home/yanchun/Projects/vllm.xpu/models/turboderp-Qwen3.5-35B-A3B-exl3-3.09bpw', speculative_config=None, tokenizer='/home/yanchun/Projects/vllm.xpu/models/turboderp-Qwen3.5-35B-A3B-exl3-3.09bpw', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=2064, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=exl3, quantization_config=None, enforce_eager=True, aux_output_config=AuxOutputConfig(enable_return_routed_experts=False, max_bytes=None), kv_cache_dtype=auto, device_config=xpu, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/home/yanchun/Projects/vllm.xpu/models/turboderp-Qwen3.5-35B-A3B-exl3-3.09bpw, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [256], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 0, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'], gelu_and_mul_sparse=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=False, moe_backend='auto', sparse_indexer_topk_backend='auto', linear_backend='auto', linear_backend_per_quant=None)
+(EngineCore pid=220723) WARNING 10-25 08:27:30 [indexer_topk.py:35] Failed to import the DeepSelect extension (vllm._deepselect_C): No module named 'vllm._deepselect_C'
+(EngineCore pid=220723) INFO 10-25 08:27:30 [parallel_state.py:1825] world_size=1 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_20d09a5704b1478e9e62c24d1e84f412 backend=xccl
+2026-10-25 08:27:30:(220723) |ERROR| [init_library_without_override:296] oneCCL could not be initialized! Could not load any plugin. Please rerun with `CCL_LOG_LEVEL=info`.
+  [oneCCL ERROR Stacktrace]:
+    /home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/torch/lib/../../../../libccl.so.2(onecclGetVersion+0x9) [0x7fc21d4f7109]
+    /home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/torch/lib/libtorch_xpu.so(_ZN4c10d14getXcclVersionB5cxx11Ev+0xe9) [0x7fc1d84d1949]
+    /home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/torch/lib/libtorch_xpu.so(_ZN4c10d16ProcessGroupXCCLC2EN3c1013intrusive_ptrINS_5StoreENS1_6detail34intrusive_target_default_null_typeIS3_EEEEiiNS2_INS0_7OptionsENS5_IS8_EEEE+0x3db) [0x7fc1d84d4bbb]
+    /home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/torch/lib/libtorch_python.so(+0xf1ff7a) [0x7fc21bd1ff7a]
+    /home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/torch/lib/libtorch_python.so(+0xf3512d) [0x7fc21bd3512d]
+    /home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/torch/lib/libtorch_python.so(+0x3f61a2) [0x7fc21b1f61a2]
+    VLLM::EngineCore() [0x18249ff]
+    VLLM::EngineCore() [0x1a75997]
+    VLLM::EngineCore() [0x1a8eb42]
+    VLLM::EngineCore() [0x18025ad]
+    /home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/torch/lib/libtorch_python.so(+0x3f465b) [0x7fc21b1f465b]
+    VLLM::EngineCore(_PyEval_EvalFrameDefault+0x45de) [0x1815ade]
+    VLLM::EngineCore() [0x1847226]
+    VLLM::EngineCore() [0x18025ad]
+    VLLM::EngineCore(_PyEval_EvalFrameDefault+0x456d) [0x1815a6d]
+    VLLM::EngineCore() [0x1847335]
+    VLLM::EngineCore() [0x18025ad]
+    VLLM::EngineCore(_PyEval_EvalFrameDefault+0xcbe4) [0x181e0e4]
+    VLLM::EngineCore(PyEval_EvalCode+0xde) [0x18a54ba]
+    VLLM::EngineCore() [0x18a5c9d]
+    VLLM::EngineCore(PyRun_SimpleStringFlags+0xe0) [0x196783e]
+    VLLM::EngineCore() [0x1ad9815]
+    VLLM::EngineCore() [0x197f61f]
+    VLLM::EngineCore() [0x197f42c]
+    /usr/lib/libc.so.6(+0x27d0e) [0x7fc21d627d0e]
+    /usr/lib/libc.so.6(__libc_start_main+0x8b) [0x7fc21d627e4b]
+    VLLM::EngineCore(_start+0x29) [0x19a78a9]
+  [oneCCL ERROR Stacktrace End]
+(MainProcess pid=220688) INFO 10-25 08:27:33 [utils.py:638] [shutdown] Process manager: send sigterm to process EngineCore
+Traceback (most recent call last):
+  File "/home/yanchun/Projects/vllm.xpu/scripts/eval_moe_ppl.py", line 159, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/scripts/eval_moe_ppl.py", line 57, in main
+    llm = LLM(
+          ^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/entrypoints/llm.py", line 344, in __init__
+    self.llm_engine = LLMEngine.from_engine_args(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py", line 185, in from_engine_args
+    return cls(
+           ^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py", line 111, in __init__
+    self.engine_core = EngineCoreClient.make_client(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 126, in make_client
+    return SyncMPClient(
+           ^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/tracing/otel.py", line 175, in sync_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 917, in __init__
+    super().__init__(
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 674, in __init__
+    with launch_core_engines(
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1268, in launch_core_engines
+    wait_for_engine_startup(
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1348, in wait_for_engine_startup
+    raise RuntimeError(
+RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}

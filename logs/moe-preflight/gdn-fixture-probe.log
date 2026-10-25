@@ -1,0 +1,26 @@
+# P0-07 GDN / hybrid-attention fixture probe
+torch: 2.14.0+xpu
+device: Intel(R) Arc(TM) Graphics
+config: /home/yanchun/Projects/vllm.xpu/fixtures/gdn-probe (from /tmp/opencode/qwen35-3.09bpw, quantization_config removed)
+model dims: hidden=2048 layers=40 full_attention_interval=4 k_heads=16 v_heads=32 head_k=128 head_v=128 conv_kernel=4
+layer pattern: 30 x linear_attention + 10 x full_attention (4:1)
+conv_state per sequence: (3, 8192)
+ssm_state per sequence:  (32, 128, 128)
+layer params: 33,718,464 (128.6 MiB)
+allocated conv_state (1, 3, 8192) 0.05 MiB, ssm_state (1, 32, 128, 128) 2.00 MiB on xpu
+
+decode x4: out (1, 2048) torch.bfloat16
+  finite: True
+  out abs mean 0.000134 max 0.000584
+  conv_state updated: True
+  ssm_state  updated: True
+
+prefill 8 tokens: out (8, 2048) torch.bfloat16
+  finite: True
+  out abs mean 0.000159 max 0.000927
+  conv_state written: True
+  ssm_state  written: True
+
+determinism (2 identical prefill runs): out=True conv=True ssm=True
+
+XPU memory: free 4.00 GiB of 28.58 GiB (mem_get_info; integrated GPU shares system RAM), host MemAvailable 19.80 GiB

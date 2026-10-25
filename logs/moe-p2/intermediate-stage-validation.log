@@ -1,0 +1,5 @@
+P2-08 intermediate stages: experts=27 worst=5.247e-05 T2=0.08
+  router: {"logits": {"max_abs": 8.66129994392395e-08, "nan_inf": 0, "p99_abs": 4.9863029261132397e-08}, "top8_agreement": 1.0, "weights": {"max_abs": 2.9802322387695312e-08, "nan_inf": 0, "p99_abs": 2.7492644605331407e-08}}
+  routed_sum: {"max_abs": 9.508198672847357e-07, "nan_inf": 0, "p99_abs": 6.800055416533723e-07}
+  shared: {"max_abs": 1.8974242266267538e-06, "nan_inf": 0, "p99_abs": 1.0119505304828635e-06}
+pass=True

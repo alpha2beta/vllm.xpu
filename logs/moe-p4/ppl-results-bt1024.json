@@ -1,0 +1,18 @@
+{
+  "model": "/home/yanchun/Projects/vllm.xpu/models/turboderp-Qwen3.5-35B-A3B-exl3-3.09bpw",
+  "dataset": "WikiText-2 raw test",
+  "method": "non-overlapping 2048-token chunks, prompt_logprobs=1",
+  "chunk_tokens": 2048,
+  "chunks_evaluated": 2,
+  "tokens_evaluated": 4094,
+  "mean_nll": 1.8477863058024953,
+  "ppl": 6.345756398498543,
+  "chunk_ppls": [
+    5.148871516009569,
+    7.820864075531221
+  ],
+  "load_time_s": 48.153870820999146,
+  "eval_time_s": 14.214624166488647,
+  "tok_per_s": 288.01324270336414,
+  "status": "PASS"
+}

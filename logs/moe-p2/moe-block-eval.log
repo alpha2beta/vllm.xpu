@@ -1,0 +1,8 @@
+P2 MoE block layer=0 T2=0.08
+  {"case": "router_alignment", "cos_min": 0.9999999403953552, "pass": true, "top8_agreement": 1.0, "weight_max_abs": 2.9802322387695312e-08}
+  {"case": "restricted_block_routed", "max_abs": 2.4937326088547707e-06, "nan_inf": 0, "p99_abs": 1.3701651369046886e-06, "pass": true}
+  {"case": "full_block_routed_plus_shared", "max_abs": 2.587323251646012e-06, "nan_inf": 0, "p99_abs": 1.687131430117006e-06, "pass": true}
+  {"assignments": 32, "case": "free_routing_vs_reference", "max_abs": 9.363184290123172e-07, "nan_inf": 0, "p99_abs": 6.840182891210134e-07, "pass": true, "unique_experts": 27}
+  {"apply_ignores_shared_argument": true, "case": "shared_ownership", "pass": true}
+  {"all_slots_contribute": true, "assignments": 32, "case": "token_accounting", "pass": true, "per_slot_contribution_max_abs": [2.0682811737060547e-05, 2.300739288330078e-05, 2.3484230041503906e-05, 2.2172927856445312e-05, 2.0265579223632812e-05, 2.288818359375e-05, 3.081560134887695e-05, 3.266334533691406e-05], "tokens": 4, "topk": 8, "zero_weights_max_abs": 0.0}
+pass=True failures=[]

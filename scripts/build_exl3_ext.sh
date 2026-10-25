@@ -51,7 +51,7 @@ rm -f "$FRESH"
 echo "fresh output: $FRESH"
 
 # shellcheck disable=SC2086
-icpx -fsycl -fsycl-targets=spir64 -O3 -ffast-math -fPIC -std=c++17 -shared \
+icpx -fsycl -fsycl-targets=spir64 -O3 -ffast-math -fPIC -std=c++20 -shared \
   -fsycl-device-code-split=per_kernel "-D_GLIBCXX_USE_CXX11_ABI=$ABI" ${EXL3_FLAGS:-} \
   -I "$EXL3_SRC/csrc" -I"$T/include" -I"$T/include/torch/csrc/api/include" \
   -x c++ "$EXL3_SRC/csrc/exl3_ops.sycl" -x none -o "$FRESH" \

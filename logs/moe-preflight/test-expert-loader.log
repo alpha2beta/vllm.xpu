@@ -1,0 +1,21 @@
+W1023 22:31:16.534000 149432 torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1023 22:31:16.535000 149432 torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1023 22:31:16.535000 149432 torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+OK   plan shapes/dtypes match real checkpoint
+OK   allocations below 4 GiB / layer
+OK   registration has no fp16 expert matrices
+OK   custom expert loader is bound
+OK   real experts 0/255 load bit-exact
+OK   AutoWeightsLoader end-to-end
+OK   packed expert descriptors
+OK   descriptor views bit-exact
+OK   arena tiling + metadata integrity
+OK   integrity detects corruption
+OK   integrity rejects dense-row layout
+OK   incomplete load fails closed
+OK   malformed tensors fail closed
+OK   complete load passes; codebook checked
+OK   dummy-load path skips completeness
+
+15/15 expert-loader cases pass
+wrote logs/moe-preflight/test-expert-loader.json

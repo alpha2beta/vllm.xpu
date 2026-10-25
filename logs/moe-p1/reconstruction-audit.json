@@ -1,0 +1,308 @@
+{
+  "task": "P1-06",
+  "pass": true,
+  "source": "checkpoint",
+  "model_dir": "/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw",
+  "layer": 0,
+  "experts": [
+    0,
+    1,
+    127,
+    254,
+    255
+  ],
+  "device": "Intel(R) Arc(TM) Graphics",
+  "cases": [
+    {
+      "case": "reconstruct bit-exact (C++ vs oracle)",
+      "pass": true
+    },
+    {
+      "case": "reconstruct n0-slice path",
+      "pass": true
+    },
+    {
+      "case": "P0-08 trace cross-check",
+      "pass": true
+    }
+  ],
+  "failures": [],
+  "reconstructions": [
+    {
+      "expert": 0,
+      "proj": "gate_proj",
+      "status": "ok",
+      "k": 2048,
+      "n": 512,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 0,
+      "proj": "up_proj",
+      "status": "ok",
+      "k": 2048,
+      "n": 512,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 0,
+      "proj": "down_proj",
+      "status": "ok",
+      "k": 512,
+      "n": 2048,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 1,
+      "proj": "gate_proj",
+      "status": "ok",
+      "k": 2048,
+      "n": 512,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 1,
+      "proj": "up_proj",
+      "status": "ok",
+      "k": 2048,
+      "n": 512,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 1,
+      "proj": "down_proj",
+      "status": "ok",
+      "k": 512,
+      "n": 2048,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 127,
+      "proj": "gate_proj",
+      "status": "ok",
+      "k": 2048,
+      "n": 512,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 127,
+      "proj": "up_proj",
+      "status": "ok",
+      "k": 2048,
+      "n": 512,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 127,
+      "proj": "down_proj",
+      "status": "ok",
+      "k": 512,
+      "n": 2048,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 254,
+      "proj": "gate_proj",
+      "status": "ok",
+      "k": 2048,
+      "n": 512,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 254,
+      "proj": "up_proj",
+      "status": "ok",
+      "k": 2048,
+      "n": 512,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 254,
+      "proj": "down_proj",
+      "status": "ok",
+      "k": 512,
+      "n": 2048,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 255,
+      "proj": "gate_proj",
+      "status": "ok",
+      "k": 2048,
+      "n": 512,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 255,
+      "proj": "up_proj",
+      "status": "ok",
+      "k": 2048,
+      "n": 512,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 255,
+      "proj": "down_proj",
+      "status": "ok",
+      "k": 512,
+      "n": 2048,
+      "K": 3,
+      "cb": 1,
+      "elements": 1048576,
+      "differing": 0,
+      "max_abs": 0.0,
+      "bit_exact": true
+    },
+    {
+      "expert": 0,
+      "proj": "gate_proj",
+      "status": "ok",
+      "slice": [
+        128,
+        384
+      ],
+      "differing": 0,
+      "bit_exact": true
+    },
+    {
+      "expert": 0,
+      "proj": "gate_proj",
+      "status": "ok",
+      "slice": [
+        256,
+        512
+      ],
+      "differing": 0,
+      "bit_exact": true
+    },
+    {
+      "expert": 255,
+      "proj": "down_proj",
+      "status": "ok",
+      "slice": [
+        128,
+        640
+      ],
+      "differing": 0,
+      "bit_exact": true
+    },
+    {
+      "expert": 255,
+      "proj": "down_proj",
+      "status": "ok",
+      "slice": [
+        1536,
+        2048
+      ],
+      "differing": 0,
+      "bit_exact": true
+    },
+    {
+      "expert": 0,
+      "proj": "gate_proj",
+      "status": "ok",
+      "trace_max_abs": 2.2351741790771484e-08
+    },
+    {
+      "expert": 0,
+      "proj": "up_proj",
+      "status": "ok",
+      "trace_max_abs": 1.4901161193847656e-08
+    },
+    {
+      "expert": 0,
+      "proj": "down_proj",
+      "status": "ok",
+      "trace_max_abs": 3.637978807091713e-11
+    },
+    {
+      "expert": 255,
+      "proj": "gate_proj",
+      "status": "ok",
+      "trace_max_abs": 1.862645149230957e-08
+    },
+    {
+      "expert": 255,
+      "proj": "up_proj",
+      "status": "ok",
+      "trace_max_abs": 1.862645149230957e-08
+    },
+    {
+      "expert": 255,
+      "proj": "down_proj",
+      "status": "ok",
+      "trace_max_abs": 3.637978807091713e-11
+    }
+  ],
+  "bit_exact_count": 19
+}

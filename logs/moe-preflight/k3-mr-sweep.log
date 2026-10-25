@@ -1,0 +1,4 @@
+K=3/mcg M-bucket sweep
+results: 32/32 pass
+no failures
+json: /home/yanchun/Projects/vllm.xpu/logs/moe-preflight/k3-mr-sweep.json

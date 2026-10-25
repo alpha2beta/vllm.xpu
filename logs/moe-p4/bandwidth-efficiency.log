@@ -1,0 +1,26 @@
+P4-05 bandwidth / workspace discipline  (layer-0 decode, M=1, Arc 140V)
+==========================================================================
+trellis bytes read per token per layer:
+  routed  (8 experts x 3 projections, K=3) :    9.00 MiB
+  GDN     (in_proj_qkv/z + out_proj, K=4)  :   16.00 MiB
+  shared  (gate+up+down, K=4)              :    1.50 MiB
+  TOTAL                                     :   26.50 MiB / token / layer
+
+measured summed device time (r6+P4-01)     :  2697.4 us / token
+effective read bandwidth                   :   10.30 GB/s
+vs P0-12 copy roofline 130.4 GB/s          :     7.9 %
+bandwidth-bound ceiling at this read volume :    4693 tok/s per layer
+occupancy ceiling if launches are removed   : (see P4-02)
+
+kernel-launch audit (decode):
+  kernel launches/token : 145.0
+  host syncs/token      : 2.0
+
+workspace / writeout discipline:
+  _reconstruct_kernel (FP16 weight writeout) : 0.0 us/token  -> 1 (0 = PASS)
+  D2H / H2D copies                          : 0.0 us/token  -> 1 (0 = PASS)
+  P1-09: small-M never materializes weights (reconstruct absent, persistent workspace 0 MiB)
+
+CONCLUSION: decode is latency/occupancy bound (~8% of bandwidth roofline);
+the remaining 145 launches/token + 2 host syncs are the constraint -> P4-02 grouped kernel.
+==========================================================================

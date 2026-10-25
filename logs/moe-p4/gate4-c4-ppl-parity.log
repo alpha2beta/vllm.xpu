@@ -1,0 +1,13 @@
+Gate 4 criterion 4 — WikiText-2 PPL parity (r7 grouped vs Gate 3 eager)
+artifact: r7 b627e3a4 (P4-02 grouped decode)   gate3: ee22deb/e4aa8fe (r5 eager)
+chunk     r7 grouped    gate3 eager   abs diff
+    0    5.152146309    5.152146309  0.000e+00
+    1    7.794307010    7.794307010  0.000e+00
+    2   10.020261788   10.020261788  0.000e+00
+    3    8.852372650    8.852372650  0.000e+00
+    4    6.395527893    6.395527893  0.000e+00
+ mean    7.439027596    7.439027596  2.665e-15
+
+per-chunk max abs diff: 0.000e+00  (BIT-IDENTICAL)
+10-chunk PPL (extended run): 6.3971 over 20470 tokens
+RESULT: Gate 4 criterion 4 PASS — numerics match Gate 3 to the bit

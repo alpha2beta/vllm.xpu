@@ -1,0 +1,17 @@
+{
+  "model": "/home/yanchun/Projects/vllm.xpu/models/turboderp-Qwen3.5-35B-A3B-exl3-3.09bpw",
+  "max_model_len": 2048,
+  "gpu_memory_utilization": 0.62,
+  "max_num_batched_tokens": 256,
+  "load_time_s": 100.65236186981201,
+  "gen_time_s": 5.43142557144165,
+  "tokens_per_s": 2.945819617620786,
+  "prompt": "The capital of France is",
+  "generated_text": " Paris.\nThe capital of France is Paris.\nThe capital of France is",
+  "prompt_tokens": 5,
+  "output_tokens": 16,
+  "peak_rss_gib": 1.6730804443359375,
+  "xpu_allocated_gib": 0.0,
+  "mem_available_gib": 3.1094589233398438,
+  "status": "PASS"
+}

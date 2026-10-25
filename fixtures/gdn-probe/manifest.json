@@ -1,0 +1,8 @@
+{
+  "purpose": "P0-07 GDN fixture probe: real Qwen3.5-35B-A3B dimensions, no quantization, dummy weights",
+  "source_config": "/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw/config.json",
+  "removed_keys": [
+    "quantization_config"
+  ],
+  "quantization_removed": true
+}

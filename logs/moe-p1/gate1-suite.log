@@ -1,0 +1,52 @@
+### tests/test_dispatch.py
+OK   unknown codebook raises
+OK   moe.py has no unquantized fallback
+
+15/15 dispatch cases pass
+EXIT=0
+
+### tests/test_expert_loader.py
+OK   complete load passes; codebook checked
+OK   dummy-load path skips completeness
+
+15/15 expert-loader cases pass
+EXIT=0
+
+### tests/test_expert_reconstruction.py
+OK   reconstruct n0-slice path
+OK   P0-08 trace cross-check
+
+25 reconstructions, 19 bit-exact; wrote /home/yanchun/Projects/vllm.xpu/logs/moe-p1/reconstruction-audit.log
+EXIT=0
+
+### tests/test_expert_mlp.py
+OK   P0-08 trace MLP (expert 0)
+OK   P0-08 trace MLP (expert 255)
+
+worst max_abs=3.62401e-06 (T-2 <= 0.08); wrote /home/yanchun/Projects/vllm.xpu/logs/moe-p1/single-expert-eval.log
+EXIT=0
+
+### tests/test_batch_sweep.py
+OK   fused vs reconstruct+GEMM crossover
+
+pass=True failures=[]
+wrote /home/yanchun/Projects/vllm.xpu/logs/moe-p1/batch-sweep.log
+EXIT=0
+
+### tests/test_reentrancy.py
+OK   large-M workspace bounded at slice=1024
+OK   concurrent streams bit-identical to serial
+
+pass=True failures=[]
+EXIT=0
+
+### scripts/test_shard_streaming.py (full 40 layers)
+streaming shards ...
+  shard 0: 70656 tensors in 5.3s | rss 1261 MiB | xpu alloc 11673 MiB
+  shard 1: 52224 tensors in 4.4s | rss 1253 MiB | xpu alloc 11673 MiB
+streamed 122880 tensors in 9.7s; missing=0 unaccounted=0 out_of_scope=0
+settled 40 layers in 2.6s
+wrote /home/yanchun/Projects/vllm.xpu/logs/moe-p1/shard-loading-memory.csv
+wrote /home/yanchun/Projects/vllm.xpu/logs/moe-p1/shard-streaming-audit.json
+PASS=True peak xpu allocated 11673 MiB, peak rss 1253 MiB
+EXIT=0

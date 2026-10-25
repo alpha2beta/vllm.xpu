@@ -1,0 +1,107 @@
+W1024 14:23:49.778000 174197 torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1024 14:23:49.778000 174197 torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1024 14:23:49.778000 174197 torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+torch=2.14.0+xpu xpu=True device=Intel(R) Arc(TM) Graphics
+Initial host RSS: 0.54 GiB
+Initial MemAvailable: 23.11 GiB, GPUActive: 0.61 GiB, GPUReclaim: 0.00 GiB
+Initializing LLM with kwargs:
+{
+  "model": "/home/yanchun/Projects/vllm.xpu/models/turboderp-Qwen3.5-35B-A3B-exl3-3.09bpw",
+  "max_model_len": 2048,
+  "gpu_memory_utilization": 0.62,
+  "enforce_eager": true,
+  "max_num_seqs": 1,
+  "max_num_batched_tokens": 256,
+  "language_model_only": true,
+  "limit_mm_per_prompt": {
+    "image": 0,
+    "video": 0
+  },
+  "trust_remote_code": true,
+  "disable_log_stats": false,
+  "seed": 0
+}
+(MainProcess pid=174197) INFO 10-24 14:23:55 [api_utils.py:286] non-default args: {'trust_remote_code': True, 'max_model_len': 2048, 'gpu_memory_utilization': 0.62, 'max_num_batched_tokens': 256, 'max_num_seqs': 1, 'enforce_eager': True, 'language_model_only': True, 'limit_mm_per_prompt': {'image': 0, 'video': 0}, 'model': '/home/yanchun/Projects/vllm.xpu/models/turboderp-Qwen3.5-35B-A3B-exl3-3.09bpw'}
+(MainProcess pid=174197) INFO 10-24 14:23:55 [model.py:699] Resolved architecture: Qwen3_5MoeForConditionalGeneration
+(MainProcess pid=174197) INFO 10-24 14:23:55 [model.py:2109] Using max model len 2048
+(MainProcess pid=174197) WARNING 10-24 14:23:55 [model.py:1069] Model does not support mm_device_do_normalize, forcing mm_device_do_normalize = False.
+(MainProcess pid=174197) INFO 10-24 14:23:56 [model.py:917] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+(MainProcess pid=174197) INFO 10-24 14:23:56 [model.py:974] Disabled mm_prefix attention mode because multimodal inputs are configuration-disabled. Attention backends without mm_prefix support may now be selected.
+(MainProcess pid=174197) WARNING 10-24 14:23:56 [indexer_topk.py:35] Failed to import the DeepSelect extension (vllm._deepselect_C): No module named 'vllm._deepselect_C'
+(MainProcess pid=174197) INFO 10-24 14:23:56 [scheduler.py:308] Chunked prefill is enabled with max_num_batched_tokens=256.
+(MainProcess pid=174197) INFO 10-24 14:23:56 [config.py:643] Mamba cache mode is set to 'align' for Qwen3_5MoeForConditionalGeneration by default when prefix caching is enabled
+(MainProcess pid=174197) INFO 10-24 14:23:57 [vllm_plugin.py:121] exl3: 30971 EXL3 modules (0 in MTP head)
+(MainProcess pid=174197) WARNING 10-24 14:23:57 [vllm.py:1706] Enforce eager set, disabling torch.compile, CUDAGraphs, and JIT kernel warmup. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none and --kernel_config.enable_jit_warmup=False
+(MainProcess pid=174197) WARNING 10-24 14:23:57 [vllm.py:1750] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(MainProcess pid=174197) INFO 10-24 14:23:57 [kernel.py:408] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'], gelu_and_mul_sparse=['native'])
+(MainProcess pid=174197) INFO 10-24 14:23:57 [vllm.py:1968] Cudagraph is disabled under eager mode
+(MainProcess pid=174197) INFO 10-24 14:23:57 [xpu.py:419] XPU platform: set server shutdown_timeout=5.
+(MainProcess pid=174197) INFO 10-24 14:23:57 [compilation.py:331] Enabled custom fusions: norm_quant, act_quant
+W1024 14:24:02.816000 174232 torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1024 14:24:02.817000 174232 torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1024 14:24:02.817000 174232 torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+(EngineCore pid=174232) INFO 10-24 14:24:08 [core.py:129] Initializing a V1 LLM engine (v0.31.0) with config: model='/home/yanchun/Projects/vllm.xpu/models/turboderp-Qwen3.5-35B-A3B-exl3-3.09bpw', speculative_config=None, tokenizer='/home/yanchun/Projects/vllm.xpu/models/turboderp-Qwen3.5-35B-A3B-exl3-3.09bpw', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=2048, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=exl3, quantization_config=None, enforce_eager=True, aux_output_config=AuxOutputConfig(enable_return_routed_experts=False, max_bytes=None), kv_cache_dtype=auto, device_config=xpu, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/home/yanchun/Projects/vllm.xpu/models/turboderp-Qwen3.5-35B-A3B-exl3-3.09bpw, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [256], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 0, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'], gelu_and_mul_sparse=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=False, moe_backend='auto', sparse_indexer_topk_backend='auto', linear_backend='auto', linear_backend_per_quant=None)
+(EngineCore pid=174232) WARNING 10-24 14:24:08 [indexer_topk.py:35] Failed to import the DeepSelect extension (vllm._deepselect_C): No module named 'vllm._deepselect_C'
+(EngineCore pid=174232) INFO 10-24 14:24:08 [parallel_state.py:1825] world_size=1 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_5d3a5466844c46ecab549df5943f49de backend=xccl
+(EngineCore pid=174232) INFO 10-24 14:24:08 [parallel_state.py:2269] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, ETP rank 0, EP rank 0, EPLB rank N/A
+(EngineCore pid=174232) INFO 10-24 14:24:08 [xpu_worker.py:196] Using V2 Model Runner
+(EngineCore pid=174232) INFO 10-24 14:24:09 [model_runner.py:375] Loading model from scratch...
+(EngineCore pid=174232) INFO 10-24 14:24:10 [xpu.py:252] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention
+(EngineCore pid=174232) INFO 10-24 14:24:10 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.
+(EngineCore pid=174232) INFO 10-24 14:24:13 [qwen_gdn_linear_attn.py:533] GDN decode kernel: XPU
+(EngineCore pid=174232) INFO 10-24 14:24:19 [xpu.py:218] Using Flash Attention backend.
+(EngineCore pid=174232) INFO 10-24 14:24:19 [flash_attn.py:1167] Using FlashAttention version 2
+(EngineCore pid=174232) INFO 10-24 14:24:51 [weight_utils.py:1063] Filesystem type for checkpoints: BTRFS. Checkpoint size: 14.25 GiB. Available RAM: 6.90 GiB.
+(EngineCore pid=174232) INFO 10-24 14:24:51 [weight_utils.py:1093] Auto-prefetch is disabled because the filesystem (BTRFS) is not a recognized network FS (NFS/Lustre) and the checkpoint size (14.25 GiB) exceeds 90% of available RAM (6.90 GiB).
+Loading safetensors checkpoint shards:   0% Completed | 0/2 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards:  50% Completed | 1/2 [00:13<00:13, 13.72s/it]
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:21<00:00, 10.33s/it]
+Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:21<00:00, 10.84s/it]
+
+(EngineCore pid=174232) INFO 10-24 14:25:13 [default_loader.py:484] Loading weights took 21.79 seconds
+(EngineCore pid=174232) INFO 10-24 14:25:17 [model_runner.py:407] Model loading took 13.54 GiB memory and 68.396377 seconds
+(EngineCore pid=174232) INFO 10-24 14:25:17 [topk_topp_sampler.py:157] Using the fused XPU kernel for top-p & top-k sampling.
+(EngineCore pid=174232) INFO 10-24 14:25:17 [torch_utils.py:286] Reducing Torch threads from 4 to 1 for serving. Set OMP_NUM_THREADS in the external environment to override.
+(EngineCore pid=174232) INFO 10-24 14:25:17 [interface.py:692] Setting kv cache block size to 64 for FLASH_ATTN backend(s).
+(EngineCore pid=174232) INFO 10-24 14:25:17 [interface.py:989] Setting attention block size to 1088 tokens to ensure that attention page size is >= mamba page size.
+(EngineCore pid=174232) INFO 10-24 14:25:17 [interface.py:1013] Padding mamba page size by 3.82% to ensure that mamba page size and attention page size are exactly equal.
+(EngineCore pid=174232) INFO 10-24 14:25:17 [utils.py:343] Using LBNHC KV cache layout.
+(EngineCore pid=174232) INFO 10-24 14:25:22 [gpu_worker.py:692] Available KV cache memory: 3.2 GiB
+(EngineCore pid=174232) INFO 10-24 14:25:22 [kv_cache_utils.py:2464] XPU KV cache size: 39,424 tokens, Maximum concurrency for 2,048 tokens per request: 19.25x
+(EngineCore pid=174232) INFO 10-24 14:25:34 [qwen_triton_warmup.py:294] Warming up Qwen GDN Triton kernels for model_type=qwen3_5_moe_text.
+(EngineCore pid=174232) INFO 10-24 14:25:34 [qwen_vl_triton_warmup.py:98] Warmed M-RoPE Triton kernels.
+(EngineCore pid=174232) INFO 10-24 14:25:34 [gpu_worker.py:955] Free memory on device (18.97/28.58 GiB) on startup. Desired GPU memory utilization is (0.62, 17.72 GiB). Actual usage is 14.5 GiB for consumed memory (weights + non-torch), 0.03 GiB for peak activation, and 0.0 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=3275691787` (3.05 GiB) to fit into requested memory, or `--kv-cache-memory=4616994816` (4.3 GiB) to fully utilize gpu memory. Current kv cache memory in use is 3.2 GiB.
+(EngineCore pid=174232) INFO 10-24 14:25:34 [core.py:380] init engine (profile, create kv cache, warmup model) took 17.12 s
+(EngineCore pid=174232) INFO 10-24 14:25:34 [kv_cache_utils.py:772] kv cache group sizes [1088, 1088, 1088, 1088]
+(EngineCore pid=174232) INFO 10-24 14:25:34 [kv_cache_utils.py:773] kv lcm block sizes 1088
+(EngineCore pid=174232) WARNING 10-24 14:25:34 [vllm.py:1706] Enforce eager set, disabling torch.compile, CUDAGraphs, and JIT kernel warmup. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none and --kernel_config.enable_jit_warmup=False
+(EngineCore pid=174232) WARNING 10-24 14:25:34 [vllm.py:1750] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(EngineCore pid=174232) INFO 10-24 14:25:34 [kernel.py:408] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'], gelu_and_mul_sparse=['native'])
+(EngineCore pid=174232) INFO 10-24 14:25:34 [vllm.py:1968] Cudagraph is disabled under eager mode
+(EngineCore pid=174232) INFO 10-24 14:25:34 [compilation.py:331] Enabled custom fusions: norm_quant, act_quant
+(MainProcess pid=174197) INFO 10-24 14:25:35 [hf.py:646] Detected the chat template content format to be 'openai'. You can set `--chat-template-content-format` to override this.
+Model loaded and engine initialized in 100.65s
+Post-load host RSS: 1.67 GiB
+XPU allocated: 0.00 GiB, reserved: 0.00 GiB, max: 0.00 GiB
+Generating completion for prompt: 'The capital of France is'
+Rendering prompts:   0%|          | 0/1 [00:00<?, ?it/s]Rendering prompts: 100%|██████████| 1/1 [00:00<00:00, 289.68it/s]
+Processed prompts:   0%|          | 0/1 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]Processed prompts: 100%|██████████| 1/1 [00:05<00:00,  5.42s/it, est. speed input: 0.92 toks/s, output: 2.95 toks/s]Processed prompts: 100%|██████████| 1/1 [00:05<00:00,  5.42s/it, est. speed input: 0.92 toks/s, output: 2.95 toks/s]Processed prompts: 100%|██████████| 1/1 [00:05<00:00,  5.42s/it, est. speed input: 0.92 toks/s, output: 2.95 toks/s]
+Generation finished in 5.43s (2.95 tok/s)
+Prompt tokens: 5, Generated tokens: 16
+----- GENERATED OUTPUT -----
+ Paris.
+The capital of France is Paris.
+The capital of France is
+----------------------------
+Final host RSS: 1.67 GiB
+Final MemAvailable: 3.11 GiB, GPUActive: 17.96 GiB, GPUReclaim: 0.01 GiB
+Results written to /home/yanchun/Projects/vllm.xpu/logs/moe-p3/smoke-offline.json
+(MainProcess pid=174197) INFO 10-24 14:25:41 [utils.py:638] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=174232) INFO 10-24 14:25:41 [core.py:1409] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=174232) INFO 10-24 14:25:41 [core.py:1558] [shutdown] EngineCore: start mode=drain timeout=5s
+(EngineCore pid=174232) INFO 10-24 14:25:41 [core.py:1589] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=174232) INFO 10-24 14:25:41 [core.py:1422] [shutdown] EngineCore: exiting busy loop
+(EngineCore pid=174232) INFO 10-24 14:25:41 [xpu_worker.py:228] XPUWorker shutdown: cleaning up (rank=0, local_rank=0)
+(EngineCore pid=174232) INFO 10-24 14:25:42 [xpu_worker.py:238] XPUWorker shutdown: done (rank=0, local_rank=0)
+(MainProcess pid=174197) WARNING 10-24 14:25:46 [utils.py:658] [shutdown] Process manager: force killing remaining processes count=1
+(MainProcess pid=174197) WARNING 10-24 14:25:46 [utils.py:663] [shutdown] Process manager: force killing remaining process EngineCore pid 174232

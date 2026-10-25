@@ -1,0 +1,80 @@
+{
+  "task": "P1-05",
+  "model_dir": "/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw",
+  "device": "xpu",
+  "device_name": "Intel(R) Arc(TM) Graphics",
+  "shards": [
+    "model-00001-of-00002.safetensors",
+    "model-00002-of-00002.safetensors"
+  ],
+  "shards_total": 2,
+  "limit_shards": null,
+  "layers_selected": [
+    0
+  ],
+  "expected_expert_keys": 122880,
+  "expected_in_scope": 3072,
+  "consumed": 3072,
+  "expert_tensors_streamed": 3072,
+  "missing": [],
+  "unaccounted": [],
+  "out_of_scope": 119808,
+  "stream_seconds": 1.5820601370069198,
+  "per_shard": [
+    {
+      "shard_index": 0,
+      "shard": "/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw/model-00001-of-00002.safetensors",
+      "expert_tensors": 3072,
+      "seconds": 1.0797891489928588,
+      "xpu_allocated_mib": 291.8349609375,
+      "xpu_reserved_mib": 310.0,
+      "xpu_free_mib": 6891.5234375,
+      "xpu_total_mib": 29270.9453125,
+      "rss_mib": 1320.671875
+    },
+    {
+      "shard_index": 1,
+      "shard": "/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw/model-00002-of-00002.safetensors",
+      "expert_tensors": 0,
+      "seconds": 0.5011784140369855,
+      "xpu_allocated_mib": 291.8349609375,
+      "xpu_reserved_mib": 310.0,
+      "xpu_free_mib": 6912.4765625,
+      "xpu_total_mib": 29270.9453125,
+      "rss_mib": 1302.10546875
+    }
+  ],
+  "peak": {
+    "xpu_allocated_mib": 291.8349609375,
+    "xpu_reserved_mib": 310.0,
+    "xpu_free_mib": 6912.4765625,
+    "xpu_total_mib": 29270.9453125,
+    "rss_mib": 1302.10546875
+  },
+  "final": {
+    "xpu_allocated_mib": 291.8349609375,
+    "xpu_reserved_mib": 310.0,
+    "xpu_free_mib": 6755.12109375,
+    "xpu_total_mib": 29270.9453125,
+    "rss_mib": 1586.8203125
+  },
+  "layer_status": {
+    "layers.0.mlp.experts": {
+      "experts": 256,
+      "projections": 3,
+      "allocations": 8,
+      "tiled_slices": 3072,
+      "trellis_tile_w13": [
+        128,
+        32,
+        48
+      ],
+      "trellis_tile_w2": [
+        32,
+        128,
+        48
+      ]
+    }
+  },
+  "pass": true
+}

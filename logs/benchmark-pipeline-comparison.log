@@ -1,0 +1,274 @@
+========================================================================
+STARTING BENCHMARK COMPARISON PIPELINE
+Start Time: Mon Oct 19 04:20:20 PM CEST 2026
+Target Endpoint: http://127.0.0.1:8080/v1
+Phase 1: Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off (Thinking OFF, 2048 tokens)
+Phase 2: Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096 (Thinking ON, 4096 tokens)
+========================================================================
+Checking if llama-server is healthy at http://127.0.0.1:8080/v1...
+Server is ready.
+
+========================================================================
+>>> [PHASE 1] Starting Option A: Thinking OFF (Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off)
+>>> Time: Mon Oct 19 04:20:20 PM CEST 2026
+========================================================================
+Phase 1 Codegen: Generating 164 solutions with thinking OFF...
+Initializing a decoder model: Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off ...
+Sanitized code outputs will be saved to evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl
+Raw outputs will be saved to evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.raw.jsonl
+Codegen: HumanEval/0 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/1 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/2 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/3 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/4 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/5 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/6 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/7 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/8 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/9 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/10 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/11 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/12 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/13 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/14 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/15 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/16 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/17 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/18 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/19 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/20 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/21 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/22 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/23 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/24 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/25 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/26 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/27 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/28 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/29 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/30 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/31 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/32 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/33 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/34 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/35 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/36 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/37 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/38 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/39 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/40 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/41 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/42 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/43 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/44 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/45 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/46 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/47 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/48 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/49 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/50 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/51 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/52 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/53 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/54 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/55 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/56 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/57 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/58 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/59 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/60 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/61 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/62 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/63 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/64 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/65 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/66 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/67 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/68 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/69 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/70 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/71 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/72 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/73 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/74 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/75 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/76 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/77 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/78 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/79 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/80 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/81 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/82 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/83 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/84 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/85 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/86 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/87 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/88 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/89 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/90 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/91 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/92 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/93 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/94 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/95 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/96 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/97 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/98 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/99 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/100 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/101 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/102 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/103 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/104 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/105 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/106 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/107 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/108 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/109 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/110 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/111 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/112 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/113 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/114 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/115 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/116 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/117 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/118 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/119 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/120 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/121 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/122 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/123 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/124 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/125 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/126 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/127 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/128 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/129 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/130 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/131 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/132 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/133 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/134 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/135 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/136 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/137 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/138 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/139 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/140 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/141 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/142 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/143 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/144 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/145 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/146 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/147 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/148 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/149 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/150 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/151 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/152 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/153 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/154 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/155 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/156 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/157 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/158 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/159 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/160 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/161 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/162 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+Codegen: HumanEval/163 @ Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off
+humaneval •100% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 164/164 • 1:01:30
+evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl
+Phase 1 Evaluate: Running HumanEval / HumanEval+ test suites for Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off...
+Load from ground-truth from /home/yanchun/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+0it [00:00, ?it/s]164it [00:00, 5442.92it/s]
+  0%|          | 0/164 [00:00<?, ?it/s]  0%|          | 0/164 [00:00<?, ?it/s]
+concurrent.futures.process._RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/home/yanchun/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/concurrent/futures/process.py", line 264, in _process_worker
+    r = call_item.fn(*call_item.args, **call_item.kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/evalplus/evaluate.py", line 97, in check_correctness
+    ret["base"] = untrusted_check(
+                  ^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/evalplus/eval/__init__.py", line 236, in untrusted_check
+    timeout = min(os.getenv("EVALPLUS_TIMEOUT_PER_TASK", 60), sum(time_limits)) + 1
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: '<' not supported between instances of 'float' and 'str'
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/yanchun/Projects/vllm.xpu/.venv/bin/evalplus.evaluate", line 10, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/evalplus/evaluate.py", line 359, in main
+    Fire(evaluate)
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+    component, remaining_args = _CallAndUpdateTrace(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/evalplus/evaluate.py", line 245, in evaluate
+    result = future.result()
+             ^^^^^^^^^^^^^^^
+  File "/home/yanchun/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/yanchun/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+TypeError: '<' not supported between instances of 'float' and 'str'
+/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/evalplus/evaluate.py:239: UserWarning: No samples had finished testing in the last 20s
+  warn("No samples had finished testing in the last 20s")
+/home/yanchun/Projects/vllm.xpu/.venv/lib/python3.12/site-packages/evalplus/evaluate.py:240: UserWarning: 164 samples to be tested: {'HumanEval/82 (line 83 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/3 (line 4 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/110 (line 111 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/95 (line 96 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/149 (line 150 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/35 (line 36 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/107 (line 108 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/112 (line 113 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/91 (line 92 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/84 (line 85 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/8 (line 9 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/85 (line 86 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/2 (line 3 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/65 (line 66 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/73 (line 74 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/87 (line 88 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/4 (line 5 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/131 (line 132 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/16 (line 17 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/94 (line 95 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/14 (line 15 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/7 (line 8 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/57 (line 58 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/92 (line 93 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/29 (line 30 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/49 (line 50 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/100 (line 101 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/129 (line 130 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/158 (line 159 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/12 (line 13 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/56 (line 57 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/83 (line 84 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/60 (line 61 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/118 (line 119 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/72 (line 73 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/152 (line 153 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/96 (line 97 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/1 (line 2 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/122 (line 123 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/48 (line 49 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/127 (line 128 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/148 (line 149 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/54 (line 55 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/102 (line 103 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/24 (line 25 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/126 (line 127 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/125 (line 126 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/53 (line 54 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/0 (line 1 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/46 (line 47 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/101 (line 102 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/136 (line 137 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/75 (line 76 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/52 (line 53 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/140 (line 141 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/42 (line 43 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/23 (line 24 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/147 (line 148 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/141 (line 142 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/6 (line 7 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/69 (line 70 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/156 (line 157 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/22 (line 23 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/81 (line 82 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/21 (line 22 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/76 (line 77 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/150 (line 151 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/59 (line 60 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/41 (line 42 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/154 (line 155 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/93 (line 94 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/88 (line 89 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/77 (line 78 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/124 (line 125 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/146 (line 147 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/121 (line 122 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/39 (line 40 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/25 (line 26 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/142 (line 143 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/105 (line 106 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/66 (line 67 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/137 (line 138 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/40 (line 41 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/44 (line 45 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/134 (line 135 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/50 (line 51 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/104 (line 105 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/117 (line 118 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/163 (line 164 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/36 (line 37 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/143 (line 144 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/19 (line 20 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/132 (line 133 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/68 (line 69 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/111 (line 112 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/33 (line 34 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/130 (line 131 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/153 (line 154 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/20 (line 21 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/47 (line 48 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/5 (line 6 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/114 (line 115 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/116 (line 117 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/74 (line 75 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/120 (line 121 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/13 (line 14 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/144 (line 145 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/109 (line 110 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/27 (line 28 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/26 (line 27 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/151 (line 152 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/128 (line 129 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/86 (line 87 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/45 (line 46 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/160 (line 161 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/10 (line 11 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/159 (line 160 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/103 (line 104 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/98 (line 99 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/145 (line 146 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/15 (line 16 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/106 (line 107 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/71 (line 72 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/38 (line 39 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/28 (line 29 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/133 (line 134 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/79 (line 80 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/99 (line 100 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/155 (line 156 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/113 (line 114 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/34 (line 35 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/37 (line 38 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/78 (line 79 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/97 (line 98 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/63 (line 64 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/80 (line 81 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/32 (line 33 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/18 (line 19 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/135 (line 136 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/17 (line 18 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/55 (line 56 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/115 (line 116 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/90 (line 91 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/70 (line 71 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/64 (line 65 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/139 (line 140 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/30 (line 31 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/89 (line 90 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/123 (line 124 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/162 (line 163 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/11 (line 12 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/51 (line 52 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/161 (line 162 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/58 (line 59 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/61 (line 62 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/119 (line 120 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/62 (line 63 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/138 (line 139 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/31 (line 32 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/157 (line 158 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/67 (line 68 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/108 (line 109 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/9 (line 10 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)', 'HumanEval/43 (line 44 in evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off_openai_temp_0.0.jsonl)'}
+  warn(f"{len(remainings)} samples to be tested: {remainings}")
+./scripts/run_option_a_then_b.sh: line 73: 22013 Killed                     .venv/bin/evalplus.evaluate --dataset humaneval --samples "${RESULTS_DIR}/${MODEL_A}_openai_temp_0.0.jsonl" 2>&1
+     22014 Done                       | tee -a "${LOG_A}"
+========================================================================
+STARTING BENCHMARK COMPARISON PIPELINE
+Start Time: Mon Oct 19 05:33:33 PM CEST 2026
+Target Endpoint: http://127.0.0.1:8080/v1
+Phase 1: Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off (Thinking OFF, 2048 tokens)
+Phase 2: Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096 (Thinking ON, 4096 tokens)
+========================================================================
+Checking if llama-server is healthy at http://127.0.0.1:8080/v1...
+Server is ready.
+
+========================================================================
+>>> [PHASE 1] Starting Option A: Thinking OFF (Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off)
+>>> Time: Mon Oct 19 05:33:33 PM CEST 2026
+========================================================================
+>>> [PHASE 1 ALREADY COMPLETE] Found existing evaluation results for Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-off.
+>>> Skipping Phase 1 codegen and using evaluated results.
+>>> [PHASE 1 COMPLETE] Option A finished at Mon Oct 19 05:33:33 PM CEST 2026!
+
+========================================================================
+>>> [PHASE 2] Starting Option B: Thinking ON with 4096 budget (Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096)
+>>> Time: Mon Oct 19 05:33:33 PM CEST 2026
+========================================================================
+Phase 2 Codegen: Generating 164 solutions with thinking ON (4096 max tokens)...
+Initializing a decoder model: Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096 ...
+Sanitized code outputs will be saved to evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096_openai_temp_0.0.jsonl
+Raw outputs will be saved to evalplus_results/humaneval/Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096_openai_temp_0.0.raw.jsonl
+Codegen: HumanEval/0 @ 
+Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096
+Codegen: HumanEval/1 @ 
+Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096
+Codegen: HumanEval/2 @ 
+Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096
+Codegen: HumanEval/3 @ 
+Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096
+Codegen: HumanEval/4 @ 
+Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096
+Codegen: HumanEval/5 @ 
+Ternary-Bonsai-2-27B-Abliterated-v2-PQ2_0-MTP-think-on-4096

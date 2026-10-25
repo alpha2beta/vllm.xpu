@@ -1,0 +1,43 @@
+# Serving config for Qwen3.5-35B-A3B EXL3 (4.00bpw planned profile) on Intel Arc 140V (Lunar Lake Xe2).
+# Upstream turboderp/Qwen3.5-35B-A3B-exl3 does not currently provide a 4.00bpw branch;
+# the active production checkpoint is 3.09bpw (models/qwen3.5-35b-a3b-exl3-3.09bpw-140v/model.yaml).
+# If a 4.00bpw revision is quantized, this profile records the bounded parameters.
+
+id: qwen3.5-35b-a3b-exl3-4bpw
+served_model_name: qwen3.5-35b-a3b-exl3
+
+source:
+  repo: turboderp/Qwen3.5-35B-A3B-exl3
+  revision: null  # No upstream 4.00bpw branch available; 3.09bpw used for bring-up & serving
+  quant: exl3 0.0.22, 4.00 bpw nominal
+  notes: >
+    Estimated weight payload at 4.00bpw is ~18.5 GB. On Arc 140V (32 GiB shared RAM,
+    ~19.0 GiB free after desktop/OS), 4.00bpw requires gpu_memory_utilization >= 0.68
+    which approaches the Level Zero memory threshold. The 3.09bpw checkpoint (13.54 GiB)
+    is the certified serving target.
+
+vllm:
+  model: models/turboderp-Qwen3.5-35B-A3B-exl3-4bpw
+  served_model_name: qwen3.5-35b-a3b-exl3
+  host: 127.0.0.1
+  port: 8002
+  dtype: bfloat16
+  max_model_len: 2048
+  max_num_seqs: 1
+  max_num_batched_tokens: 256
+  gpu_memory_utilization: 0.62
+  enforce_eager: true
+  kv_cache_dtype: auto
+  language_model_only: true
+  limit_mm_per_prompt: {image: 0, video: 0}
+  seed: 0
+
+env:
+  EXL3_VLLM_PATCHES: "0"
+  EXL3_SMALL_M_MAX: "8"
+  EXL3_INT8_PREFILL: "0"
+  EXL3_BACKEND: "auto"
+  EXL3_RECON_SLICE_N: "1024"
+  EXL3_NO_DNNL: "1"
+  UR_L0_ENABLE_RELAXED_ALLOCATION_LIMITS: "1"
+  ONEAPI_DEVICE_SELECTOR: "level_zero:gpu"
