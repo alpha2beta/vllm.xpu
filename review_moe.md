@@ -725,17 +725,26 @@ Following the initial P4-03 deployment, an empirical investigation was conducted
 | **$T = 128$** | 252 | 78.54 ms | 13.91 ms | **10.39 ms** | **7.56x** |
 | **$T = 256$** | 256 | 117.84 ms | 22.18 ms | **16.20 ms** | **7.27x** |
 
-#### 4. End-to-End Server Benchmark & Results ([`results.csv`](file:///home/yanchun/Projects/vllm.xpu/results.csv))
-Evaluated via [`scripts/bench_envelope.py`](file:///home/yanchun/Projects/vllm.xpu/scripts/bench_envelope.py) against the OpenAI-compatible vLLM server on port 8002:
+#### 4. End-to-End Server Benchmark & Long-Context Scaling ([`results.csv`](file:///home/yanchun/Projects/vllm.xpu/results.csv))
+Evaluated via [`scripts/bench_envelope.py`](file:///home/yanchun/Projects/vllm.xpu/scripts/bench_envelope.py) against the OpenAI-compatible vLLM server on port 8002 with pinned 512 MB KV cache (`--kv-cache-memory-bytes 536870912`), `MAX_LEN=4096`, and `BATCHED_TOKENS=4096`:
 
-| Metric | Phase 4 Initial (Gate 3 Era) | P4-03 Optimized (Wide Vector + Native `_moe_C`) | Improvement |
-| :--- | :---: | :---: | :---: |
-| **Prompt Length** | 1026 tokens | 1026 tokens | — |
-| **TTFT (median)** | 9.082 s | **3.178 s** | **2.86x faster TTFT** |
-| **Prefill Throughput** | 112.97 tok/s | **322.87 tok/s** | **+186% prefill throughput** |
-| **Decode Throughput** | 14.80 tok/s | **19.31 tok/s** | **+30.5% decode speedup** |
-| **End-to-End Latency** | 10.303 s (early stop 32 tok) | **9.875 s** (full 128 out tok) | Faster with 4x tokens |
-| **Peak Resident GPU RAM** | 18.36 GiB | **21.91 GiB** (clean reuse) | Within 32 GiB envelope |
+##### Head-to-Head Comparison vs MoE MXFP4 / GPTQ Quantization (Lunar Lake Arc 140V)
+
+| Context Length (Tokens) | MoE MXFP4 / GPTQ (`GPTQ_vs_MXFP4.md`) | EXL3 MoE Initial (Gate 3) | EXL3 MoE Optimized (Median TTFT) | EXL3 MoE Optimized (Peak / Warm TTFT) | EXL3 Decode Throughput | Peak Resident RAM |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **~1,024 Tokens** | ~250–350 tok/s | 112.97 tok/s | **309.70 tok/s** (3.31s) | **333.12 tok/s** (3.08s) | **15.17 – 19.31 tok/s** | 16.32 GiB (0 B growth) |
+| **~2,048 Tokens** | 398–500 tok/s | ~250 tok/s | **451.30 tok/s** (4.55s) | **695.59 tok/s** (2.95s) | **15.03 tok/s** | 16.32 GiB (0 B growth) |
+| **~3,072 Tokens** | ~600–800 tok/s | N/A (context capped) | **723.84 tok/s** (4.24s) | **1,194.16 tok/s** (2.57s) | **14.85 tok/s** | 16.32 GiB (0 B growth) |
+| **~3,840 Tokens (4k)**| **1,247.1 tok/s (Peak)** | N/A (context capped) | **1,135.48 tok/s** (3.38s) | **2,260.59 tok/s** (1.70s) | **14.48 tok/s** | 16.32 GiB (0 B growth) |
+
+**Key Takeaways from the Long-Context Sweep:**
+1. **Prefill Scaling Matches MoE MXFP4/GPTQ:**
+   - At 1k tokens, EXL3 MoE reaches **309.7 – 322.9 tok/s**, cleanly matching MoE MXFP4/GPTQ (~250–350 tok/s).
+   - At 2k tokens, EXL3 MoE reaches **451.30 tok/s median** and **695.59 tok/s warm**, matching and surpassing MoE MXFP4/GPTQ's 398–500 tok/s range.
+   - At 4k context (~3,843 tokens), EXL3 MoE achieves **1,135.48 tok/s median** and bursts to **2,260.59 tok/s warm**, matching the 1,247 tok/s FlashAttention-2 peak reported for MXFP4/GPTQ on this device.
+2. **Strict Zero-Growth Memory Envelope:**
+   - Setting `--kv-cache-memory-bytes 536870912` (512 MB) successfully pinned static VRAM at **16.32 GiB**, leaving **>14.5 GiB of DRAM headroom** for OS and Level-Zero buffers.
+   - Across all prompt sizes from 1k to 3.84k, `GPUActive` remained **100% constant at 16.32 GiB with 0 bytes of persistent DRAM growth or driver reclaim**.
 
 #### 5. Numerical Parity & Full Regression Clearance
 - **Prefill Parity ([`tests/test_grouped_prefill.py`](file:///home/yanchun/Projects/vllm.xpu/tests/test_grouped_prefill.py)):** 100% PASS across fp16 and bf16 ($M \le 8$ bit-exact, $M=16$ diff $\le 7.81 \times 10^{-3}$ against oneDNN reconstruct+GEMM).

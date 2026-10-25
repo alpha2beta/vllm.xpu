@@ -17,10 +17,11 @@ MODEL=${MODEL:-models/turboderp-Qwen3.5-35B-A3B-exl3-3.09bpw}
 SERVED=${SERVED:-qwen3.5-35b-a3b-exl3}
 HOST=${HOST:-127.0.0.1}
 PORT=${PORT:-8002}
-MAX_LEN=${MAX_LEN:-2048}
+MAX_LEN=${MAX_LEN:-4096}
 MAX_SEQS=${MAX_SEQS:-1}
-BATCHED_TOKENS=${BATCHED_TOKENS:-1024}
-GPU_UTIL=${GPU_UTIL:-0.60}
+BATCHED_TOKENS=${BATCHED_TOKENS:-4096}
+GPU_UTIL=${GPU_UTIL:-0.65}
+KV_CACHE_BYTES=${KV_CACHE_BYTES:-536870912}
 EAGER=${EAGER:-1}
 PINNED=${PINNED:-1}
 
@@ -76,6 +77,7 @@ ARGS=(
   --max-num-seqs "$MAX_SEQS"
   --max-num-batched-tokens "$BATCHED_TOKENS"
   --gpu-memory-utilization "$GPU_UTIL"
+  --kv-cache-memory-bytes "$KV_CACHE_BYTES"
   --language-model-only
   --seed 0
   "${EAGER_FLAG[@]}"
