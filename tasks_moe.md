@@ -1007,7 +1007,9 @@ Comprehensive certification documented in `docs/gate3_serving_report.md`.
 | 2 | zero host-device syncs | **MET** — 0.0 syncs/token (all 5 audited primitives at 0 over 50 steps) | `logs/moe-p4/moe-profile-r7-p402.json` |
 | 3 | zero FP16 weight writeout | **MET** — 0 `_reconstruct_kernel`, 0 D2H/H2D in the r7 decode profile | `logs/moe-p4/moe-profile-r7-p402.json`, `logs/moe-p4/bandwidth-efficiency.log` |
 | 4 | numerics match Gate 2/3 | **MET** — WikiText-2 PPL bit-identical per chunk (7.439027596 both), grouped parity 3/3 + 1920/1920 bit-exact, Phase 2 6/6 (worst 0.00244 unchanged), dense 91/91 | `logs/moe-p4/gate4-c4-ppl-parity.log`, `tests/test_grouped_gemv.py`, `logs/moe-p2/phase2-summary.json`, `logs/moe-p4/dense-regression-r7.log` |
-| 5 | multi-hour stress stability | **IN PROGRESS** — 3 h soak (`bench/soak_moe.py`) started 2026-10-25 00:01 CEST | `logs/moe-p4/soak-r7.jsonl` |
+| 5 | multi-hour stress stability | **MET** — 3 h soak: 397/397 requests OK, 0 errors, decode drift −3.0 %, GPUActive flat 18.36 GiB, 44–52 °C | `logs/moe-p4/soak-r7.jsonl`, `logs/moe-p4/soak-r7.summary.json` |
+
+**→ GATE 4: ALL 5 CRITERIA MET (2026-10-25).** Full report: `docs/gate4_perf_report.md`.
 
 ---
 

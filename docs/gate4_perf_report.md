@@ -14,7 +14,7 @@
 | 2. Zero host-device syncs during single-sequence decode | **PASS — 0.0 syncs/token** | `logs/moe-p4/moe-profile-r7-p402.json` |
 | 3. Zero DRAM writeout of intermediate FP16 weights | **PASS — 0 `_reconstruct_kernel`, 0 D2H/H2D** | `logs/moe-p4/moe-profile-r7-p402.json`, `logs/moe-p4/bandwidth-efficiency.log` |
 | 4. Numerical outputs match Gate 2/3 baselines | **PASS — bit-identical WikiText-2 PPL, Phase 2 6/6, dense 91/91** | `logs/moe-p4/gate4-c4-ppl-parity.log`, `logs/moe-p2/phase2-summary.json`, `logs/moe-p4/dense-regression-r7.log` |
-| 5. Multi-hour stress stability | **PENDING** — 3 h soak in progress | `logs/moe-p4/soak-r7.jsonl` |
+| 5. Multi-hour stress stability | **PASS — 397/397 requests over 3 h, 0 errors, −3.0 % decode drift, GPU flat** | `logs/moe-p4/soak-r7.jsonl`, `logs/moe-p4/soak-r7.summary.json` |
 
 ## 1. What P4-02 changed
 
@@ -35,7 +35,7 @@ P4-02 (`csrc/exl3_moe_gemv.sycl`, exl3xpu `306192e`) collapses this to **2 group
 | r6 + P4-01 (exec cache, B=1 fast path) | 3.064 | 2.0 | 145 |
 | **r7 + P4-02 (grouped kernel)** | **0.835** | **0.0** | **41** |
 
-**9.8× vs the r5 eager baseline, 3.67× over P4-01.** The remaining 41 launches are dominated by the shared expert and GDN attention (`GemvKernel<4,1,1,8,false>` 299 µs/token + `HadOutKernel` 127 µs/token are the shared/dense K=4 path — P4-03 territory), plus 20 grouped-kernel launches (332 µs/token, 2 per layer × 10 profiled layers… the profile counts per-token across the decode window).
+**9.8× vs the r5 eager baseline, 3.67× over P4-01.** The remaining 41 launches/token are dominated by the shared expert and GDN attention: the profile's largest remaining stage is the dense K=4 path (`GemvKernel<4,1,1,8,false>` 299 µs/token + its `HadOutKernel` 127 µs/token + `HadInKernel` 25 µs/token) — the shared expert still runs the 3-launch eager chain, as does GDN — while the grouped routed kernels together cost 332 µs/token for all 8 experts × 3 projections. Prefill-side and shared-expert grouping is P4-03 territory.
 
 ## 2. Criterion 1 — server-level decode speedup
 
@@ -80,9 +80,27 @@ For K=3 the eager path takes the **non-fused** branch of `exl3_gemm_small`: `Had
 
 ## 6. Criterion 5 — multi-hour stress stability
 
-*(3-hour soak running: `bench/soak_moe.py`, rotating real/uniform/skewed × 128/512/max-context cells, per-request JSONL in `logs/moe-p4/soak-r7.jsonl`. Final numbers to be recorded here on completion.)*
+**PASS.** 3.00-hour soak on 2026-10-25 00:01–03:00 CEST against the live r7
+server (`bench/soak_moe.py`, rotating real/uniform/skewed × 128/512/max-context
+cells, ~7 min/request cycle including 5 s inter-request sleep):
 
-Pass bar: ≥100 requests, 0 errors, no GPU-memory leak (GPUActive drift < 0.5 GiB), decode drift within ±10 % first-half vs second-half.
+| metric | result | bar |
+|---|---|---|
+| requests | **397 total, 397 ok, 0 errors** (all three routing patterns ≈133 each) | ≥100, 0 errors |
+| duration | 3.00 h continuous | multi-hour |
+| decode drift (2nd half vs 1st half median) | **−3.0 %** (17.70 → 17.17 tok/s) | ±10 % |
+| TTFT drift | 4.96 → 4.94 s median (max 12.05 s at max-context cell) | no degradation |
+| GPUActive | **18.36 GiB flat** (start = min = max; leak bar was < +0.5 GiB) | stable |
+| temperature | 44 → max 52 °C, no throttling | no throttle |
+| swap | 8.68 → 9.72 GiB (+1.02 GiB) while MemAvailable *rose* 2.16 → 3.02 GiB — host page-cache churn, not a serving-process leak (GPUActive and per-request latency flat throughout) | observed, benign |
+
+Per-pattern decode during soak (median): real 17.47, uniform 17.30,
+skewed 17.94 tok/s — no pattern-specific degradation; the soak's mix
+includes max-context cells (in≈1912), so these medians sit below the
+short-context P4-07 numbers by construction.
+
+Evidence: `logs/moe-p4/soak-r7.jsonl` (397 JSONL records, one per request),
+`logs/moe-p4/soak-r7.summary.json`.
 
 ## 7. P4-07 benchmark matrix (`results_moe.csv`)
 
@@ -118,6 +136,6 @@ Ranking check: the fastest cells are max-context (in≈1912): KV-heavy decode st
 
 ## 9. Remaining work
 
-* **C5**: record soak outcome above (in progress).
 * **P4-03**: grouped prefill (`exl3_moe_grouped_gemm.sycl`) — the profile shows the shared-expert/dense K=4 chain (299 + 127 µs/token) is now the largest decode term, and prefill TTFT is the next lever (4.97–9.08 s at 512/1024).
+* **P4-04**: blocked FWHT sharing between gate/up (verify `s_u,gate == s_u,up` from P0-03 first).
 * **P4-06**: TorchScript/Inductor custom-op schemas + fake-tensor tests.
