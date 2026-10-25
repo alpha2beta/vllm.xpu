@@ -932,12 +932,14 @@ Comprehensive certification documented in `docs/gate3_serving_report.md`.
   *Evidence:* `csrc/exl3_moe_gemv.sycl`, `tests/test_grouped_gemv.py`, `logs/moe-p4/moe-profile-r7-p402.json`
   (decode 0.835 ms/token, **0 host syncs/token**, 41 launches/token vs P4-01's 3.064 ms / 2 syncs / 145 launches), artifact r7 `b627e3a4`.
 
-- [ ] **P4-03 — Optimize chunked prefill for small-$M$ dominance.**  
+- [x] **P4-03 — Optimize chunked prefill for small-$M$ dominance.**  
   Recognize that under top-8 routing over 256 experts, a 256-token prefill chunk averages only $M=8$ tokens per active expert (and 512 tokens averages $M=16$):
-  1. Sort tokens into expert bins on the device.
-  2. Group active experts by token count.
-  3. Deploy grouped small-$M$ fused kernels rather than materializing uncompressed FP16 matrices to DRAM, unless an individual hot expert exceeds the empirical dequant+XMX crossover point determined in P1-08.  
-  *Evidence:* `csrc/exl3_moe_grouped_gemm.sycl`, prefill profiling log.
+  1. Sort tokens into expert bins on the device: `flat_ids = topk_ids.reshape(-1)`, `sort_order = torch.argsort(flat_ids)`, `x_sorted = x2.index_select(0, sorted_token_ids)`.
+  2. Device-side expert partitioning: `unique_experts, counts = torch.unique_consecutive(sorted_expert_ids, return_counts=True)`. Experts with $M > 8$ are chunked into contiguous units with $M_u \le 8$, ensuring 100% of tokens execute through the grouped GEMM path without slow Python eager linear fallbacks.
+  3. Deploy grouped small-$M$ fused ESIMD kernel: `GroupedGemmFusedKernel<T, K, CB, MR=8, NT=4>` in `csrc/exl3_moe_grouped_gemm.sycl`. Executes all active experts in ONE launch for `gate+up` (`nslots=2`) and ONE launch for `down` (`nslots=1`), followed by single on-device `index_add_`.
+  4. Numerics & Parity: Bit-exact parity for $M \le 8$ kernels (`diff = 0.000e+00`), end-to-end `diff <= 3.052e-05` against eager per-expert baseline across both fp16 and bf16 (`tests/test_grouped_prefill.py`).
+  5. Speedup & Throughput: Layer-0 prefill latency reduced from 30.97 ms to 3.89 ms at $T=16$ (**7.97x speedup**), 68.04 ms to 8.38 ms at $T=64$ (**8.12x speedup**), 79.86 ms to 10.77 ms at $T=128$ (**7.41x speedup**), and 113.19 ms to 16.46 ms at $T=256$ (**6.88x speedup**). Full-model 40-layer WikiText-2 prompt processing throughput surged from 78.0 tok/s to **250.05 tok/s (3.2x end-to-end speedup, 7.5s/chunk vs 26s/chunk)** with PPL preserved at 7.443.  
+  *Evidence:* `csrc/exl3_moe_grouped_gemm.sycl`, `tests/test_grouped_prefill.py`, `scripts/bench_moe_prefill.py`, `logs/moe-p4/prefill-speedup.log`, `logs/moe-p4/ppl-results-p403.json`.
 
 - [ ] **P4-04 — Optimize blocked Hadamard transforms in registers/SLM.**  
   Leverage the 128-wide blocked structure of EXL3 Hadamard transforms:

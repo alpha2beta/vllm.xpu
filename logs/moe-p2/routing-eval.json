@@ -82,8 +82,8 @@
       "case": "extreme_skew_single_expert",
       "tokens": 16,
       "unique_experts": 1,
-      "max_abs": 2.8888534870930016e-06,
-      "p99_abs": 1.7057094510164461e-06,
+      "max_abs": 3.143193680443801e-06,
+      "p99_abs": 1.9501055703585735e-06,
       "nan_inf": 0,
       "pass": true
     },
