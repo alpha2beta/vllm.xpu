@@ -688,5 +688,61 @@ In `Qwen3.5-35B-A3B` top-8 routing over 256 experts:
 - **Dense Operators ([`logs/moe-p4/dense-regression-r8.json`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p4/dense-regression-r8.json)):** 15/15 token dimensions across all codebooks ($K \in \{1, 2, 3, 4, 6\}$) passed with zero regressions.
 - **Phase 2 Modular Suites ([`logs/moe-p2/phase2-summary.json`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p2/phase2-summary.json)):** All 6 suites (`P2-01` through `P2-09`) passed with `worst_max_abs = 0.00244`.
 
+---
+
+### 9.9 Wide-Vector Grouped GEMM ($MR=16$), Native C++ SYCL Dispatch & Prefill Scaling to >320 tok/s
+
+Following the initial P4-03 deployment, an empirical investigation was conducted into the prefill performance gap between EXL3 MoE (~250 tok/s at chunk size 256) and previous benchmarks on this Intel Arc 140V platform (where Dense EXL3 reached ~1,016 tok/s for 2k context, and MoE MXFP4/GPTQ reached 398–500 tok/s for 2k and 1,247 tok/s for 4k chunked batches).
+
+#### 1. Hardware Architecture & Root Cause Analysis on Lunar Lake Xe2-LPG
+1. **No XMX (DPAS) Systolic Hardware:**
+   - Executed a SYCL hardware capability probe against the Intel Arc 140V device.
+   - Confirmed: The mobile Arc 140V iGPU (Lunar Lake) omits XMX systolic tensor hardware (`cl_intel_subgroup_matrix_multiply_accumulate` is absent; `cl_intel_subgroups` only). Compute is driven exclusively by the 64 Xe Vector Engines.
+2. **Dense vs MoE Granularity & Walsh-Hadamard Transforms:**
+   - In dense models (e.g., Qwen3.8-27B), prefill executes a single large GEMM ($M=1024 \times K=2048 \times N=10944$) using oneDNN SYCL BLAS, reaching peak vector engine FLOP efficiency.
+   - In 256-expert MoE, top-8 routing fragments computation into 256 tiny GEMMs ($M \approx 32$). Crucially, EXL3 executes a 16-wide fast Walsh-Hadamard transform (FWHT) across every expert's activations: 8 routed experts $\times$ 40 layers = **320 FWHTs per token** (327,680 vector transforms per 1024-token prompt).
+3. **Dispatch & Scatter-Gather Overhead:**
+   - Profiling revealed that PyTorch-level token sorting (`torch.argsort`, `index_select`) and reduction (`index_add_`) introduced significant driver latency compared to the native compiled C++ SYCL kernels (`_moe_C`) used by MXFP4/GPTQ.
+
+#### 2. Architectural Optimizations Deployed
+1. **Dual-Tile Wide-Vector Template ($MR \in \{8, 16\}$):**
+   - Enhanced [`csrc/exl3_moe_grouped_gemm.sycl`](file:///home/yanchun/Projects/exl3xpu/csrc/exl3_moe_grouped_gemm.sycl) and [`csrc/exl3_ops.sycl`](file:///home/yanchun/Projects/exl3xpu/csrc/exl3_ops.sycl) with a templated `GroupedGemmFusedKernel<T, K, CB, MR, NT>`.
+   - For $MR=16$, $NT=2$ work-items share each 16-element input strip, doubling memory coalescing efficiency for experts with $>8$ tokens.
+   - Integrated an occupancy-preserving tile selector in [`exl3xpu/moe.py`](file:///home/yanchun/Projects/exl3xpu/exl3xpu/moe.py): preserves $MR=8$ (twice the concurrent thread occupancy per subslice) when tokens per active expert are small, promoting to $MR=16$ only when $>50\%$ of active experts have $>8$ tokens ($T \ge 512$).
+2. **Native C++ SYCL Remap & Gather Integration (`_moe_C`):**
+   - Integrated `torch.ops._moe_C.remap_hidden_states` (compiled SYCL token sorting into contiguous expert slices with exact row counts) and `torch.ops._moe_C.moe_gather` (fused float32 weighted scatter-reduction).
+   - Retains automatic fallback to device PyTorch ops (`argsort` + `index_add_`) when `_moe_C` is not present.
+3. **Chunked Prefill Batch Tuning:**
+   - In [`scripts/launch_vllm_moe_exl3.sh`](file:///home/yanchun/Projects/vllm.xpu/scripts/launch_vllm_moe_exl3.sh), updated default `BATCHED_TOKENS=1024` and `GPU_UTIL=0.60` with `MAX_LEN=2048`.
+   - Sizing chunked prefill at 1024 tokens eliminates 75% of model streaming passes compared to 256-token chunking, while keeping activation memory strictly bounded (~0.35 GiB vs 1.14 GiB at 2048), guaranteeing zero OOM and zero DRAM growth.
+
+#### 3. Layer-0 Prefill Benchmark Progression ([`logs/moe-p4/prefill-speedup.log`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p4/prefill-speedup.log))
+
+| Prompt Tokens ($T$) | Active Experts | Eager Prefill | P4-03 Initial ($MR=8$, Python Ops) | P4-03 Optimized ($MR=16$, Native `_moe_C`) | Speedup vs Eager |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| **$T = 16$** | 105 | 30.85 ms | 5.43 ms | **3.78 ms** | **8.16x** |
+| **$T = 64$** | 219 | 65.81 ms | 11.23 ms | **8.13 ms** | **8.09x** |
+| **$T = 128$** | 252 | 78.54 ms | 13.91 ms | **10.39 ms** | **7.56x** |
+| **$T = 256$** | 256 | 117.84 ms | 22.18 ms | **16.20 ms** | **7.27x** |
+
+#### 4. End-to-End Server Benchmark & Results ([`results.csv`](file:///home/yanchun/Projects/vllm.xpu/results.csv))
+Evaluated via [`scripts/bench_envelope.py`](file:///home/yanchun/Projects/vllm.xpu/scripts/bench_envelope.py) against the OpenAI-compatible vLLM server on port 8002:
+
+| Metric | Phase 4 Initial (Gate 3 Era) | P4-03 Optimized (Wide Vector + Native `_moe_C`) | Improvement |
+| :--- | :---: | :---: | :---: |
+| **Prompt Length** | 1026 tokens | 1026 tokens | — |
+| **TTFT (median)** | 9.082 s | **3.178 s** | **2.86x faster TTFT** |
+| **Prefill Throughput** | 112.97 tok/s | **322.87 tok/s** | **+186% prefill throughput** |
+| **Decode Throughput** | 14.80 tok/s | **19.31 tok/s** | **+30.5% decode speedup** |
+| **End-to-End Latency** | 10.303 s (early stop 32 tok) | **9.875 s** (full 128 out tok) | Faster with 4x tokens |
+| **Peak Resident GPU RAM** | 18.36 GiB | **21.91 GiB** (clean reuse) | Within 32 GiB envelope |
+
+#### 5. Numerical Parity & Full Regression Clearance
+- **Prefill Parity ([`tests/test_grouped_prefill.py`](file:///home/yanchun/Projects/vllm.xpu/tests/test_grouped_prefill.py)):** 100% PASS across fp16 and bf16 ($M \le 8$ bit-exact, $M=16$ diff $\le 7.81 \times 10^{-3}$ against oneDNN reconstruct+GEMM).
+- **End-to-End Perplexity ([`logs/moe-p4/ppl-results-bt2048-fused.json`](file:///home/yanchun/Projects/vllm.xpu/logs/moe-p4/ppl-results-bt2048-fused.json)):** WikiText-2 PPL is **7.428** across 10,235 tokens (Gate 3 eager baseline: 7.439).
+- **Decode Parity ([`tests/test_grouped_gemv.py`](file:///home/yanchun/Projects/vllm.xpu/tests/test_grouped_gemv.py)):** 100% bit-exact across all 1,920 test projections.
+- **Operator & Modular Regressions:** `test_exl3_ops.py` (15/15 passed) and `run_phase2_tests.py` (6/6 passed, `worst_max_abs = 0.00244`).
+
+
 
 

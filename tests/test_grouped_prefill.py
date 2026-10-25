@@ -19,8 +19,11 @@ EXPERTS = [3, 7, 42, 100, 255, 0, 17, 200]
 COUNTS = [1, 2, 3, 4, 5, 6, 7, 8]
 
 
-def test_grouped_gemm_parity(dtype: torch.dtype = torch.bfloat16):
-    print(f"\n--- Testing Grouped Prefill GEMM Parity [{dtype}] ---")
+def test_grouped_gemm_parity(dtype: torch.dtype = torch.bfloat16, counts_list: list[int] | None = None):
+    if counts_list is None:
+        counts_list = [1, 2, 3, 4, 5, 6, 7, 8]
+    max_c = max(counts_list)
+    print(f"\n--- Testing Grouped Prefill GEMM Parity [{dtype}] (max_M={max_c}) ---")
     h = Harness()
     h.method._build_exec_cache(h.layer)
     dev = torch.device("xpu")
@@ -28,12 +31,12 @@ def test_grouped_gemm_parity(dtype: torch.dtype = torch.bfloat16):
     shard13 = h.method._shard_of_nb(dev, INTERMEDIATE)
     shard2 = h.method._shard_of_nb(dev, HIDDEN)
 
-    total_tokens = sum(COUNTS)
+    total_tokens = sum(counts_list)
     U = len(EXPERTS)
 
     # Prepare device arrays
     expert_ids = torch.tensor(EXPERTS, dtype=torch.int32, device=dev)
-    counts = torch.tensor(COUNTS, dtype=torch.int32, device=dev)
+    counts = torch.tensor(counts_list, dtype=torch.int32, device=dev)
     offsets = torch.zeros(U, dtype=torch.int32, device=dev)
     offsets[1:] = torch.cumsum(counts[:-1], dim=0)
 
@@ -63,13 +66,15 @@ def test_grouped_gemm_parity(dtype: torch.dtype = torch.bfloat16):
         INTERMEDIATE,
         K,
         CB,
+        max_c,
     )
     assert gu.shape == (2, total_tokens, INTERMEDIATE), f"Shape mismatch: {gu.shape}"
 
     # Verify gate and up against reference eager per-expert linear
     worst_diff = 0.0
+    tol = 1e-3 if dtype == torch.float16 else 0.02
     for i, exp in enumerate(EXPERTS):
-        m = COUNTS[i]
+        m = counts_list[i]
         off = offsets[i].item()
         x_slice = x[off : off + m]
 
@@ -82,11 +87,16 @@ def test_grouped_gemm_parity(dtype: torch.dtype = torch.bfloat16):
         diff_gate = (got_gate.float() - ref_gate.float()).abs().max().item()
         diff_up = (got_up.float() - ref_up.float()).abs().max().item()
 
-        assert torch.equal(got_gate, ref_gate), f"Gate mismatch for expert {exp}: max_abs={diff_gate:.3e}"
-        assert torch.equal(got_up, ref_up), f"Up mismatch for expert {exp}: max_abs={diff_up:.3e}"
+        if max_c <= 8:
+            assert torch.equal(got_gate, ref_gate), f"Gate mismatch for expert {exp}: max_abs={diff_gate:.3e}"
+            assert torch.equal(got_up, ref_up), f"Up mismatch for expert {exp}: max_abs={diff_up:.3e}"
+        else:
+            assert diff_gate <= tol, f"Gate mismatch for expert {exp}: max_abs={diff_gate:.3e} (tol={tol})"
+            assert diff_up <= tol, f"Up mismatch for expert {exp}: max_abs={diff_up:.3e} (tol={tol})"
         worst_diff = max(worst_diff, diff_gate, diff_up)
 
-    print(f"Grouped gate+up [{dtype}]: {U*2} units bit-exact across variable M in [1, 8] (worst_abs={worst_diff:.3e})")
+    parity_label = "bit-exact" if max_c <= 8 else f"within {tol} (vs oneDNN reconstruct+GEMM)"
+    print(f"Grouped gate+up [{dtype}] (max_M={max_c}): {U*2} units {parity_label} (worst_abs={worst_diff:.3e})")
 
     # 2. Gated activation
     act = (F.silu(gu[0]) * gu[1]).contiguous()
@@ -107,12 +117,13 @@ def test_grouped_gemm_parity(dtype: torch.dtype = torch.bfloat16):
         HIDDEN,
         K,
         CB,
+        max_c,
     )
     assert dn.shape == (total_tokens, HIDDEN), f"Shape mismatch: {dn.shape}"
 
     worst_diff_down = 0.0
     for i, exp in enumerate(EXPERTS):
-        m = COUNTS[i]
+        m = counts_list[i]
         off = offsets[i].item()
         act_slice = act[off : off + m]
 
@@ -120,11 +131,15 @@ def test_grouped_gemm_parity(dtype: torch.dtype = torch.bfloat16):
         got_down = dn[off : off + m]
 
         diff_down = (got_down.float() - ref_down.float()).abs().max().item()
-        assert torch.equal(got_down, ref_down), f"Down mismatch for expert {exp}: max_abs={diff_down:.3e}"
+        if max_c <= 8:
+            assert torch.equal(got_down, ref_down), f"Down mismatch for expert {exp}: max_abs={diff_down:.3e}"
+        else:
+            assert diff_down <= tol, f"Down mismatch for expert {exp}: max_abs={diff_down:.3e} (tol={tol})"
         worst_diff_down = max(worst_diff_down, diff_down)
 
-    print(f"Grouped down [{dtype}]: {U} units bit-exact across variable M in [1, 8] (worst_abs={worst_diff_down:.3e})")
-    print(f"P4-03 grouped prefill GEMM parity [{dtype}]: PASS")
+    parity_label = "bit-exact" if max_c <= 8 else f"within {tol} (vs oneDNN reconstruct+GEMM)"
+    print(f"Grouped down [{dtype}] (max_M={max_c}): {U} units {parity_label} (worst_abs={worst_diff_down:.3e})")
+    print(f"P4-03 grouped prefill GEMM parity [{dtype}] (max_M={max_c}): PASS")
 
 
 def test_apply_prefill_parity(dtype: torch.dtype = torch.bfloat16):
@@ -158,8 +173,10 @@ def test_apply_prefill_parity(dtype: torch.dtype = torch.bfloat16):
 
 
 if __name__ == "__main__":
-    test_grouped_gemm_parity(torch.float16)
-    test_grouped_gemm_parity(torch.bfloat16)
+    test_grouped_gemm_parity(torch.float16, [1, 2, 3, 4, 5, 6, 7, 8])
+    test_grouped_gemm_parity(torch.bfloat16, [1, 2, 3, 4, 5, 6, 7, 8])
+    test_grouped_gemm_parity(torch.float16, [1, 5, 8, 9, 11, 14, 15, 16])
+    test_grouped_gemm_parity(torch.bfloat16, [1, 5, 8, 9, 11, 14, 15, 16])
     test_apply_prefill_parity(torch.float16)
     test_apply_prefill_parity(torch.bfloat16)
     print("\nALL PREFILL GROUPED GEMM PARITY TESTS PASS!")

@@ -34,6 +34,8 @@ def main() -> int:
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--data", default=DEFAULT_DATA)
     parser.add_argument("--chunk-tokens", type=int, default=2048)
+    parser.add_argument("--max-num-batched-tokens", type=int, default=256,
+                        help="Max batched tokens for chunked prefill (default 256, scale to 512/1024)")
     parser.add_argument("--max-chunks", type=int, default=10,
                         help="Number of chunks to evaluate (0 for full test set, default 10 for bounded baseline)")
     parser.add_argument("--gpu-util", type=float, default=0.62)
@@ -52,14 +54,14 @@ def main() -> int:
 
     from vllm import LLM, SamplingParams
 
-    print(f"Loading model {args.model} for PPL eval (max_model_len={args.chunk_tokens + 16})...")
+    print(f"Loading model {args.model} for PPL eval (max_model_len={args.chunk_tokens + 16}, max_num_batched_tokens={args.max_num_batched_tokens})...")
     t0 = time.time()
     llm = LLM(
         model=args.model,
         enforce_eager=True,
         max_model_len=args.chunk_tokens + 16,
         max_num_seqs=1,
-        max_num_batched_tokens=256,
+        max_num_batched_tokens=args.max_num_batched_tokens,
         gpu_memory_utilization=args.gpu_util,
         language_model_only=True,
         limit_mm_per_prompt={"image": 0, "video": 0},
