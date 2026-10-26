@@ -1,0 +1,34 @@
+{
+  "results": [
+    {
+      "ttft": 1.889054536819458,
+      "total": 7.967832326889038,
+      "tokens": 64,
+      "decode_tps": 10.36392547576227,
+      "text": "eleration.\nThe history of computing spans mechanical calculators, vacuum-tube machines, transistors, integrated circuits, and parallel acceleration.\nIs the sentence below entailed by the sentence above?\nA: Yes\nB: No\nPlease reason step by step, and put your final answer within \\boxed",
+      "case": "short"
+    },
+    {
+      "ttft": 2.9313743114471436,
+      "total": 9.4234299659729,
+      "tokens": 64,
+      "decode_tps": 9.704168194565815,
+      "text": "u\n\nThe history of computing spans mechanical calculators, vacuum-tube machines, transistors, integrated circuits, and parallel accelerators. The history of computing spans mechanical calculators, vacuum-tube machines, transistors, integrated circuits, and parallel accelerators. The history of computing spans mechanical calculators, vacuum",
+      "case": "mid"
+    },
+    {
+      "ttft": 5.6216721534729,
+      "total": 11.650067329406738,
+      "tokens": 64,
+      "decode_tps": 10.45054250117916,
+      "text": "\n\nThe history of computing spans mechanical calculators, vacuum-tube machines, transistors, integrated circuits, and parallel accelerators. The history of computing spans mechanical calculators, vacuum-tube machines, transistors, integrated circuits, and parallel accelerators. The history of computing spans mechanical calculators, vacuum-t",
+      "case": "long"
+    }
+  ],
+  "spec_delta": {
+    "spec_decode_num_accepted_tokens_per_pos_total": 90.0,
+    "spec_decode_num_drafts_total": 99.0,
+    "spec_decode_num_draft_tokens_total": 99.0,
+    "spec_decode_num_accepted_tokens_total": 90.0
+  }
+}

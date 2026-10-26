@@ -6,7 +6,8 @@
 #   scripts/launch_vllm_moe_exl3.sh [label] [extra vllm serve args...]
 # Env overrides:
 #   MODEL, SERVED, MAX_LEN, MAX_SEQS, BATCHED_TOKENS, GPU_UTIL, PORT, HOST,
-#   EAGER=1/0, PINNED=1/0, WARMUP=1/0
+#   EAGER=1/0, PINNED=1/0, WARMUP=1/0,
+#   SPEC=mtp-k1|mtp-k2|ngram-k<N> (empty disables speculation; default empty)
 
 set -uo pipefail
 
@@ -57,7 +58,7 @@ export UR_L0_ENABLE_RELAXED_ALLOCATION_LIMITS=1
 export ONEAPI_DEVICE_SELECTOR="${ONEAPI_DEVICE_SELECTOR:-level_zero:gpu}"
 
 echo "ONEAPI_DEVICE_SELECTOR=$ONEAPI_DEVICE_SELECTOR"
-echo "EXL3 MoE env: PATCHES=$EXL3_VLLM_PATCHES SMALL_M_MAX=$EXL3_SMALL_M_MAX BACKEND=$EXL3_BACKEND RECON_SLICE_N=$EXL3_RECON_SLICE_N"
+echo "EXL3 MoE env: PATCHES=$EXL3_VLLM_PATCHES SMALL_M_MAX=$EXL3_SMALL_M_MAX BACKEND=$EXL3_BACKEND RECON_SLICE_N=$EXL3_RECON_SLICE_N SPEC=${SPEC:-off}"
 
 # Pre-flight: drain GPUReclaim
 if [ "${WARMUP:-1}" = "1" ]; then
@@ -67,6 +68,22 @@ fi
 
 EAGER_FLAG=(--enforce-eager)
 [ "$EAGER" = "0" ] && EAGER_FLAG=()
+
+# Speculative decoding (SPEC=mtp-k1/mtp-k2/ngram-k<N>; empty = off, the
+# certified Gate 4 default). Note: ${SPEC-} (no colon) so an explicit empty
+# SPEC= disables speculation and an unset SPEC stays off.
+SPEC=${SPEC-}
+SPEC_FLAG=()
+case "$SPEC" in
+  "") ;;
+  mtp-k1) SPEC_FLAG=(--speculative-config '{"method":"mtp","num_speculative_tokens":1}') ;;
+  mtp-k2) SPEC_FLAG=(--speculative-config '{"method":"mtp","num_speculative_tokens":2}') ;;
+  ngram-k*)
+    K="${SPEC#ngram-k}"
+    SPEC_FLAG=(--speculative-config "{\"method\":\"ngram\",\"num_speculative_tokens\":${K},\"prompt_lookup_max\":${K},\"prompt_lookup_min\":2}")
+    ;;
+  *) echo "unknown SPEC='$SPEC' (expected mtp-k1, mtp-k2, ngram-k<N>, or empty)" >&2; exit 2 ;;
+esac
 
 ARGS=(
   --model "$MODEL"
@@ -81,6 +98,7 @@ ARGS=(
   --language-model-only
   --seed 0
   "${EAGER_FLAG[@]}"
+  "${SPEC_FLAG[@]}"
   "$@"
 )
 

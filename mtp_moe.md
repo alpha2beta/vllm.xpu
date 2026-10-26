@@ -1,7 +1,7 @@
 # MTP Status — Qwen3.5-35B-A3B EXL3 MoE on vLLM XPU (Arc 140V)
 
-**Date:** October 25, 2026
-**Scope:** Read-only status assessment. No code, launcher, checkpoint, or configuration changes were made; this document is the only output.
+**Date:** October 25, 2026 (addendum and validation October 26, 2026)
+**Scope:** Original assessment was read-only. On October 26 an MTP-bearing checkpoint was retrieved, `SPEC` support was added to the MoE launcher (default off), and the MTP path was validated (§9). No serving default was changed: the certified Gate 4 configuration still runs without speculation.
 **Checkpoint under test:** `turboderp/Qwen3.5-35B-A3B-exl3` @ 3.09 bpw, rev `f599771c…`, local path `/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw`
 **Serving stack:** vLLM XPU v0.31.0, `enforce-eager`, TP=1, `max_num_seqs=1`, 2048 context, port 8002
 
@@ -17,6 +17,8 @@
 2. `SPEC` plumbing in `scripts/launch_vllm_moe_exl3.sh`.
 
 MTP is explicitly out of scope for the current plan (`tasks_moe.md:28`) and is deferred until a validated checkpoint exists. No speculative decoding was enabled or benchmarked on the MoE model for this report.
+
+**Addendum (October 26, 2026):** both gaps have since been closed — an MTP-bearing candidate checkpoint was retrieved and `SPEC` plumbing was added to the MoE launcher — and a validation run was performed (§9). Result: MTP loads and decodes correctly, but K=1 is a **0.39× decode regression** on this stack, so `SPEC` remains off by default. The analysis below still describes the pinned 3.09 bpw Gate 4 artifact.
 
 ---
 
@@ -74,7 +76,7 @@ So the loader is not silently skipping MTP weights — there are none to load, a
 | Launcher | MTP support |
 |---|---|
 | `scripts/launch_vllm_exl3.sh` (dense) | `SPEC=${SPEC-mtp-k1}` default; builds `--speculative-config` for `mtp-k1`, `mtp-k2`, `ngram-k<N>` |
-| `scripts/launch_vllm_moe_exl3.sh` (MoE) | **none** — no `SPEC` variable, no speculative flag, no `--speculative-config` |
+| `scripts/launch_vllm_moe_exl3.sh` (MoE) | supports `SPEC=mtp-k1|mtp-k2|ngram-k<N>`, default **empty (off)** as of Oct 26 |
 
 This asymmetry is the entire plumbing gap on the serving side.
 
@@ -106,7 +108,7 @@ These numbers are **not** a speedup claim and are **not transferable** to the Mo
 Four independent blockers, in order of hardness:
 
 1. **No weights.** The pinned 3.09 bpw revision ships no `mtp.*` tensors. No launcher flag can fix this; a different checkpoint revision (or a re-conversion with MTP preserved) is required.
-2. **No launcher plumbing.** Even with weights, `scripts/launch_vllm_moe_exl3.sh` cannot pass a speculative config.
+2. **No launcher plumbing.** Even with weights, `scripts/launch_vllm_moe_exl3.sh` could not pass a speculative config. *(Resolved Oct 26: `SPEC` support added, §9.)*
 3. **No MoE-specific validation.** Nothing has verified tensor mapping, bitrate assignment (`mtp_bits` vs base 3.09), draft-head vocabulary pruning, or acceptance rate for `Qwen3_5MoeMTP` + EXL3.
 4. **Plan scope.** `tasks_moe.md:28` defers speculative decoding / MTP, to be evaluated separately after the core Gates. Gates 0–4 were certified without it; MTP is not a Gate 4 criterion.
 
@@ -138,12 +140,12 @@ Additional technical consideration: the P4-02 grouped decode kernel fast path is
 | Upstream `"mtp"` speculative method | available |
 | Plugin `mtp.*` tensor remapping | available, exercised on dense |
 | Plugin `mtp_bits` / draft-vocab pruning | available |
-| MoE checkpoint MTP weights | **missing (0 tensors)** |
-| MoE launcher `SPEC` plumbing | **missing** |
-| MoE MTP validation (parity, acceptance, perf, soak) | **not performed** |
+| MoE checkpoint MTP weights | **available in candidate (`Sage-A1.5` 4.0 bpw, §9); absent in pinned 3.09 bpw** |
+| MoE launcher `SPEC` plumbing | **available, default off** |
+| MoE MTP validation (parity, acceptance, perf, soak) | **load + acceptance + A/B perf done (§9): K=1 = 0.39× decode; no soak** |
 | Plan scope | deferred (`tasks_moe.md:28`) |
 
-**Conclusion:** MTP on Qwen3.5-35B-A3B EXL3 is infrastructure-ready but deployment-blocked on checkpoint contents. The certified Gate 4 configuration remains the supported operating point.
+**Conclusion:** MTP is now fully plumbed and loads on the MoE path, but it is **not a deployment win**: on an MTP-bearing 4.0 bpw checkpoint, K=1 achieved 86.6 % acceptance yet decoded at 0.39× the non-MTP rate, because the M=2 verify batch bypasses the M=1 fast path. The certified Gate 4 configuration (no speculation) remains the supported operating point; MTP needs an M≥2 verify kernel before it can be reconsidered.
 
 ---
 
@@ -162,4 +164,83 @@ EOF
 grep -E "EXL3 modules|speculative_config=" logs/moe-p3/server-*.log | tail -4
 ```
 
-Expected current output: `0 MTP tensors`, `0 in MTP head`, `speculative_config=None`.
+For the pinned 3.09 bpw checkpoint the expected output is `0 MTP tensors`, `0 in MTP head`, `speculative_config=None`.
+
+---
+
+## 9. Addendum — MTP-capable candidate checkpoint (October 26, 2026)
+
+**Retrieved and verified:** `sam33339999/Sage-A1.5-Heretic-Abliterated-Uncensored-exl3-4.0bpw` @ `fc5e3f5581c6cf004c58013e1d7af9997ebd569a`
+**Local path:** `/home/yanchun/models/Sage-A1.5-EXL3-4.0bpw-mtp`
+**Size:** 18.38 GiB, 3 shards, 127,692 tensors
+**Quantization:** EXL3 1.6.4, `bits=4.0`, `head_bits=6`, **`mtp_bits=4`**, `codebook=mul1`
+
+This is an abliterated/uncensored derivative of the same architecture family (`Qwen3_5MoeForConditionalGeneration`, 40 layers, hidden 2048, 256 experts top-8, moe intermediate 512, `mtp_num_hidden_layers=1`, `mtp_use_dedicated_embeddings=false`). It is a **4.0 bpw** checkpoint, not the pinned 3.09 bpw Gate 4 artifact, and it is a different fine-tune — so it is suitable for MTP functional bring-up and performance measurement, not for Gate 3/4 numerical parity claims.
+
+### MTP head inventory
+
+| Item | Value |
+|---|---|
+| `mtp.*` tensors | **3,113** |
+| Quantized linears in MTP head | 776 (`fc` + 256 routed experts × 3 projections + shared expert × 3 + attention × 4) |
+| MTP head size | **0.398 GiB** |
+| `mtp.fc` | Linear 4096 → 2048, EXL3-quantized, `trellis [256, 128, 64]` (4.0 bpw), no bf16 `.weight` |
+| `mtp.layers.0` | full-attention layer + 256 routed experts + shared expert; router `mlp.gate.weight [256, 2048]` and `shared_expert_gate.weight` are bf16 |
+| Norms | `pre_fc_norm_embedding`, `pre_fc_norm_hidden`, `norm` (bf16) |
+| Embeddings | shared with the main model (no `mtp.embed_tokens`) |
+
+Representative shapes (all consistent with 4 bpw, 16-column trellis blocks):
+
+| Tensor | Shape | Dtype |
+|---|---|---|
+| `mtp.fc.trellis` | `[256, 128, 64]` | I16 |
+| `mtp.layers.0.self_attn.q_proj.trellis` | `[128, 512, 64]` | I16 |
+| `mtp.layers.0.mlp.experts.0.gate_proj.trellis` | `[128, 32, 64]` | I16 |
+| `mtp.layers.0.mlp.experts.0.down_proj.trellis` | `[32, 128, 64]` | I16 |
+| `mtp.layers.0.mlp.gate.weight` | `[256, 2048]` | F16 |
+
+### Integrity check
+
+- Index ↔ shard mapping: **0 missing, 0 extra, 0 duplicate, 0 shard mismatches** across all 127,692 tensors.
+- Per-shard counts: 52,803 / 62,120 / 12,769; all three `safetensors` headers parse cleanly.
+- `quantization_config.tensor_storage` omits the MTP head (0 `mtp.*` keys), which the plugin already handles by defaulting `mtp.` tensors to `mtp_bits=4`.
+- Byte accounting: decoder 15.85 GiB, embeddings + LM head 0.95 GiB, vision tower 0.83 GiB (bf16, unused with `--language-model-only`), MTP 0.40 GiB, other 0.36 GiB.
+
+### Validation run (October 26, 2026)
+
+`SPEC` plumbing was added to `scripts/launch_vllm_moe_exl3.sh` (default off, so the certified Gate 4 path is unchanged) and the Sage checkpoint was served on port 8002 with `SPEC=mtp-k1`, `MAX_LEN=1024`, `BATCHED_TOKENS=256`, `GPU_UTIL=0.72`, `EAGER=1`.
+
+**Loader — pass:**
+
+```
+Resolved architecture: Qwen3_5MoeMTP
+exl3: 31747 EXL3 modules (776 in MTP head)
+speculative_config=SpeculativeConfig(method='mtp', num_spec_tokens=1)
+```
+
+Startup 55 s; KV cache 2,150 tokens (3 padding layers added for the MTP drafter, 512 MiB budget); generation coherent.
+
+**Acceptance and throughput — A/B on the same checkpoint, same six natural prompts, 96 output tokens each:**
+
+| Metric | Baseline (no spec) | MTP K=1 | Delta |
+|---|---|---|---|
+| Aggregate decode | **24.29 tok/s** | **9.53 tok/s** | **0.39× (−61 %)** |
+| Per-case range | 15.4–29.2 | 8.1–11.9 | slower in every case |
+| Tokens per step | 1.000 | 1.866 | +87 % |
+| Step time | 41.2 ms | 196.5 ms | 4.77× |
+| Acceptance (`accepted/draft`) | — | 266/307 = **86.6 %** | — |
+| TTFT | 0.62–2.25 s | 0.88–1.09 s | no clear effect |
+
+Evidence: `logs/moe-p3/server-sage-mtp-k1.log`, `server-sage-base-nomtp.log`, `sage-mtp-k1-natural.json`, `sage-base-nomtp-natural.json`, `sage-mtp-k1-smoke.json`; probes in `scripts/mtp_smoke.py` and `scripts/mtp_acceptance.py`.
+
+**Diagnosis:** acceptance is high (the model emits templated `<think>` reasoning, easy for the drafter), yet each MTP step costs 4.8× a baseline step. A step is a draft forward at M=1 plus a verify forward at M=2; only M=1 uses the P4-01 zero-copy fast path / P4-02 grouped kernel, so the verify batch falls into the slower eager multi-token path. Accepted tokens per step (1.87) cannot recover a 4.8× per-step cost.
+
+**Verdict:** MTP is now functionally plumbed and loads correctly, but **K=1 is a net decode regression (0.39×) on this stack**. Do not enable it for deployment. The concrete lever is a grouped/verify kernel for M≥2 (the P4-03 grouped-prefill GEMM or a dedicated 2-token verify kernel); until that exists, `SPEC` stays empty.
+
+### Implications
+
+- **Memory:** language-only weights are ~17.15 GiB + 0.40 GiB MTP ≈ 17.55 GiB, about **+2.5 GiB** versus the 3.09 bpw artifact, whose Gate 4 peak was 18.36 GiB GPUActive at `GPU_UTIL=0.62` (2048 context). The observed bring-up used `GPU_UTIL=0.72` at 1024 context with a 512 MiB KV budget and loaded comfortably.
+- **Loader:** the per-expert `mtp.` prefix is handled correctly by the plugin MoE stacking path — the load log reports 776 MTP modules, as predicted.
+- **Kernel path:** verify batches are `k+1` tokens, so the M=1 grouped decode kernel is bypassed and the eager P4-01 loop serves MTP steps. This is the measured bottleneck.
+- **Remaining work if MTP is pursued:** kernel support for M≥2 verify, then re-run this A/B; plus PPL/parity and a soak.
+
