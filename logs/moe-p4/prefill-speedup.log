@@ -2,12 +2,12 @@
 Device: Intel(R) Arc(TM) Graphics
    T | Active Exp | <=8 Exp |  >8 Exp |  Eager (ms) | Grouped (ms) |  Speedup |   Max Diff
 -------------------------------------------------------------------------------------
-  16 |        105 |     105 |       0 |       30.85 |         3.78 |    8.16x |   1.16e-10
-  64 |        219 |     219 |       0 |       65.81 |         8.13 |    8.09x |   7.63e-06
- 128 |        252 |     251 |       1 |       78.54 |        10.39 |    7.56x |   3.05e-05
- 256 |        256 |     150 |     106 |      117.84 |        16.20 |    7.27x |   1.22e-04
+  16 |        105 |     105 |       0 |       33.10 |        10.75 |    3.08x |   1.53e-05
+  64 |        219 |     219 |       0 |       70.99 |        24.00 |    2.96x |   9.54e-07
+ 128 |        252 |     251 |       1 |       80.17 |        35.50 |    2.26x |   3.05e-05
+ 256 |        256 |     150 |     106 |      118.36 |        61.68 |    1.92x |   6.10e-05
 -------------------------------------------------------------------------------------
-T= 16: 40-layer prefill projected eager=1234.0 ms, grouped=151.2 ms (saving 1082.8 ms)
-T= 64: 40-layer prefill projected eager=2632.2 ms, grouped=325.3 ms (saving 2306.9 ms)
-T=128: 40-layer prefill projected eager=3141.8 ms, grouped=415.6 ms (saving 2726.2 ms)
-T=256: 40-layer prefill projected eager=4713.8 ms, grouped=648.1 ms (saving 4065.7 ms)
+T= 16: 40-layer prefill projected eager=1324.0 ms, grouped=430.0 ms (saving 894.0 ms)
+T= 64: 40-layer prefill projected eager=2839.5 ms, grouped=959.9 ms (saving 1879.6 ms)
+T=128: 40-layer prefill projected eager=3206.9 ms, grouped=1420.0 ms (saving 1786.9 ms)
+T=256: 40-layer prefill projected eager=4734.4 ms, grouped=2467.4 ms (saving 2267.1 ms)

@@ -14,6 +14,7 @@ It is imported by ``tests/test_moe_block.py`` and ``tests/test_moe_routing.py``.
 from __future__ import annotations
 
 import json
+import os
 import types
 from pathlib import Path
 
@@ -34,7 +35,9 @@ INTERMEDIATE = 512
 TOPK = 8
 T2_MAX_ABS = 0.08
 PROJECTIONS = ("gate_proj", "up_proj", "down_proj")
-DEFAULT_MODEL = "/home/yanchun/models/Qwen3.5-35B-A3B-exl3-3.09bpw"
+DEFAULT_MODEL = os.environ.get(
+    "MOE_MODEL_DIR", "/home/yanchun/models/Sage-A1.5-EXL3-4.0bpw-mtp"
+)
 
 
 class Checkpoint:

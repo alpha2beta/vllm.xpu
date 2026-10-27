@@ -1,0 +1,32 @@
+[
+  {
+    "target_len": 128,
+    "actual_len": 128,
+    "ttft_s": 1.7627895890036598,
+    "pp_speed_tps": 72.61218287109719
+  },
+  {
+    "target_len": 512,
+    "actual_len": 512,
+    "ttft_s": 6.326613509008894,
+    "pp_speed_tps": 80.92797185586389
+  },
+  {
+    "target_len": 1024,
+    "actual_len": 1024,
+    "ttft_s": 10.343387093002093,
+    "pp_speed_tps": 99.00045224961134
+  },
+  {
+    "target_len": 2048,
+    "actual_len": 2048,
+    "ttft_s": 19.167019654996693,
+    "pp_speed_tps": 106.85020607604491
+  },
+  {
+    "target_len": 3149,
+    "actual_len": 3149,
+    "ttft_s": 29.540038840001216,
+    "pp_speed_tps": 106.60107852450848
+  }
+]

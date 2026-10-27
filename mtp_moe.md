@@ -680,8 +680,8 @@ Consequences:
 Next steps in order:
 1. ~~**Decide P4-03's disposition:**~~ **Resolved (Option b)** — explicitly disabled for uncertified `K/cb` in `moe.py`, certified on (3, 1) only, fail-safe fallback to eager prefill.
 2. ~~**G4 deploy validation:**~~ **Certified** — completed across 12 diverse prompts (5,760 tokens total) with 1.884× aggregate decode speedup (26.35 vs 13.98 tok/s).
-3. **Fix P4-03 so it can be re-enabled:** (a) the K=4/cb=2 numerics — currently 17–28 % off the reference, gate is `test_grouped_verify.py --strict` passing on that K/cb; (b) the SYCL JIT failure (`CisaBuilder` / `could not create output file`) that latches it off in the serving process even once (a) is fixed. Worth ≈1.6× on prompt processing (above) — the largest remaining item.
-4. **Evaluate `SPEC=mtp-k2`:** test if drafting 2 tokens amortizes the 364 MiB sequential LM-head read across ~2.6 tokens per step to reach higher net throughput.
+3. ~~**Fix P4-03 so it can be re-enabled:**~~ **Resolved & Certified** — JIT register file overflow eliminated by removing `MR=16`; numerics fixed by pinning `MR=4`, adding write-through/clean cache coherence, and chunking $M>4$ in Python. `test_grouped_verify.py --strict` passes 50/50 checks.
+4. ~~**Evaluate `SPEC=mtp-k2`:**~~ **Evaluated & Certified** — achieves **27.28 tok/s** aggregate decode (**1.951×** speedup vs baseline, outperforming $K=1$'s 26.35 tok/s), 68.87% acceptance across 4,844 drafts (2.377 tok/step), with TTFT reduced from 1.34s to 0.80s via active P4-03 prefill-gemm.
 5. **Pin fixture checkpoint:** restore a small local fixture so the legacy P4 test suite runs cleanly.
 
 ### 13.8 G4 Certification Results — Full Suite Benchmark
@@ -711,6 +711,118 @@ Suite: 12 diverse production prompts (`scripts/g4_deploy_benchmark.py`) at `max_
 * **Criterion 3 (Total Drafted Tokens $\ge 3,000$):** **3,161 drafts** (2,593 accepted, **82.03% acceptance rate**, 1.820 tokens/step) — **PASS**.
 * **Total Generation Output:** 5,760 output tokens, wall time reduced from 427.5 s to 234.3 s (1.825× wall-clock reduction).
 * **Artifacts:** `logs/moe-p3/g4-baseline-natural.json`, `logs/moe-p3/g4-mtp-k1-natural.json`.
+
+---
+
+### 13.9 P4-03 Resolution: JIT Register File Overflow & Numerics Certification
+
+**Date:** October 27, 2026  
+**Status:** **CERTIFIED** (`test_grouped_verify.py --strict` 50/50 checks pass; prefill speedup 1.92×–3.08× measured on Layer 0).
+
+#### Root Cause Analysis:
+1. **JIT Compilation Failure:**
+   - Level-Zero / IGC error: `V4078 (size = 16384 bytes) is indirectly addressed and spans complete GRF file of 8192 GRFs. This cannot be allocated by RA.`
+   - Cause: `launch_grouped_gemm` instantiated `MR=16`. For $K=4, MR=16$: $NT=4$, accumulator size $\text{ACC} = MR \times NT \times 2 \times GVV = 16 \times 4 \times 2 \times 32 = 4,096$ floats = **16,384 bytes**, exactly double the 8,192-byte hardware register file limit of an Arc 140V Xe2 EU thread.
+2. **Numerical Defect ($17\%\text{--}28\%$ mismatch on $K=4/cb=2$):**
+   - For $MR=8$: vector state $\text{acc}\ (4,096\text{B}) + \text{hacc}\ (2,048\text{B}) + \text{xblk}\ (2,048\text{B}) = 8,192\text{ bytes}$ saturated the register file, causing severe accumulator spilling and arithmetic corruption.
+   - For $MR \in \{1, 2, 4\}$: vector state fits within register budget ($\le 7,168\text{ bytes}$). At $MR=4$, output is **bit-exact (`0.0000e+00`)** with the eager reference.
+   - Cache Coherence: $NT=2$ or $NT=4$ column strips write partials across multiple EUs into the same 128-column Hadamard block. Default store was L1 write-back, while `had_out` loaded past L1 directly from L2. Resolved with `properties{cache_hint_L1<cache_hint::write_through>, cache_hint_L2<cache_hint::write_back>}` on `block_store` and `fence_flush_op::clean` before the atomic split-K counter.
+
+#### Fix Implementation:
+- **`csrc/exl3_moe_grouped_gemm.sycl`:**
+  - Removed `MR=16` template instantiations; pinned $MR=4$ ($NT=4$, accumulator size $\text{ACC} = 1,024$ floats / 2,048B $\text{hacc}$, total vector state $7,168\text{B} < 8,192\text{B}$).
+  - Added store properties `cache_hint_L1::write_through` / `cache_hint_L2::write_back`.
+  - Added `fence<memory_kind::global, fence_flush_op::clean, fence_scope::gpu>()` prior to split-K arrival atomic increment.
+- **`exl3xpu/exl3xpu/moe.py`:**
+  - Removed the uncertified guard `if (self.K, self.cb) != (3, 1):`.
+  - Pinned `max_m_target = 4` in `_grouped_mlp_prefill`. Experts with $M > 4$ tokens are chunked into contiguous units of size $\le 4$ and processed concurrently in the same single grouped launch.
+
+#### Parity Results (`tests/test_grouped_verify.py --strict`):
+* **All 50/50 checks pass (exit 0)** under `--strict`:
+  - V-1: 18/18 bit-exact (`0.0000e+00`)
+  - V-2: 18/18 verify vs eager parity
+  - V-3: 5/5 dispatch ladder
+  - V-4: 3/3 latch isolation
+  - V-5: 6/6 prefill vs reference parity on $K=4/cb=2$:
+    - $T=4$ router: max abs diff $3.72 \times 10^{-9}$ (rel $1.50 \times 10^{-7}$)
+    - $T=4$ disjoint: max abs diff $0.0000$ (rel $0.0000$)
+    - $T=16$ router: max abs diff $2.98 \times 10^{-8}$ (rel $8.48 \times 10^{-7}$)
+    - $T=16$ disjoint: max abs diff $4.88 \times 10^{-4}$ (rel $2.60 \times 10^{-4}$)
+    - $T=64$ router: max abs diff $6.10 \times 10^{-5}$ (rel $1.82 \times 10^{-3}$)
+    - $T=64$ disjoint: max abs diff $3.91 \times 10^{-3}$ (rel $8.33 \times 10^{-4}$)
+
+#### Measured Prefill Speedup (Layer 0, `scripts/bench_moe_prefill.py`):
+
+| $T$ (tokens) | Active Experts | Eager Loop (ms) | Grouped GEMM (ms) | Speedup | Max Diff vs Eager | 40-Layer Savings |
+|---|---|---|---|---|---|---|
+| 16 | 105 | 33.10 ms | 10.75 ms | **3.08×** | $1.53 \times 10^{-5}$ | 894 ms |
+| 64 | 219 | 70.99 ms | 24.00 ms | **2.96×** | $9.54 \times 10^{-7}$ | 1,880 ms |
+| 128 | 252 | 80.17 ms | 35.50 ms | **2.26×** | $3.05 \times 10^{-5}$ | 1,787 ms |
+| 256 | 256 | 118.36 ms | 61.68 ms | **1.92×** | $6.10 \times 10^{-5}$ | 2,267 ms |
+
+---
+
+### 13.10 End-to-End Prefill Verification & SPEC=mtp-k2 Deployment Benchmark
+
+**Date:** October 27, 2026  
+**Environment:** Intel Arc 140V (Lunar Lake, Xe2), `Sage-A1.5-EXL3-4.0bpw-mtp` served on port 8002 at `MAX_LEN=2048/4096`, `GPU_UTIL=0.72`, `EAGER=1`.
+
+#### Part 1: End-to-End vLLM Prefill Verification (P4-03 Active)
+With commit `a46d417` in `exl3xpu`, the uncertified guard was removed and P4-03 (`exl3_moe_grouped_gemm`) is active in `_grouped_mlp_prefill`.
+- Server log trace confirmed: `[exl3] path engaged: prefill-gemm tokens=512` and `prefill-gemm tokens=4096`.
+- **Zero fallbacks**: `eager-fallback`, `prefill-latched`, and `prefill-uncertified` did not appear in any server log during prefill.
+- Measured TTFT & prompt throughput across prompt lengths (`scripts/bench_pp_server.py`):
+
+| Prompt Tokens | `BATCHED_TOKENS=512` TTFT | `BATCHED_TOKENS=512` Speed | `BATCHED_TOKENS=4096` TTFT | `BATCHED_TOKENS=4096` Speed | Chunking Speedup |
+|---|---|---|---|---|---|
+| **128** | 1.763 s | 72.6 tok/s | 1.656 s | **77.3 tok/s** | 1.06× |
+| **512** | 6.327 s | 80.9 tok/s | 4.796 s | **106.8 tok/s** | **1.32×** |
+| **1,024** | 10.343 s | 99.0 tok/s | 9.174 s | **111.6 tok/s** | 1.13× |
+| **2,048** | 19.167 s | 106.9 tok/s | 18.220 s | **112.4 tok/s** | 1.05× |
+| **3,149** | 29.540 s | 106.6 tok/s | 27.825 s | **113.2 tok/s** | 1.06× |
+
+Artifacts: `logs/moe-p4/pp-bt512.json`, `logs/moe-p4/pp-bt4096.json`.
+
+---
+
+#### Part 2: SPEC=mtp-k2 Deployment Benchmark
+Evaluated whether drafting 2 speculative tokens per step amortizes sequential LM-head memory bandwidth on Arc 140V across the 12 production prompts (5,760 tokens total generated per run).
+
+| Test Case | Domain | Baseline (tok/s) | MTP $K=1$ (tok/s) | MTP $K=2$ (tok/s) | $K=2$ vs Base Speedup | MTP $K=1$ TTFT | MTP $K=2$ TTFT |
+|---|---|---|---|---|---|---|---|
+| `explain_refrigerator` | Thermodynamics / Physics | 13.90 | 30.95 | **30.62** | **2.20×** | 1.59 s | **1.37 s** |
+| `history_french_rev` | History / Social analysis | 14.05 | 28.74 | **27.28** | **1.94×** | 1.78 s | **0.73 s** |
+| `howto_derailleur` | Mechanical engineering | 13.72 | 26.08 | **26.29** | **1.92×** | 0.88 s | **0.71 s** |
+| `story_lighthouse` | Creative writing | 14.03 | 20.72 | **25.91** | **1.85×** | 1.46 s | **0.72 s** |
+| `code_merge_sort` | Algorithms / Python | 14.22 | 26.13 | **25.43** | **1.79×** | 1.05 s | **0.66 s** |
+| `code_lru_cache` | Data structures / Systems | 14.30 | 27.84 | **29.41** | **2.06×** | 1.30 s | **0.76 s** |
+| `math_bridge_logic` | Logic puzzles / Reasoning | 14.15 | 26.47 | **28.13** | **1.99×** | 1.69 s | **1.16 s** |
+| `math_compound_interest` | Financial mathematics | 14.01 | 25.61 | **26.36** | **1.88×** | 1.49 s | **0.93 s** |
+| `physics_relativity` | Theoretical physics | 13.93 | 26.98 | **29.36** | **2.11×** | 1.27 s | **0.71 s** |
+| `system_design` | Architecture / Distributed | 13.96 | 26.43 | **26.57** | **1.90×** | 1.15 s | **0.76 s** |
+| `code_parser` | Compilers / AST | 13.84 | 27.16 | **27.45** | **1.98×** | 1.25 s | **0.68 s** |
+| `philosophy_ethics` | Ethics / Decision theory | 13.73 | 25.62 | **25.66** | **1.87×** | 1.21 s | **0.70 s** |
+| **Summary / Aggregate** | **All 12 Prompts** | **13.98 tok/s** | **26.35 tok/s** | **27.28 tok/s** | **1.951×** | **1.34 s avg** | **0.80 s avg** |
+
+#### Comparison Summary:
+1. **Decode Throughput:**
+   - **Baseline:** 13.98 tok/s
+   - **MTP $K=1$:** 26.35 tok/s (1.884× aggregate speedup)
+   - **MTP $K=2$:** **27.28 tok/s** (**1.951× aggregate speedup**, +3.5% over $K=1$)
+   - Mean speedup across prompts: **1.957×** (Min: **1.788×**, Max: **2.203×**).
+2. **TTFT Improvement with P4-03:**
+   - Average TTFT dropped from **1.34 s** down to **0.80 s** (a **1.68× improvement** in prompt response time) due to the active `prefill-gemm` path.
+3. **Speculation Metrics:**
+   - Total draft tokens evaluated: **4,844** (Target $\ge 3,000$ satisfied).
+   - Accepted tokens: **3,336** (**68.87% acceptance rate**).
+   - Net tokens accepted per step: **2.377**.
+4. **End-to-End Wall Time (5,760 tokens):**
+   - Baseline: 427.5 s
+   - MTP $K=1$: 234.3 s
+   - MTP $K=2$: **220.6 s** (**1.938× faster** wall-clock generation).
+5. **Artifacts:** `logs/moe-p3/g4-mtp-k2-natural.json`, `logs/moe-p3/server-sage-g4-mtp-k2.log`.
+
+
 
 
 
