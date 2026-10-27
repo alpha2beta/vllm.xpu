@@ -1,0 +1,114 @@
+{
+  "model": "sage-a1.5-exl3",
+  "base_url": "http://127.0.0.1:8002/v1",
+  "total_score": "9/10",
+  "pass_rate_pct": 90.0,
+  "category_stats": {
+    "long_ctx": "2/2",
+    "math": "1/2",
+    "code": "3/3",
+    "logic_constraint": "3/3"
+  },
+  "results": [
+    {
+      "id": "long_ctx_multihop_needle",
+      "category": "long_ctx",
+      "latency_s": 45.35,
+      "think_chars": 0,
+      "answer_chars": 981,
+      "passed": true,
+      "reason": "Found target: 9f8a-c4e1-22b0",
+      "answer_preview": "To determine the cryptographic key-hash, I will trace the migration event and then locate the corresponding operator record in the keyring logs.\n\n**Step 1: Identify the operator who migrated server phoenix-7.**\nScanning the logs for the migration event:\n- At `[2026-10-08T06:30:30.170Z]`, a `[CRITICA"
+    },
+    {
+      "id": "long_ctx_distractor_amendment",
+      "category": "long_ctx",
+      "latency_s": 12.34,
+      "think_chars": 0,
+      "answer_chars": 615,
+      "passed": true,
+      "reason": "Found target: 3,180,000",
+      "answer_preview": "Based on the provided infrastructure logs, I have reviewed the financial governance entries for Project Chimera-Alpha.\n\n1.  **Initial Entry**: At `2026-10-08T12:00:00.780Z`, the `[FINANCE-GOVERNANCE]` log indicates that the initial budget of $4,500,000 was amended and capped at $3,180,000 by executi"
+    },
+    {
+      "id": "math_chinese_remainder",
+      "category": "math",
+      "latency_s": 55.57,
+      "think_chars": 0,
+      "answer_chars": 2177,
+      "passed": true,
+      "reason": "Matched expected pattern: 3386",
+      "answer_preview": "To find the smallest positive integer $x$ satisfying the system of congruences:\n\n1. $x \\equiv 3 \\pmod{17}$\n2. $x \\equiv 4 \\pmod{19}$\n3. $x \\equiv 5 \\pmod{23}$\n\nWe can solve this step-by-step using the method of substitution or the Chinese Remainder Theorem.\n\n### Step 1: Combine the first two congrue"
+    },
+    {
+      "id": "math_bounded_combinatorics",
+      "category": "math",
+      "latency_s": 110.37,
+      "think_chars": 0,
+      "answer_chars": 4119,
+      "passed": false,
+      "reason": "Did not find pattern for 301 in: \"= $18 - 28 = -10$. **0** solutions.\\n\\nSum of triple violations: $0$.\\n\\n**Quadruple Violation:**\\n1.  **$a' \\\\ge 6, b' \\\\ge 7, c' \\\\ge 11, d' \\\\ge 10$**: Sum reduced by $6+7+11+10=34$. New sum = $18 - 34 = -1\"",
+      "answer_preview": "To find the number of integer solutions to the equation $a + b + c + d = 24$ subject to the given constraints, we can use the method of generating functions or the Principle of Inclusion-Exclusion.\n\n### Step 1: Define the Constraints\n\nThe constraints are:\n1. $1 \\le a \\le 6$\n2. $2 \\le b \\le 8$\n3. $0 "
+    },
+    {
+      "id": "code_trapping_rain_water",
+      "category": "code",
+      "latency_s": 11.66,
+      "think_chars": 0,
+      "answer_chars": 611,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\ndef trap(height: list[int]) -> int:\n    if not height:\n        return 0\n\n    left, right = 0, len(height) - 1\n    left_max = right_max = 0\n    total = 0\n\n    while left < right:\n        if height[left] < height[right]:\n            if height[left] >= left_max:\n                left_max = hei"
+    },
+    {
+      "id": "code_lru_cache",
+      "category": "code",
+      "latency_s": 27.27,
+      "think_chars": 0,
+      "answer_chars": 1663,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\nclass Node:\n    def __init__(self, key, value):\n        self.key = key\n        self.value = value\n        self.prev = None\n        self.next = None\n\n\nclass LRUCache:\n    def __init__(self, capacity: int):\n        self.capacity = capacity\n        self.cache = {}\n        # Sentinel nodes for"
+    },
+    {
+      "id": "code_min_window_substring",
+      "category": "code",
+      "latency_s": 34.17,
+      "think_chars": 0,
+      "answer_chars": 2074,
+      "passed": true,
+      "reason": "All unit tests passed",
+      "answer_preview": "```python\ndef min_window(s: str, t: str) -> str:\n    \"\"\"\n    Find the minimum window substring of s such that every character in t\n    (including duplicate occurrences) is included in the window.\n    \n    Time complexity: O(|s| + |t|)\n    Space complexity: O(|t|)\n    \"\"\"\n    if not s or not t:\n     "
+    },
+    {
+      "id": "logic_five_floors",
+      "category": "logic_constraint",
+      "latency_s": 39.4,
+      "think_chars": 0,
+      "answer_chars": 1857,
+      "passed": true,
+      "reason": "Matched expected pattern: Alice=5, Bob=3, Carol=2, David=4, Elena=1",
+      "answer_preview": "To determine the exact floor for each colleague, we will analyze the given rules step by step.\n\n**The Colleagues:** Alice, Bob, Carol, David, Elena\n**The Floors:** 1, 2, 3, 4, 5\n\n**Rules:**\n1. Alice > Bob\n2. Carol $\\neq$ 1 and Carol $\\neq$ 5\n3. David = Carol + 2\n4. Elena $\\neq$ 4 and Elena $\\neq$ 5\n"
+    },
+    {
+      "id": "format_multi_constraint_4rules",
+      "category": "logic_constraint",
+      "latency_s": 3.87,
+      "think_chars": 0,
+      "answer_chars": 138,
+      "passed": true,
+      "reason": "Passed all 4 rules simultaneously",
+      "answer_preview": "Although the sky is clear, the wind is cold. Because the deep blue ocean calls to me, I feel calm. Although the waves are high, I am safe."
+    },
+    {
+      "id": "trap_sheep_all_but_nine",
+      "category": "logic_constraint",
+      "latency_s": 3.17,
+      "think_chars": 0,
+      "answer_chars": 76,
+      "passed": true,
+      "reason": "Matched expected pattern: 9 (all but 9 die means 9 remain alive)",
+      "answer_preview": "The phrase \"all but 9 die\" means that 9 sheep survive the illness.\n\nAlive: 9"
+    }
+  ]
+}

@@ -1,0 +1,183 @@
+=== HumanEval & HumanEval+ Benchmark for sage-a1.5-exl3 Started: Mon Oct 26 10:13:23 PM CET 2026 ===
+Target Endpoint: http://127.0.0.1:8002/v1 (Raw Model: sage-a1.5-exl3)
+Settings: EVALPLUS_TIMEOUT_PER_TASK=1200s, EVALPLUS_MAX_NEW_TOKENS=2048, EVALPLUS_ENABLE_THINKING=0
+--- Generating 164 solutions via evalplus.codegen ---
+Initializing a decoder model: sage-a1.5-exl3 ...
+Sanitized code outputs will be saved to evalplus_results/humaneval/sage-a1.5-exl3_openai_temp_0.0.jsonl
+Raw outputs will be saved to evalplus_results/humaneval/sage-a1.5-exl3_openai_temp_0.0.raw.jsonl
+Codegen: HumanEval/0 @ sage-a1.5-exl3
+Codegen: HumanEval/1 @ sage-a1.5-exl3
+Codegen: HumanEval/2 @ sage-a1.5-exl3
+Codegen: HumanEval/3 @ sage-a1.5-exl3
+Codegen: HumanEval/4 @ sage-a1.5-exl3
+Codegen: HumanEval/5 @ sage-a1.5-exl3
+Codegen: HumanEval/6 @ sage-a1.5-exl3
+Codegen: HumanEval/7 @ sage-a1.5-exl3
+Codegen: HumanEval/8 @ sage-a1.5-exl3
+Codegen: HumanEval/9 @ sage-a1.5-exl3
+Codegen: HumanEval/10 @ sage-a1.5-exl3
+Codegen: HumanEval/11 @ sage-a1.5-exl3
+Codegen: HumanEval/12 @ sage-a1.5-exl3
+Codegen: HumanEval/13 @ sage-a1.5-exl3
+Codegen: HumanEval/14 @ sage-a1.5-exl3
+Codegen: HumanEval/15 @ sage-a1.5-exl3
+Codegen: HumanEval/16 @ sage-a1.5-exl3
+Codegen: HumanEval/17 @ sage-a1.5-exl3
+Codegen: HumanEval/18 @ sage-a1.5-exl3
+Codegen: HumanEval/19 @ sage-a1.5-exl3
+Codegen: HumanEval/20 @ sage-a1.5-exl3
+Codegen: HumanEval/21 @ sage-a1.5-exl3
+Codegen: HumanEval/22 @ sage-a1.5-exl3
+Codegen: HumanEval/23 @ sage-a1.5-exl3
+Codegen: HumanEval/24 @ sage-a1.5-exl3
+Codegen: HumanEval/25 @ sage-a1.5-exl3
+Codegen: HumanEval/26 @ sage-a1.5-exl3
+Codegen: HumanEval/27 @ sage-a1.5-exl3
+Codegen: HumanEval/28 @ sage-a1.5-exl3
+Codegen: HumanEval/29 @ sage-a1.5-exl3
+Codegen: HumanEval/30 @ sage-a1.5-exl3
+Codegen: HumanEval/31 @ sage-a1.5-exl3
+Codegen: HumanEval/32 @ sage-a1.5-exl3
+Codegen: HumanEval/33 @ sage-a1.5-exl3
+Codegen: HumanEval/34 @ sage-a1.5-exl3
+Codegen: HumanEval/35 @ sage-a1.5-exl3
+Codegen: HumanEval/36 @ sage-a1.5-exl3
+Codegen: HumanEval/37 @ sage-a1.5-exl3
+Codegen: HumanEval/38 @ sage-a1.5-exl3
+Codegen: HumanEval/39 @ sage-a1.5-exl3
+Codegen: HumanEval/40 @ sage-a1.5-exl3
+Codegen: HumanEval/41 @ sage-a1.5-exl3
+Codegen: HumanEval/42 @ sage-a1.5-exl3
+Codegen: HumanEval/43 @ sage-a1.5-exl3
+Codegen: HumanEval/44 @ sage-a1.5-exl3
+Codegen: HumanEval/45 @ sage-a1.5-exl3
+Codegen: HumanEval/46 @ sage-a1.5-exl3
+Codegen: HumanEval/47 @ sage-a1.5-exl3
+Codegen: HumanEval/48 @ sage-a1.5-exl3
+Codegen: HumanEval/49 @ sage-a1.5-exl3
+Codegen: HumanEval/50 @ sage-a1.5-exl3
+Codegen: HumanEval/51 @ sage-a1.5-exl3
+Codegen: HumanEval/52 @ sage-a1.5-exl3
+Codegen: HumanEval/53 @ sage-a1.5-exl3
+Codegen: HumanEval/54 @ sage-a1.5-exl3
+Codegen: HumanEval/55 @ sage-a1.5-exl3
+Codegen: HumanEval/56 @ sage-a1.5-exl3
+Codegen: HumanEval/57 @ sage-a1.5-exl3
+Codegen: HumanEval/58 @ sage-a1.5-exl3
+Codegen: HumanEval/59 @ sage-a1.5-exl3
+Codegen: HumanEval/60 @ sage-a1.5-exl3
+Codegen: HumanEval/61 @ sage-a1.5-exl3
+Codegen: HumanEval/62 @ sage-a1.5-exl3
+Codegen: HumanEval/63 @ sage-a1.5-exl3
+Codegen: HumanEval/64 @ sage-a1.5-exl3
+Codegen: HumanEval/65 @ sage-a1.5-exl3
+Codegen: HumanEval/66 @ sage-a1.5-exl3
+Codegen: HumanEval/67 @ sage-a1.5-exl3
+Codegen: HumanEval/68 @ sage-a1.5-exl3
+Codegen: HumanEval/69 @ sage-a1.5-exl3
+Codegen: HumanEval/70 @ sage-a1.5-exl3
+Codegen: HumanEval/71 @ sage-a1.5-exl3
+Codegen: HumanEval/72 @ sage-a1.5-exl3
+Codegen: HumanEval/73 @ sage-a1.5-exl3
+Codegen: HumanEval/74 @ sage-a1.5-exl3
+Codegen: HumanEval/75 @ sage-a1.5-exl3
+Codegen: HumanEval/76 @ sage-a1.5-exl3
+Codegen: HumanEval/77 @ sage-a1.5-exl3
+Codegen: HumanEval/78 @ sage-a1.5-exl3
+Codegen: HumanEval/79 @ sage-a1.5-exl3
+Codegen: HumanEval/80 @ sage-a1.5-exl3
+Codegen: HumanEval/81 @ sage-a1.5-exl3
+Codegen: HumanEval/82 @ sage-a1.5-exl3
+Codegen: HumanEval/83 @ sage-a1.5-exl3
+Codegen: HumanEval/84 @ sage-a1.5-exl3
+Codegen: HumanEval/85 @ sage-a1.5-exl3
+Codegen: HumanEval/86 @ sage-a1.5-exl3
+Codegen: HumanEval/87 @ sage-a1.5-exl3
+Codegen: HumanEval/88 @ sage-a1.5-exl3
+Codegen: HumanEval/89 @ sage-a1.5-exl3
+Codegen: HumanEval/90 @ sage-a1.5-exl3
+Codegen: HumanEval/91 @ sage-a1.5-exl3
+Codegen: HumanEval/92 @ sage-a1.5-exl3
+Codegen: HumanEval/93 @ sage-a1.5-exl3
+Codegen: HumanEval/94 @ sage-a1.5-exl3
+Codegen: HumanEval/95 @ sage-a1.5-exl3
+Codegen: HumanEval/96 @ sage-a1.5-exl3
+Codegen: HumanEval/97 @ sage-a1.5-exl3
+Codegen: HumanEval/98 @ sage-a1.5-exl3
+Codegen: HumanEval/99 @ sage-a1.5-exl3
+Codegen: HumanEval/100 @ sage-a1.5-exl3
+Codegen: HumanEval/101 @ sage-a1.5-exl3
+Codegen: HumanEval/102 @ sage-a1.5-exl3
+Codegen: HumanEval/103 @ sage-a1.5-exl3
+Codegen: HumanEval/104 @ sage-a1.5-exl3
+Codegen: HumanEval/105 @ sage-a1.5-exl3
+Codegen: HumanEval/106 @ sage-a1.5-exl3
+Codegen: HumanEval/107 @ sage-a1.5-exl3
+Codegen: HumanEval/108 @ sage-a1.5-exl3
+Codegen: HumanEval/109 @ sage-a1.5-exl3
+Codegen: HumanEval/110 @ sage-a1.5-exl3
+Codegen: HumanEval/111 @ sage-a1.5-exl3
+Codegen: HumanEval/112 @ sage-a1.5-exl3
+Codegen: HumanEval/113 @ sage-a1.5-exl3
+Codegen: HumanEval/114 @ sage-a1.5-exl3
+Codegen: HumanEval/115 @ sage-a1.5-exl3
+Codegen: HumanEval/116 @ sage-a1.5-exl3
+Codegen: HumanEval/117 @ sage-a1.5-exl3
+Codegen: HumanEval/118 @ sage-a1.5-exl3
+Codegen: HumanEval/119 @ sage-a1.5-exl3
+Codegen: HumanEval/120 @ sage-a1.5-exl3
+Codegen: HumanEval/121 @ sage-a1.5-exl3
+Codegen: HumanEval/122 @ sage-a1.5-exl3
+Codegen: HumanEval/123 @ sage-a1.5-exl3
+Codegen: HumanEval/124 @ sage-a1.5-exl3
+Codegen: HumanEval/125 @ sage-a1.5-exl3
+Codegen: HumanEval/126 @ sage-a1.5-exl3
+Codegen: HumanEval/127 @ sage-a1.5-exl3
+Codegen: HumanEval/128 @ sage-a1.5-exl3
+Codegen: HumanEval/129 @ sage-a1.5-exl3
+Codegen: HumanEval/130 @ sage-a1.5-exl3
+Codegen: HumanEval/131 @ sage-a1.5-exl3
+Codegen: HumanEval/132 @ sage-a1.5-exl3
+Codegen: HumanEval/133 @ sage-a1.5-exl3
+Codegen: HumanEval/134 @ sage-a1.5-exl3
+Codegen: HumanEval/135 @ sage-a1.5-exl3
+Codegen: HumanEval/136 @ sage-a1.5-exl3
+Codegen: HumanEval/137 @ sage-a1.5-exl3
+Codegen: HumanEval/138 @ sage-a1.5-exl3
+Codegen: HumanEval/139 @ sage-a1.5-exl3
+Codegen: HumanEval/140 @ sage-a1.5-exl3
+Codegen: HumanEval/141 @ sage-a1.5-exl3
+Codegen: HumanEval/142 @ sage-a1.5-exl3
+Codegen: HumanEval/143 @ sage-a1.5-exl3
+Codegen: HumanEval/144 @ sage-a1.5-exl3
+Codegen: HumanEval/145 @ sage-a1.5-exl3
+Codegen: HumanEval/146 @ sage-a1.5-exl3
+Codegen: HumanEval/147 @ sage-a1.5-exl3
+Codegen: HumanEval/148 @ sage-a1.5-exl3
+Codegen: HumanEval/149 @ sage-a1.5-exl3
+Codegen: HumanEval/150 @ sage-a1.5-exl3
+Codegen: HumanEval/151 @ sage-a1.5-exl3
+Codegen: HumanEval/152 @ sage-a1.5-exl3
+Codegen: HumanEval/153 @ sage-a1.5-exl3
+Codegen: HumanEval/154 @ sage-a1.5-exl3
+Codegen: HumanEval/155 @ sage-a1.5-exl3
+Codegen: HumanEval/156 @ sage-a1.5-exl3
+Codegen: HumanEval/157 @ sage-a1.5-exl3
+Codegen: HumanEval/158 @ sage-a1.5-exl3
+Codegen: HumanEval/159 @ sage-a1.5-exl3
+Codegen: HumanEval/160 @ sage-a1.5-exl3
+Codegen: HumanEval/161 @ sage-a1.5-exl3
+Codegen: HumanEval/162 @ sage-a1.5-exl3
+Codegen: HumanEval/163 @ sage-a1.5-exl3
+humaneval •100% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 164/164 • 0:44:13
+evalplus_results/humaneval/sage-a1.5-exl3_openai_temp_0.0.jsonl
+--- Evaluating solutions with EvalPlus (Base + Plus test suites) ---
+Load from ground-truth from /home/yanchun/.cache/evalplus/fe585eb4df8c88d844eeb463ea4d0302.pkl
+Reading samples...
+0it [00:00, ?it/s]164it [00:00, 3035.58it/s]
+  0%|          | 0/164 [00:00<?, ?it/s]  4%|▎         | 6/164 [00:00<00:03, 51.18it/s]  7%|▋         | 12/164 [00:00<00:03, 42.73it/s] 10%|█         | 17/164 [00:00<00:05, 28.50it/s] 15%|█▍        | 24/164 [00:00<00:03, 37.86it/s] 18%|█▊        | 29/164 [00:00<00:03, 40.41it/s] 21%|██▏       | 35/164 [00:00<00:02, 44.23it/s] 24%|██▍       | 40/164 [00:01<00:04, 30.86it/s] 27%|██▋       | 44/164 [00:01<00:03, 30.67it/s] 30%|██▉       | 49/164 [00:01<00:03, 33.04it/s] 32%|███▏      | 53/164 [00:01<00:03, 32.85it/s] 35%|███▌      | 58/164 [00:01<00:03, 35.29it/s] 39%|███▉      | 64/164 [00:01<00:02, 39.34it/s] 42%|████▏     | 69/164 [00:01<00:02, 38.34it/s] 46%|████▌     | 75/164 [00:02<00:02, 39.17it/s] 51%|█████     | 83/164 [00:02<00:01, 48.04it/s] 54%|█████▍    | 89/164 [00:02<00:01, 48.04it/s] 58%|█████▊    | 95/164 [00:02<00:01, 47.40it/s] 62%|██████▏   | 101/164 [00:02<00:01, 45.43it/s] 65%|██████▍   | 106/164 [00:02<00:01, 41.33it/s] 68%|██████▊   | 111/164 [00:02<00:01, 39.65it/s] 71%|███████   | 116/164 [00:02<00:01, 38.17it/s] 74%|███████▍  | 121/164 [00:03<00:01, 40.84it/s] 77%|███████▋  | 126/164 [00:03<00:01, 21.54it/s] 80%|███████▉  | 131/164 [00:03<00:01, 24.14it/s] 84%|████████▎ | 137/164 [00:03<00:00, 29.63it/s] 88%|████████▊ | 144/164 [00:03<00:00, 34.91it/s] 93%|█████████▎| 152/164 [00:04<00:00, 43.79it/s] 96%|█████████▋| 158/164 [00:04<00:00, 45.93it/s]100%|██████████| 164/164 [00:04<00:00, 47.94it/s]100%|██████████| 164/164 [00:04<00:00, 38.00it/s]
+humaneval (base tests)
+pass@1:	0.915
+humaneval+ (base + extra tests)
+pass@1:	0.872
+=== HumanEval & HumanEval+ Benchmark for sage-a1.5-exl3 Completed: Mon Oct 26 10:57:46 PM CET 2026 ===

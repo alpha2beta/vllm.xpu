@@ -1,0 +1,174 @@
+{
+  "model": "sage-a1.5-exl3",
+  "base_url": "http://127.0.0.1:8002/v1",
+  "total_score": "15/16",
+  "pass_rate_pct": 93.8,
+  "category_stats": {
+    "math": "4/4",
+    "code": "4/4",
+    "instruction": "3/4",
+    "fact_trap": "4/4"
+  },
+  "results": [
+    {
+      "id": "math_bridge",
+      "category": "math",
+      "prompt": "Four hikers reach a bridge at night with one flashlight. Crossing times: 1, 2, 5, and 10 minutes. At most two people can cross together, moving at the slower hiker's pace. The flashlight must be carried back. What is the minimum total time (in minutes) for all four to cross? State the final number clearly on the last line as 'Total time: X minutes'.",
+      "think": "",
+      "answer": "To find the minimum total time for all four hikers to cross the bridge, we need to consider the most efficient way to move the two slowest hikers (5 and 10 minutes) across.\n\n**The Hikers:**\n- Hiker A: 1 minute\n- Hiker B: 2 minutes\n- Hiker C: 5 minutes\n- Hiker D: 10 minutes\n\n**Strategy:**\nThe key insight is that the two slowest hikers (5 and 10) should cross together so that their times overlap (the 10-minute hiker doesn't add an extra 5 minutes). However, to get the flashlight back to the starting side, a fast hiker needs to be on the other side to return it.\n\nLet's evaluate the two main strategies:\n\n**Strategy 1: Use the fastest hiker (1 min) to escort everyone.**\n1. A and B cross (2 min). Total: 2.\n2. A returns (1 min). Total: 3.\n3. A and C cross (5 min). Total: 8.\n4. A returns (1 min). Total: 9.\n5. A and D cross (10 min). Total: 19.\n**Total: 19 minutes.**\n\n**Strategy 2: Use the two fastest hikers (1 and 2) to shuttle the flashlight.**\n1. A and B cross (2 min). Total: 2.\n2. A returns (1 min). Total: 3.\n3. C and D cross together (10 min). Total: 13.\n4. B returns (2 min). Total: 15.\n5. A and B cross again (2 min). Total: 17.\n**Total: 17 minutes.**\n\n**Verification of Strategy 2:**\n- Start: [A, B, C, D] | Flashlight on left.\n- Step 1: A and B cross to right. Time: 2. Right: [A, B]. Left: [C, D].\n- Step 2: A returns with flashlight. Time: 1. Right: [B]. Left: [A, C, D].\n- Step 3: C and D cross to right. Time: 10. Right: [B, C, D]. Left: [A].\n- Step 4: B returns with flashlight. Time: 2. Right: [C, D]. Left: [A, B].\n- Step 5: A and B cross to right. Time: 2. Right: [A, B, C, D]. Left: [].\n\nTotal time = 2 + 1 + 10 + 2 + 2 = 17 minutes.\n\nThis is the optimal solution.\n\nTotal time: 17 minutes",
+      "latency_s": 30.79,
+      "passed": true,
+      "reason": "Matched expected pattern: 17 minutes"
+    },
+    {
+      "id": "math_lcm",
+      "category": "math",
+      "prompt": "A store sells apples in packs of 6 and oranges in packs of 8. A customer wants to buy the exact same number of apples and oranges. What is the smallest positive total number of fruit (apples + oranges combined) the customer must buy? State the final answer on the last line as 'Total fruit: X'.",
+      "think": "",
+      "answer": "To find the smallest positive total number of fruit, we need to determine the smallest number of apples and oranges that are equal.\n\n1.  **Find the Least Common Multiple (LCM):**\n    *   Apples come in packs of 6.\n    *   Oranges come in packs of 8.\n    *   We need the smallest number that is a multiple of both 6 and 8.\n    *   Prime factorization of 6: $2 \\times 3$\n    *   Prime factorization of 8: $2^3$\n    *   LCM(6, 8) = $2^3 \\times 3 = 8 \\times 3 = 24$.\n\n    So, the customer must buy 24 apples and 24 oranges.\n\n2.  **Calculate the number of packs:**\n    *   Packs of apples: $24 / 6 = 4$ packs.\n    *   Packs of oranges: $24 / 8 = 3$ packs.\n\n3.  **Calculate the total fruit:**\n    *   Total apples = 24\n    *   Total oranges = 24\n    *   Total fruit = $24 + 24 = 48$.\n\nTotal fruit: 48",
+      "latency_s": 15.11,
+      "passed": true,
+      "reason": "Matched expected pattern: 48 (24 apples + 24 oranges)"
+    },
+    {
+      "id": "math_speed",
+      "category": "math",
+      "prompt": "Train A leaves a station traveling at 60 mph. Train B leaves the same station 1 hour later traveling in the same direction on a parallel track at 80 mph. How many hours after Train B departs will Train B catch up to Train A? State the final answer on the last line as 'Hours: X'.",
+      "think": "",
+      "answer": "To solve this problem, we can determine the distance Train A travels before Train B starts and then calculate how long it takes for Train B to close that gap.\n\n**Step 1: Calculate the head start distance of Train A.**\nTrain A travels at 60 mph and leaves 1 hour before Train B.\n$$ \\text{Distance} = \\text{Speed} \\times \\text{Time} $$\n$$ \\text{Head Start Distance} = 60 \\text{ mph} \\times 1 \\text{ hour} = 60 \\text{ miles} $$\n\n**Step 2: Determine the relative speed.**\nSince both trains are traveling in the same direction, we subtract their speeds to find out how fast Train B is closing the gap.\n$$ \\text{Relative Speed} = 80 \\text{ mph} - 60 \\text{ mph} = 20 \\text{ mph} $$\n\n**Step 3: Calculate the time to catch up.**\nTrain B needs to cover the 60-mile gap at a relative speed of 20 mph.\n$$ \\text{Time} = \\frac{\\text{Distance}}{\\text{Relative Speed}} $$\n$$ \\text{Time} = \\frac{60 \\text{ miles}}{20 \\text{ mph}} = 3 \\text{ hours} $$\n\n**Verification:**\n- In 3 hours, Train B travels: $80 \\times 3 = 240$ miles.\n- In 3 hours (plus its 1-hour head start), Train A travels: $60 \\times (3 + 1) = 60 \\times 4 = 240$ miles.\n- The distances match, confirming the answer.\n\nHours: 3",
+      "latency_s": 21.51,
+      "passed": true,
+      "reason": "Matched expected pattern: 3 hours"
+    },
+    {
+      "id": "math_probability",
+      "category": "math",
+      "prompt": "A bag contains 3 red balls and 5 blue balls. If two balls are drawn at random without replacement, what is the exact probability (in fraction form in lowest terms, like P/Q) that both balls are red? State the final fraction on the last line as 'Probability: P/Q'.",
+      "think": "",
+      "answer": "To find the probability that both balls drawn are red, we can follow these steps:\n\n1.  **Identify the total number of balls and red balls:**\n    *   Red balls = 3\n    *   Blue balls = 5\n    *   Total balls = $3 + 5 = 8$\n\n2.  **Determine the probability of drawing the first red ball:**\n    Since there are 3 red balls out of 8 total balls, the probability is:\n    $$P(\\text{First Red}) = \\frac{3}{8}$$\n\n3.  **Determine the probability of drawing the second red ball:**\n    Since the drawing is without replacement, there is now 1 less red ball and 1 less total ball.\n    *   Remaining red balls = $3 - 1 = 2$\n    *   Remaining total balls = $8 - 1 = 7$\n    \n    So, the probability is:\n    $$P(\\text{Second Red}) = \\frac{2}{7}$$\n\n4.  **Calculate the combined probability:**\n    Multiply the probabilities of the two dependent events:\n    $$P(\\text{Both Red}) = \\frac{3}{8} \\times \\frac{2}{7} = \\frac{3 \\times 2}{8 \\times 7} = \\frac{6}{56}$$\n\n5.  **Simplify the fraction:**\n    Divide the numerator and denominator by their greatest common divisor, which is 2:\n    $$\\frac{6 \\div 2}{56 \\div 2} = \\frac{3}{28}$$\n\nThe fraction $\\frac{3}{28}$ is in lowest terms because 3 and 28 share no common factors other than 1.\n\nProbability: 3/28",
+      "latency_s": 17.98,
+      "passed": true,
+      "reason": "Matched expected pattern: 3/28"
+    },
+    {
+      "id": "code_palindrome",
+      "category": "code",
+      "prompt": "Write a Python function `is_palindrome(s: str) -> bool` that returns True if the string is a palindrome, ignoring non-alphanumeric characters and case. Output ONLY the python function implementation. Do not include markdown fences or usage examples.",
+      "think": "",
+      "answer": "def is_palindrome(s: str) -> bool:\n    cleaned = ''.join(char.lower() for char in s if char.isalnum())\n    return cleaned == cleaned[::-1]",
+      "latency_s": 3.76,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "code_merge_intervals",
+      "category": "code",
+      "prompt": "Write a Python function `merge_intervals(intervals: list[list[int]]) -> list[list[int]]` that merges all overlapping intervals and returns the merged list sorted by start time. Output ONLY the python function implementation without markdown code fences or explanatory text.",
+      "think": "",
+      "answer": "def merge_intervals(intervals: list[list[int]]) -> list[list[int]]:\n    if not intervals:\n        return []\n    intervals.sort(key=lambda x: x[0])\n    merged = [intervals[0]]\n    for interval in intervals[1:]:\n        last = merged[-1]\n        if interval[0] <= last[1]:\n            last[1] = max(last[1], interval[1])\n        else:\n            merged.append(interval)\n    return merged",
+      "latency_s": 6.49,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "code_two_sum",
+      "category": "code",
+      "prompt": "Write a Python function `two_sum(nums: list[int], target: int) -> list[int]` that finds two distinct indices i and j such that nums[i] + nums[j] == target. Output ONLY the python function implementation without markdown code fences or commentary.",
+      "think": "",
+      "answer": "def two_sum(nums: list[int], target: int) -> list[int]:\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []",
+      "latency_s": 4.36,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "code_flatten_dict",
+      "category": "code",
+      "prompt": "Write a Python function `flatten_dict(d: dict, parent_key: str = '', sep: str = '.') -> dict` that flattens a nested dictionary. Keys should be concatenated with `sep`. Output ONLY the python function implementation without markdown code fences or commentary.",
+      "think": "",
+      "answer": "def flatten_dict(d: dict, parent_key: str = '', sep: str = '.') -> dict:\n    items = []\n    for k, v in d.items():\n        new_key = f\"{parent_key}{sep}{k}\" if parent_key else k\n        if isinstance(v, dict):\n            items.extend(flatten_dict(v, new_key, sep=sep).items())\n        else:\n            items.append((new_key, v))\n    return dict(items)",
+      "latency_s": 6.04,
+      "passed": true,
+      "reason": "All unit tests passed"
+    },
+    {
+      "id": "format_json_only",
+      "category": "instruction",
+      "prompt": "Extract the user information from this sentence: \"Marcus Aurelius was born on April 26, 121 in Rome.\" Output ONLY a raw valid JSON object with keys \"name\", \"birth_date\", and \"birth_place\". Absolutely NO markdown code fences (no ```json), NO introductory words, NO commentary.",
+      "think": "",
+      "answer": "{\"name\": \"Marcus Aurelius\", \"birth_date\": \"April 26, 121\", \"birth_place\": \"Rome\"}",
+      "latency_s": 3.8,
+      "passed": true,
+      "reason": "Strict valid raw JSON with all required keys"
+    },
+    {
+      "id": "format_reverse_capitals",
+      "category": "instruction",
+      "prompt": "List exactly 5 distinct European capital cities in strict reverse alphabetical order (Z to A). Format your output strictly as a numbered list (1. to 5.) with only the city names. No other text, no explanations.",
+      "think": "",
+      "answer": "1. Zagreb\n2. Vilnius\n3. Tallinn\n4. Stockholm\n5. Riga",
+      "latency_s": 3.15,
+      "passed": true,
+      "reason": "Passed reverse alphabetical list: ['Zagreb', 'Vilnius', 'Tallinn', 'Stockholm', 'Riga']"
+    },
+    {
+      "id": "format_no_letter_e",
+      "category": "instruction",
+      "prompt": "Write a complete English sentence describing the ocean without using the letter 'e' (or 'E') anywhere in the sentence. Output only the sentence.",
+      "think": "",
+      "answer": "The sea is vast.",
+      "latency_s": 1.73,
+      "passed": false,
+      "reason": "Failed constraint: contains 2 'e'/'E' letters"
+    },
+    {
+      "id": "format_word_count",
+      "category": "instruction",
+      "prompt": "Summarize what photosynthesis is in exactly between 15 and 25 words (inclusive). Do not include any title, prefix, or explanation. Output only the summary sentence.",
+      "think": "",
+      "answer": "Photosynthesis is the process by which plants convert sunlight into chemical energy to produce food and release oxygen.",
+      "latency_s": 2.31,
+      "passed": true,
+      "reason": "Word count 18 is within [15, 25]"
+    },
+    {
+      "id": "fact_capital_australia",
+      "category": "fact_trap",
+      "prompt": "What is the capital of Australia? Answer in one short sentence.",
+      "think": "",
+      "answer": "The capital of Australia is Canberra.",
+      "latency_s": 1.22,
+      "passed": true,
+      "reason": "Found target keyword 'Canberra'"
+    },
+    {
+      "id": "trap_us_president_1650",
+      "category": "fact_trap",
+      "prompt": "Who was the President of the United States in the year 1650?",
+      "think": "",
+      "answer": "There was **no President of the United States** in the year 1650.\n\nThe United States did not exist as a nation until 1776, and the presidency was not established until 1789 with the ratification of the U.S. Constitution. The first President, George Washington, took office in 1789.\n\nIn 1650, the area that would become the United States was composed of various English colonies (such as Virginia, Massachusetts, and Maryland) and other European settlements. The English head of state at that time was **Oliver Cromwell**, who served as Lord Protector of the Commonwealth of England (having previously been a leading figure in the English Civil War and the execution of King Charles I in 1649).",
+      "latency_s": 7.3,
+      "passed": true,
+      "reason": "Correctly rejected premise (US/president did not exist in 1650)"
+    },
+    {
+      "id": "trap_steel_vs_feathers",
+      "category": "fact_trap",
+      "prompt": "Which weighs more: two kilograms of steel or two kilograms of feathers? Answer in one sentence.",
+      "think": "",
+      "answer": "They weigh the same, as both are exactly two kilograms.",
+      "latency_s": 1.22,
+      "passed": true,
+      "reason": "Correctly recognized equal weight"
+    },
+    {
+      "id": "reasoning_shortest_person",
+      "category": "fact_trap",
+      "prompt": "Alice is taller than Bob. Charlie is shorter than Bob. David is taller than Alice. Who is the shortest person? Give only the name of the shortest person.",
+      "think": "",
+      "answer": "Charlie",
+      "latency_s": 0.99,
+      "passed": true,
+      "reason": "Found target keyword 'Charlie'"
+    }
+  ]
+}

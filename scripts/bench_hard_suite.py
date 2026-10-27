@@ -362,11 +362,14 @@ def evaluate_hard_item(item: dict, answer: str) -> tuple[bool, str]:
     return False, "Unknown evaluation type"
 
 
-def run_hard_benchmark(base_url: str, model_name: str, out_file: str, max_tokens: int = 2048, skip_long_ctx: bool = False, start_task: int = 1):
+def run_hard_benchmark(base_url: str, model_name: str, out_file: str, max_tokens: int = 2048, skip_long_ctx: bool = False, start_task: int = 1, no_think: bool = False):
     client = OpenAI(base_url=base_url, api_key="dummy")
+    extra = ({"extra_body": {"chat_template_kwargs": {"enable_thinking": False}}}
+             if no_think else {})
     print(f"=== Starting Challenging 10-Task Hard Benchmark ===")
     print(f"Target: {model_name} @ {base_url}")
-    print(f"Sampling: greedy (temperature=0.0), max_tokens={max_tokens}")
+    print(f"Sampling: greedy (temperature=0.0), max_tokens={max_tokens}, "
+          f"thinking={'off' if no_think else 'on'}")
     if skip_long_ctx:
         print("Note: --skip-long-ctx enabled (skipping 12K token prompts)")
     if start_task > 1:
@@ -422,7 +425,8 @@ def run_hard_benchmark(base_url: str, model_name: str, out_file: str, max_tokens
                 model=model_name,
                 messages=[{"role": "user", "content": prompt_content}],
                 temperature=0.0,
-                max_tokens=max_tokens
+                max_tokens=max_tokens,
+                **extra
             )
             dur = time.time() - t0
             msg = resp.choices[0].message
@@ -504,7 +508,9 @@ if __name__ == "__main__":
     parser.add_argument("--max-tokens", type=int, default=2048)
     parser.add_argument("--skip-long-ctx", action="store_true")
     parser.add_argument("--start-task", type=int, default=1, help="Start from task index (1-based)")
+    parser.add_argument("--no-think", action="store_true",
+                        help="disable model reasoning (chat_template_kwargs.enable_thinking=false)")
     args = parser.parse_args()
 
-    run_hard_benchmark(args.base_url, args.model, args.out, args.max_tokens, args.skip_long_ctx, args.start_task)
+    run_hard_benchmark(args.base_url, args.model, args.out, args.max_tokens, args.skip_long_ctx, args.start_task, args.no_think)
 

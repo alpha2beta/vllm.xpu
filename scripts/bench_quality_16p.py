@@ -299,11 +299,15 @@ def evaluate_item(item: dict, answer: str) -> tuple[bool, str]:
     return False, "Unknown evaluation type"
 
 
-def run_benchmark(base_url: str, model_name: str, out_file: str, max_tokens: int = 2048):
+def run_benchmark(base_url: str, model_name: str, out_file: str, max_tokens: int = 2048,
+                  no_think: bool = False):
     client = OpenAI(base_url=base_url, api_key="dummy")
+    extra = ({"extra_body": {"chat_template_kwargs": {"enable_thinking": False}}}
+             if no_think else {})
     print(f"=== Starting 16-Prompt Quality Benchmark ===")
     print(f"Target: {model_name} @ {base_url}")
-    print(f"Sampling: greedy (temperature=0.0), max_tokens={max_tokens}\n")
+    print(f"Sampling: greedy (temperature=0.0), max_tokens={max_tokens}, "
+          f"thinking={'off' if no_think else 'on'}\n")
 
     results = []
     category_stats = {"math": [0, 0], "code": [0, 0], "instruction": [0, 0], "fact_trap": [0, 0]}
@@ -319,7 +323,8 @@ def run_benchmark(base_url: str, model_name: str, out_file: str, max_tokens: int
                 model=model_name,
                 messages=[{"role": "user", "content": item["prompt"]}],
                 temperature=0.0,
-                max_tokens=max_tokens
+                max_tokens=max_tokens,
+                **extra
             )
             dur = time.time() - t0
             msg = resp.choices[0].message
@@ -389,6 +394,8 @@ if __name__ == "__main__":
     parser.add_argument("--model", default="qwen3.8-27b-2.2bpw")
     parser.add_argument("--out", default="results_bench_16p.json")
     parser.add_argument("--max-tokens", type=int, default=2048)
+    parser.add_argument("--no-think", action="store_true",
+                        help="disable model reasoning (chat_template_kwargs.enable_thinking=false)")
     args = parser.parse_args()
 
-    run_benchmark(args.base_url, args.model, args.out, args.max_tokens)
+    run_benchmark(args.base_url, args.model, args.out, args.max_tokens, args.no_think)

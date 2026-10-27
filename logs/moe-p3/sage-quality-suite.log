@@ -1,0 +1,11 @@
+=== Starting 16-Prompt Quality Benchmark ===
+Target: sage-a1.5-exl3 @ http://127.0.0.1:8002/v1
+Sampling: greedy (temperature=0.0), max_tokens=2048
+
+[01/16] (MATH) math_bridge... PASS (101.5s, think_chars=0, ans_chars=4697)
+[02/16] (MATH) math_lcm... PASS (66.7s, think_chars=3232, ans_chars=499)
+[03/16] (MATH) math_speed... PASS (46.3s, think_chars=2115, ans_chars=358)
+[04/16] (MATH) math_probability... PASS (108.2s, think_chars=0, ans_chars=6384)
+[05/16] (CODE) code_palindrome... FAIL (100.5s, think_chars=0, ans_chars=8214)
+       Reason: Execution error: NameError: name 'is_palindrome' is not defined
+[06/16] (CODE) code_merge_intervals... 
