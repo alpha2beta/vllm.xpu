@@ -673,7 +673,7 @@ Consequences:
 * **39 % of prefill time at `BATCHED_TOKENS=4096` is removable host-op overhead**: 472 tok/s today against an upper bound of ~770, i.e. **≈1.6×**. At `BATCHED_TOKENS=512` the removable share is 84 % (126 tok/s).
 * Upper bound, not a promise: part of A is vLLM scheduler / KV / attention fixed cost that P4-03 cannot touch, and none of it is recoverable until **both** the K=4/cb=2 numerics (§13.5) and the JIT failure (§13.4) are fixed — which is exactly why the explicit K/cb refusal matters.
 * **Largest open win in this document**: ≈1.6× on prompt processing, versus the 1.14× the §11.5 verify path already bought on decode (§12.2).
-  * ***Measured outcome (§13.11):*** both defects were then fixed (numerals 50/50, JIT failure gone) — but the resulting `MR = 4` implementation runs P4-03 **2.7–4.6× slower than the eager loop it replaces** (111 vs 464 tok/s at ~13k tokens, §13.11), because chunking to 4 re-reads each expert's trellis 32× at production `cnt ≈ 128`. This estimate is therefore **not** what re-enabling P4-03 delivers; it is the size of the prize for a replacement implementation — gate by `cnt`, cut the eager path's 257 host syncs, or re-tile `(MR, NT)` under the register budget (§13.11 fix direction).
+  * ***Measured outcome (§13.11):*** both defects were then fixed (numerals 50/50, JIT failure gone) — but the resulting `MR = 4` implementation ran P4-03 **2.7–4.6× slower than the eager loop it replaced** (111 vs 464 tok/s at ~13k tokens), because chunking to 4 re-reads each expert's trellis 32× at production `cnt ≈ 128`. The replacement implementation (P4-03 gated at $T \le 64$ + device-binned eager path, `exl3xpu` `dee02ae`) then measured **785.4 tok/s** at 12,099 tokens — **within 2 % of the ~770 tok/s predicted here**. This estimate was therefore correct: P4-03 was the wrong vehicle for it, and the win came from deleting the per-expert `nonzero()` syncs rather than from a fused kernel (§13.11 Outcome).
 * Config note while it stays down: keep `--max-num-batched-tokens` large — small chunks are disproportionately expensive (126 vs 473 tok/s on the same prompt).
 
 *Evidence: `logs/moe-p3/server-pp-bt4096.log`, `logs/moe-p3/server-pp-bt512.log` (both carry the `EXL3_TRACE_PATHS` lines showing `prefill-uncertified K=4 cb=2` → `eager-fallback` at the respective chunk size).*
@@ -681,7 +681,7 @@ Consequences:
 Next steps in order:
 1. ~~**Decide P4-03's disposition:**~~ **Resolved (Option b)** — explicitly disabled for uncertified `K/cb` in `moe.py`, certified on (3, 1) only, fail-safe fallback to eager prefill.
 2. ~~**G4 deploy validation:**~~ **Certified** — completed across 12 diverse prompts (5,760 tokens total) with 1.884× aggregate decode speedup (26.35 vs 13.98 tok/s).
-3. ~~**Fix P4-03 so it can be re-enabled:**~~ **Half done — numerics and JIT resolved, performance now open.** The two reported defects are fixed: the JIT register-file overflow is eliminated by dropping the `MR=16` instantiations, and the numerics are fixed (write-through/`fence_flush_op::clean` on the split-K `part` stores, `MR=4` for register headroom) with `test_grouped_verify.py --strict` at **50/50**. **However the implementation is not shippable**: `MR = 4` + `max_m_target = 4` regresses prefill **2.7–4.6×** at production chunk sizes (§13.11, 111 vs 464 tok/s), so P4-03 must stay gated off until the performance side is fixed — gate by `cnt`, cut the eager path's 257 host syncs, or re-tile `(MR, NT)` under the §13.9 register budget (§13.11 fix direction).
+3. ~~**Fix P4-03 so it can be re-enabled:**~~ **Resolved — numerics, JIT and performance.** Numerics 50/50 under `--strict` (write-through/`fence_flush_op::clean` on the split-K `part` stores, `MR=4` for register headroom after dropping the `MR=16` instantiations that caused the GRF overflow). The performance defect §13.11 found in that fix is closed by `exl3xpu` `dee02ae`: P4-03 gated at $T \le 64$ (the measured layer-0 crossover) plus a device-binned eager path that replaces 257 host syncs per layer with one. Prefill at `BATCHED_TOKENS=4096`: **111.4 → 785.4 tok/s** at 12,099 tokens (+69 % over the old eager loop, 7.1× over the broken grouped path, within 2 % of this section's ~770 tok/s estimate). P4-03 stays out of service above T=64 **by design**, not by accident.
 4. ~~**Evaluate `SPEC=mtp-k2`:**~~ **Evaluated & Certified** — achieves **27.28 tok/s** aggregate decode (**1.951×** speedup vs baseline, outperforming $K=1$'s 26.35 tok/s), 68.87% acceptance across 4,844 drafts (2.377 tok/step). The reported TTFT 1.34 s → 0.80 s spans *two* changes ($K=1 \to K=2$ and eager $\to$ engaged prefill), so it is not an isolated P4-03 attribution — see §13.10.
 5. **Pin fixture checkpoint:** restore a small local fixture so the legacy P4 test suite runs cleanly.
 
@@ -878,6 +878,39 @@ Note the register constraint is real: per §13.9's model MR=8 occupies exactly 8
 1. **Immediate:** gate P4-03 on `max(counts) <= max_m_target` (i.e. only when no chunking is needed) or by chunk size, so it can never split an expert more than the tile requires. Their own micro says it wins 2.26× at T=128 — that regime should be kept.
 2. **Biggest safe win, numerics-neutral:** attack the eager tax directly. `_grouped_mlp_prefill`'s fallback does `torch.unique(ids).tolist()` plus a `(ids == e).nonzero()` **per expert — 257 host syncs/layer**. `_HAS_MOE_C.remap_hidden_states` already produces `rows_per_expert`/offsets on device; consuming them with a **single** `.tolist()` removes ~256 of 257 syncs while keeping the tuned per-expert `_cached_linear` calls (which amortize weights over M). That targets the exact ≈39 % §13.7 measured, with no kernel change and no numerics risk.
 3. **Kernel (the real "fix the kernel approach"):** choose `(MR, NT)` jointly from the §13.9 register budget instead of pinning MR — e.g. reduce `NT` for MR=8 so `acc` halves (4,096 → 2,048 B) and total vector state returns under the GRF limit, giving `cnt/8` sub-units instead of `cnt/4`. Requires re-validating V-5 and re-running this A/B; a `P`-vs-`MR` sweep at T=512/1024/2048/4096 is the missing measurement.
+
+#### Outcome — fix applied and measured (`exl3xpu` `dee02ae`)
+
+Directions (1) and (2) were implemented (both in `moe.py`, no rebuild); (3) is **superseded** — once the eager path stops paying 257 syncs, the grouped launch no longer has an advantage to win back, so re-tiling is not worth the numerics risk.
+
+**Layer-0 A/B, ms/layer** (batched = device-binned eager; grouped = P4-03 under the new gate):
+
+| T | old loop | batched (new) | grouped (gated) | grouped vs batched |
+|---|---|---|---|---|
+| 16 | 32.66 | 13.18 | **10.95** | grouped 1.20× better |
+| 64 | 66.76 | 25.61 | **23.88** | grouped 1.07× better |
+| 128 | 80.49 | **31.67** | 36.48 | batched 1.15× better ← crossover |
+| 256 | 126.71 | **48.03** | 62.13 | batched 1.29× better |
+| 4096 | 157.90 | **66.17** | 65.89 (gated → batched) | — |
+
+So `_PREFILL_GEMM_MAX_T = 64`: P4-03 keeps the short-prompt/last-chunk regime where its single launch genuinely pays, and is refused everywhere else with a sync-free `T` test (no device round trip).
+
+**End to end**, same config and instrument as the A/B above (`BATCHED_TOKENS=4096`, `MAX_LEN=16384`, `KV_CACHE_BYTES=536870912`, nonce prompts):
+
+| state | ~12,000-token prompt | ~2,650-token prompt |
+|---|---|---|
+| broken grouped (`a46d417`) | 111.4 tok/s | 112.8 tok/s |
+| old eager loop | 464.0 tok/s | 306.8 tok/s |
+| **gated + batched (`dee02ae`)** | **785.4 tok/s** | **570.8 tok/s** |
+
+**+69 % over the old eager loop and 7.1× over the broken grouped path.** The trace confirms the intended ladder: `prefill-eager-gated T=4096` → `eager-fallback` → `eager-batched`.
+
+Two conclusions worth carrying forward:
+
+* **§13.7's ≈1.6× estimate was right; P4-03 was the wrong vehicle.** It predicted a ~770 tok/s floor for BT=4096 prefill; the fix measures **785.4 tok/s**, within 2 % of the prediction. The win came from deleting host syncs, not from a fused kernel — the eager loop's per-expert `nonzero()` was the entire A term.
+* **The crossover moved, so any future P4-03 tuning must be re-measured against the batched path, not against the old loop.** Grouped's 1.9–3.1× wins in §13.9 were measured against an eager baseline that was 2.4–2.6× slower than it is now.
+
+**Status:** numerics 50/50 under `--strict` (V-5 still exercises P4-03 at T=4/16/64, all inside the gate); performance now exceeds both the old eager loop and the estimate. P4-03 is out of service above T=64 **by design**, not by accident.
 
 
 
