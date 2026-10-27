@@ -154,6 +154,10 @@ def test_apply_prefill_parity(dtype: torch.dtype = torch.bfloat16):
         logits = torch.randn(T, 256, device=dev)
         weights, ids = torch.topk(logits.softmax(dim=-1), 8, dim=-1)
 
+        # §11.5's verify path owns 1 < T <= 4 in apply(); latch it off so this
+        # keeps measuring P4-03 prefill rather than verify-vs-verify.
+        h.method._verify_supported = False
+
         # 1. Grouped prefill path
         h.method._grouped_gemm_supported = True
         out_grouped = h.method.apply(h.layer, x, weights, ids, None, None)

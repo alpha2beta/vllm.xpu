@@ -1,0 +1,310 @@
+{
+  "task": "G3-grouped-verify",
+  "pass": true,
+  "checks": [
+    {
+      "case": "V-1 kernel parity T=2 router torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=2 router torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.0,
+      "rel": 0.0
+    },
+    {
+      "case": "V-1 kernel parity T=2 disjoint torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=2 disjoint torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.00048828125,
+      "rel": 0.0017985611510791368
+    },
+    {
+      "case": "V-1 kernel parity T=2 shared torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=2 shared torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.0001220703125,
+      "rel": 0.0003720238095238095
+    },
+    {
+      "case": "V-1 kernel parity T=3 router torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=3 router torch.bfloat16",
+      "ok": true,
+      "max_abs": 1.862645149230957e-09,
+      "rel": 6.465588585805085e-08
+    },
+    {
+      "case": "V-1 kernel parity T=3 disjoint torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=3 disjoint torch.bfloat16",
+      "ok": true,
+      "max_abs": 6.103515625e-05,
+      "rel": 0.00016801075268817206
+    },
+    {
+      "case": "V-1 kernel parity T=3 shared torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=3 shared torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.00048828125,
+      "rel": 0.0013966480446927375
+    },
+    {
+      "case": "V-1 kernel parity T=4 router torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=4 router torch.bfloat16",
+      "ok": true,
+      "max_abs": 9.313225746154785e-10,
+      "rel": 4.036716683201058e-08
+    },
+    {
+      "case": "V-1 kernel parity T=4 disjoint torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=4 disjoint torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.000244140625,
+      "rel": 0.0006510416666666666
+    },
+    {
+      "case": "V-1 kernel parity T=4 shared torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=4 shared torch.bfloat16",
+      "ok": true,
+      "max_abs": 0.000244140625,
+      "rel": 0.0004940711462450593
+    },
+    {
+      "case": "V-1 kernel parity T=2 router torch.float16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=2 router torch.float16",
+      "ok": true,
+      "max_abs": 5.960464477539063e-08,
+      "rel": 2.8041995692749463e-06
+    },
+    {
+      "case": "V-1 kernel parity T=2 disjoint torch.float16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=2 disjoint torch.float16",
+      "ok": true,
+      "max_abs": 0.0,
+      "rel": 0.0
+    },
+    {
+      "case": "V-1 kernel parity T=2 shared torch.float16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=2 shared torch.float16",
+      "ok": true,
+      "max_abs": 1.52587890625e-05,
+      "rel": 4.646840148698885e-05
+    },
+    {
+      "case": "V-1 kernel parity T=3 router torch.float16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=3 router torch.float16",
+      "ok": true,
+      "max_abs": 9.5367431640625e-07,
+      "rel": 3.305129561078794e-05
+    },
+    {
+      "case": "V-1 kernel parity T=3 disjoint torch.float16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=3 disjoint torch.float16",
+      "ok": true,
+      "max_abs": 6.103515625e-05,
+      "rel": 0.00016823687752355316
+    },
+    {
+      "case": "V-1 kernel parity T=3 shared torch.float16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=3 shared torch.float16",
+      "ok": true,
+      "max_abs": 6.103515625e-05,
+      "rel": 0.00017397355601948505
+    },
+    {
+      "case": "V-1 kernel parity T=4 router torch.float16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=4 router torch.float16",
+      "ok": true,
+      "max_abs": 1.9073486328125e-06,
+      "rel": 8.239947264337508e-05
+    },
+    {
+      "case": "V-1 kernel parity T=4 disjoint torch.float16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=4 disjoint torch.float16",
+      "ok": true,
+      "max_abs": 7.62939453125e-06,
+      "rel": 2.0292207792207792e-05
+    },
+    {
+      "case": "V-1 kernel parity T=4 shared torch.float16",
+      "ok": true,
+      "max_abs": 0.0
+    },
+    {
+      "case": "V-2 apply vs eager T=4 shared torch.float16",
+      "ok": true,
+      "max_abs": 3.814697265625e-06,
+      "rel": 7.7084361124815e-06
+    },
+    {
+      "case": "V-3 dispatch T=1",
+      "ok": true,
+      "verify_calls": [],
+      "expected": null
+    },
+    {
+      "case": "V-3 dispatch T=2",
+      "ok": true,
+      "verify_calls": [
+        2
+      ],
+      "expected": 2
+    },
+    {
+      "case": "V-3 dispatch T=3",
+      "ok": true,
+      "verify_calls": [
+        3
+      ],
+      "expected": 3
+    },
+    {
+      "case": "V-3 dispatch T=4",
+      "ok": true,
+      "verify_calls": [
+        4
+      ],
+      "expected": 4
+    },
+    {
+      "case": "V-3 dispatch T=5",
+      "ok": true,
+      "verify_calls": [],
+      "expected": null
+    },
+    {
+      "case": "V-4a latch + single warning",
+      "ok": true,
+      "warnings": 1
+    },
+    {
+      "case": "V-4b decode path unaffected",
+      "ok": true,
+      "_grouped_supported": true,
+      "decode_max_abs": 0.0
+    },
+    {
+      "case": "V-4c apply() falls back correctly",
+      "ok": true,
+      "max_abs": 0.0
+    }
+  ],
+  "pre_existing": [
+    {
+      "case": "V-5 prefill vs reference T=4 router",
+      "ok": false,
+      "max_abs": 0.006866455078125,
+      "rel": 0.2757352941176471,
+      "tol": "0.02/0.05"
+    },
+    {
+      "case": "V-5 prefill vs reference T=4 disjoint",
+      "ok": false,
+      "max_abs": 0.091796875,
+      "rel": 0.2052401746724891,
+      "tol": "0.02/0.05"
+    },
+    {
+      "case": "V-5 prefill vs reference T=16 router",
+      "ok": false,
+      "max_abs": 0.008056640625,
+      "rel": 0.22916666666666666,
+      "tol": "0.02/0.05"
+    },
+    {
+      "case": "V-5 prefill vs reference T=16 disjoint",
+      "ok": false,
+      "max_abs": 0.32470703125,
+      "rel": 0.17317708333333334,
+      "tol": "0.02/0.05"
+    },
+    {
+      "case": "V-5 prefill vs reference T=64 router",
+      "ok": false,
+      "max_abs": 0.00775146484375,
+      "rel": 0.23175182481751824,
+      "tol": "0.02/0.05"
+    },
+    {
+      "case": "V-5 prefill vs reference T=64 disjoint",
+      "ok": false,
+      "max_abs": 1.26220703125,
+      "rel": 0.26927083333333335,
+      "tol": "0.02/0.05"
+    }
+  ],
+  "failures": [],
+  "strict": false,
+  "k_cb": {
+    "K": 4,
+    "cb": 2
+  },
+  "model_dir": "/home/yanchun/models/Sage-A1.5-EXL3-4.0bpw-mtp",
+  "device": "Intel(R) Arc(TM) Graphics",
+  "torch": "2.14.0+xpu",
+  "moe_method_module": "/home/yanchun/Projects/exl3xpu/exl3xpu/moe.py"
+}
