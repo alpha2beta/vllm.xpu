@@ -673,6 +673,7 @@ Consequences:
 * **39 % of prefill time at `BATCHED_TOKENS=4096` is removable host-op overhead**: 472 tok/s today against an upper bound of ~770, i.e. **≈1.6×**. At `BATCHED_TOKENS=512` the removable share is 84 % (126 tok/s).
 * Upper bound, not a promise: part of A is vLLM scheduler / KV / attention fixed cost that P4-03 cannot touch, and none of it is recoverable until **both** the K=4/cb=2 numerics (§13.5) and the JIT failure (§13.4) are fixed — which is exactly why the explicit K/cb refusal matters.
 * **Largest open win in this document**: ≈1.6× on prompt processing, versus the 1.14× the §11.5 verify path already bought on decode (§12.2).
+  * ***Measured outcome (§13.11):*** both defects were then fixed (numerals 50/50, JIT failure gone) — but the resulting `MR = 4` implementation runs P4-03 **2.7–4.6× slower than the eager loop it replaces** (111 vs 464 tok/s at ~13k tokens, §13.11), because chunking to 4 re-reads each expert's trellis 32× at production `cnt ≈ 128`. This estimate is therefore **not** what re-enabling P4-03 delivers; it is the size of the prize for a replacement implementation — gate by `cnt`, cut the eager path's 257 host syncs, or re-tile `(MR, NT)` under the register budget (§13.11 fix direction).
 * Config note while it stays down: keep `--max-num-batched-tokens` large — small chunks are disproportionately expensive (126 vs 473 tok/s on the same prompt).
 
 *Evidence: `logs/moe-p3/server-pp-bt4096.log`, `logs/moe-p3/server-pp-bt512.log` (both carry the `EXL3_TRACE_PATHS` lines showing `prefill-uncertified K=4 cb=2` → `eager-fallback` at the respective chunk size).*
@@ -680,8 +681,8 @@ Consequences:
 Next steps in order:
 1. ~~**Decide P4-03's disposition:**~~ **Resolved (Option b)** — explicitly disabled for uncertified `K/cb` in `moe.py`, certified on (3, 1) only, fail-safe fallback to eager prefill.
 2. ~~**G4 deploy validation:**~~ **Certified** — completed across 12 diverse prompts (5,760 tokens total) with 1.884× aggregate decode speedup (26.35 vs 13.98 tok/s).
-3. ~~**Fix P4-03 so it can be re-enabled:**~~ **Resolved & Certified** — JIT register file overflow eliminated by removing `MR=16`; numerics fixed by pinning `MR=4`, adding write-through/clean cache coherence, and chunking $M>4$ in Python. `test_grouped_verify.py --strict` passes 50/50 checks.
-4. ~~**Evaluate `SPEC=mtp-k2`:**~~ **Evaluated & Certified** — achieves **27.28 tok/s** aggregate decode (**1.951×** speedup vs baseline, outperforming $K=1$'s 26.35 tok/s), 68.87% acceptance across 4,844 drafts (2.377 tok/step), with TTFT reduced from 1.34s to 0.80s via active P4-03 prefill-gemm.
+3. ~~**Fix P4-03 so it can be re-enabled:**~~ **Half done — numerics and JIT resolved, performance now open.** The two reported defects are fixed: the JIT register-file overflow is eliminated by dropping the `MR=16` instantiations, and the numerics are fixed (write-through/`fence_flush_op::clean` on the split-K `part` stores, `MR=4` for register headroom) with `test_grouped_verify.py --strict` at **50/50**. **However the implementation is not shippable**: `MR = 4` + `max_m_target = 4` regresses prefill **2.7–4.6×** at production chunk sizes (§13.11, 111 vs 464 tok/s), so P4-03 must stay gated off until the performance side is fixed — gate by `cnt`, cut the eager path's 257 host syncs, or re-tile `(MR, NT)` under the §13.9 register budget (§13.11 fix direction).
+4. ~~**Evaluate `SPEC=mtp-k2`:**~~ **Evaluated & Certified** — achieves **27.28 tok/s** aggregate decode (**1.951×** speedup vs baseline, outperforming $K=1$'s 26.35 tok/s), 68.87% acceptance across 4,844 drafts (2.377 tok/step). The reported TTFT 1.34 s → 0.80 s spans *two* changes ($K=1 \to K=2$ and eager $\to$ engaged prefill), so it is not an isolated P4-03 attribution — see §13.10.
 5. **Pin fixture checkpoint:** restore a small local fixture so the legacy P4 test suite runs cleanly.
 
 ### 13.8 G4 Certification Results — Full Suite Benchmark
@@ -717,7 +718,7 @@ Suite: 12 diverse production prompts (`scripts/g4_deploy_benchmark.py`) at `max_
 ### 13.9 P4-03 Resolution: JIT Register File Overflow & Numerics Certification
 
 **Date:** October 27, 2026  
-**Status:** **CERTIFIED** (`test_grouped_verify.py --strict` 50/50 checks pass; prefill speedup 1.92×–3.08× measured on Layer 0).
+**Status:** **Numerics CERTIFIED** (`test_grouped_verify.py --strict` 50/50 checks pass). **Performance is scoped to $T \le 256$**: the 1.92×–3.08× figures below are layer-0 at $T \le 256$ only, and the end-to-end A/B at production chunk sizes shows the opposite sign (§13.11 — grouped is 2.7–4.6× *slower* than eager at $T=4096$).
 
 #### Root Cause Analysis:
 1. **JIT Compilation Failure:**
@@ -760,6 +761,8 @@ Suite: 12 diverse production prompts (`scripts/g4_deploy_benchmark.py`) at `max_
 | 128 | 252 | 80.17 ms | 35.50 ms | **2.26×** | $3.05 \times 10^{-5}$ | 1,787 ms |
 | 256 | 256 | 118.36 ms | 61.68 ms | **1.92×** | $6.10 \times 10^{-5}$ | 2,267 ms |
 
+> **Scope of this table (§13.11).** Every row has $\text{cnt} \le 8$, so `max_m_target = 4` splits each expert into at most 2 sub-units and the weight re-read cost is ~2×. Production prefill chunks have $\text{cnt} \approx 128$ ($T=4096$), where the same pin splits each expert into **32 sub-units and re-reads its trellis 32×** — the grouped path's cost then grows with $\text{cnt}$ while the eager loop's per-expert host tax stays flat. The rows to measure are $T = 512/1024/2048/4096$; without them this table cannot be extrapolated to serving.
+
 ---
 
 ### 13.10 End-to-End Prefill Verification & SPEC=mtp-k2 Deployment Benchmark
@@ -782,6 +785,15 @@ With commit `a46d417` in `exl3xpu`, the uncertified guard was removed and P4-03 
 | **3,149** | 29.540 s | 106.6 tok/s | 27.825 s | **113.2 tok/s** | 1.06× |
 
 Artifacts: `logs/moe-p4/pp-bt512.json`, `logs/moe-p4/pp-bt4096.json`.
+
+> **What this table does and does not show (§13.11).** Both columns have P4-03 *active*; the "Chunking Speedup" column compares `BATCHED_TOKENS` against each other, **not** P4-03 against the eager loop. The missing control is the engaged-vs-eager A/B, which was run on 2026-10-27 at identical config (same 17,873-token KV pool, same `MAX_LEN=16384`, same nonce-based prompts, both paths proven by the `EXL3_TRACE_PATHS` trace):
+>
+> | prompt | P4-03 engaged (`prefill-gemm`) | eager (`prefill-uncertified` → `eager-fallback`) | |
+> |---|---|---|---|
+> | ~13,000 tokens | 118.44 s → **111.4 tok/s** | 26.08 s → **464.0 tok/s** | grouped **4.2× slower** |
+> | ~2,700–2,900 tokens | 25.71 s → 112.8 tok/s | 8.64 s → 306.8 tok/s | grouped **2.7× slower** |
+>
+> Artifacts: `logs/moe-p3/server-review-eng.log`, `server-review-eager.log`, `logs/moe-p4/pp-review-{eng,eager}.json`. The eager run's `pp-bench` row (517.9 tok/s) is prefix-cache contaminated — `bench_pp_server.py` derives its prompt from `random.Random(target_len + 42)`, so the identical text was already cached from the engaged run — and should not be quoted. Also note `Avg prompt throughput: N` in the engine log is *tokens dispatched per 10 s window*, not measured prefill rate (it reported exactly 3149/10, 2048/10, …), so it cannot be used as a cross-check.
 
 ---
 
@@ -810,8 +822,7 @@ Evaluated whether drafting 2 speculative tokens per step amortizes sequential LM
    - **MTP $K=1$:** 26.35 tok/s (1.884× aggregate speedup)
    - **MTP $K=2$:** **27.28 tok/s** (**1.951× aggregate speedup**, +3.5% over $K=1$)
    - Mean speedup across prompts: **1.957×** (Min: **1.788×**, Max: **2.203×**).
-2. **TTFT Improvement with P4-03:**
-   - Average TTFT dropped from **1.34 s** down to **0.80 s** (a **1.68× improvement** in prompt response time) due to the active `prefill-gemm` path.
+2. **TTFT across the two runs:** K=1 (§13.8, measured *before* `a46d417`, so eager prefill) averaged **1.34 s**; K=2 here (measured *after*, so `prefill-gemm` active) averaged **0.80 s**. Two variables changed at once — $K=1 \to K=2$ **and** eager $\to$ engaged — so this is **not** an isolated P4-03 attribution. Given the engaged-vs-eager A/B above (§13.10 note), where eager is 2.7–4.6× faster on prompts of these sizes' chunking regime, the 0.80 s is more plausibly due to the spec/config differences; a clean attribution needs K held constant.
 3. **Speculation Metrics:**
    - Total draft tokens evaluated: **4,844** (Target $\ge 3,000$ satisfied).
    - Accepted tokens: **3,336** (**68.87% acceptance rate**).
@@ -821,6 +832,52 @@ Evaluated whether drafting 2 speculative tokens per step amortizes sequential LM
    - MTP $K=1$: 234.3 s
    - MTP $K=2$: **220.6 s** (**1.938× faster** wall-clock generation).
 5. **Artifacts:** `logs/moe-p3/g4-mtp-k2-natural.json`, `logs/moe-p3/server-sage-g4-mtp-k2.log`.
+
+---
+
+### 13.11 P4-03 performance regression at production chunk sizes
+
+**Date:** October 27, 2026 · **Status:** numerics fix stands (§13.9); the `MR = 4` pin + `max_m_target = 4` chunking **regress prefill 2.7–4.6×** and must be reverted or gated. **This section supersedes the performance claims in §13.9 and §13.10.**
+
+#### Method — one variable, both paths proven
+
+Both legs identical except the `moe.py` state: `MAX_LEN=16384`, `KV_CACHE_BYTES=536870912` (both report a **17,873-token** KV pool), `BATCHED_TOKENS=4096`, `GPU_UTIL=0.64`, `EXL3_TRACE_PATHS=1`, prompt nonce regenerated per process (no prefix-cache reuse), one warmup request to absorb SYCL JIT of the MR=4 templates. Path proven by the trace in each log:
+
+* engaged run → `[exl3] path engaged: prefill-gemm tokens=4096`
+* eager run (moe.py restored to `2357be1`) → `prefill-uncertified K=4 cb=2` → `eager-fallback tokens=4096`
+
+`exl3xpu/_C.so` was built 14:05 vs `a46d417` at 14:18, so the installed binary carries the MR=4 kernel. Working tree restored to `a46d417` after the run.
+
+#### Result
+
+| prompt | P4-03 engaged | eager loop | grouped vs eager |
+|---|---|---|---|
+| ~13,000 tokens | 118.44 s → **111.4 tok/s** | 26.08 s → **464.0 tok/s** | **4.2× slower** |
+| ~2,700–2,900 tokens | 25.71 s → 112.8 tok/s | 8.64 s → 306.8 tok/s | **2.7× slower** |
+| 3,149 (`bench_pp_server.py`) | 27.74 s → 113.5 tok/s | 6.08 s → 517.9 tok/s ⚠ | — ⚠ |
+
+⚠ the eager bench row is prefix-cache contaminated (deterministic prompt text, engaged ran first) — do not quote it; the nonce-based probe above is the comparison. Equivalently: engaged ≈ 900 ms/layer for a 4,096-token chunk vs eager ≈ 220 ms/layer.
+
+#### Root cause
+
+The GEMM work is **not** the problem — the *tiling* is:
+
+1. **The `MR = 4` pin destroys M-amortization.** With `max_m_target = 4` and production `cnt ≈ 128` (T=4096, top-8 over 256 experts), each expert is split into **32 sub-units, each re-reading that expert's full trellis** — 32× the weight traffic instead of 8× at MR=16 or 1× unchunked. Per layer: ~24 GiB of weight reads instead of ~384 MiB; ×40 layers ≈ **950 GiB per chunk**. The eager loop has no such split, so it amortizes each expert's weights over all 128 rows — which is why eager barely moves between T=256 (118 ms/layer) and T=4096 (220 ms/layer) while grouped grows ~14× (62 → 900 ms/layer).
+2. **Split-K scratch scales with T**: `part = (T·k) × P × N × 4 B` = 32,768 × 16 × 512 × 4 ≈ **1.07 GB per projection**, written and re-read → ~4.3 GB/layer ≈ **172 GB per chunk**. MR-independent (pre-existing, §11.7) but now live traffic.
+3. **Why §13.9's table said otherwise**: every row has `cnt ≤ 8`, so the pin created at most 2 sub-units (≤2× re-read) while the eager reference still paid its full ~257-host-op tax. The micro measured the left side of a crossover that lies between T=256 and T=4096.
+
+Note the register constraint is real: per §13.9's model MR=8 occupies exactly 8,192 B (the Xe2 GRF limit, spilling) and MR=4 occupies 7,168 B — so **MR cannot simply be restored to 8/16**; the tile must change shape, not just the constant.
+
+#### Corrected estimates
+
+* §13.7's "≈1.6× PP win" was an **upper bound on a correct-and-cheap replacement**, which does not exist yet: the available replacement costs 111 tok/s against eager's 464. The overhead §13.7 measured (≈39 % of prefill at BT=4096) is real, but capturing it needs a different implementation, not re-enabling this one.
+* §13.10's TTFT and chunk-size tables remain valid as *measurements*; their interpretation as P4-03 speedups does not hold.
+
+#### Fix direction, in order
+
+1. **Immediate:** gate P4-03 on `max(counts) <= max_m_target` (i.e. only when no chunking is needed) or by chunk size, so it can never split an expert more than the tile requires. Their own micro says it wins 2.26× at T=128 — that regime should be kept.
+2. **Biggest safe win, numerics-neutral:** attack the eager tax directly. `_grouped_mlp_prefill`'s fallback does `torch.unique(ids).tolist()` plus a `(ids == e).nonzero()` **per expert — 257 host syncs/layer**. `_HAS_MOE_C.remap_hidden_states` already produces `rows_per_expert`/offsets on device; consuming them with a **single** `.tolist()` removes ~256 of 257 syncs while keeping the tuned per-expert `_cached_linear` calls (which amortize weights over M). That targets the exact ≈39 % §13.7 measured, with no kernel change and no numerics risk.
+3. **Kernel (the real "fix the kernel approach"):** choose `(MR, NT)` jointly from the §13.9 register budget instead of pinning MR — e.g. reduce `NT` for MR=8 so `acc` halves (4,096 → 2,048 B) and total vector state returns under the GRF limit, giving `cnt/8` sub-units instead of `cnt/4`. Requires re-validating V-5 and re-running this A/B; a `P`-vs-`MR` sweep at T=512/1024/2048/4096 is the missing measurement.
 
 
 
