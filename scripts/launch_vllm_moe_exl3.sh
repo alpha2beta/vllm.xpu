@@ -85,6 +85,13 @@ case "$SPEC" in
   *) echo "unknown SPEC='$SPEC' (expected mtp-k1, mtp-k2, ngram-k<N>, or empty)" >&2; exit 2 ;;
 esac
 
+KV_BYTES_FLAG=()
+if [ -n "${KV_CACHE_BYTES:-}" ]; then
+  if [[ ! " $* " =~ " --kv-cache-memory-bytes " ]]; then
+    KV_BYTES_FLAG=(--kv-cache-memory-bytes "$KV_CACHE_BYTES")
+  fi
+fi
+
 ARGS=(
   --model "$MODEL"
   --served-model-name "$SERVED"
@@ -94,7 +101,7 @@ ARGS=(
   --max-num-seqs "$MAX_SEQS"
   --max-num-batched-tokens "$BATCHED_TOKENS"
   --gpu-memory-utilization "$GPU_UTIL"
-  --kv-cache-memory-bytes "$KV_CACHE_BYTES"
+  "${KV_BYTES_FLAG[@]}"
   --language-model-only
   --seed 0
   "${EAGER_FLAG[@]}"
