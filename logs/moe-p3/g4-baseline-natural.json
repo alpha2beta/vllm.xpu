@@ -1,0 +1,121 @@
+{
+  "tag": "baseline",
+  "tot_tokens": 5760,
+  "wall_time": 427.5437777042389,
+  "aggregate_decode_tps": 13.984868385088946,
+  "spec_delta": {},
+  "drafts": 0.0,
+  "accepted": 0.0,
+  "steps": 0.0,
+  "acceptance_rate": 0.0,
+  "rows": [
+    {
+      "ttft": 1.7889735698699951,
+      "total": 36.242305755615234,
+      "decode_time": 34.45333218574524,
+      "tokens": 480,
+      "decode_tps": 13.902864240173031,
+      "sample_text": "<think> Thinking Process:  1.  **Analyze the Request:**     *   **Topic:** How a",
+      "case": "explain_refrigerator"
+    },
+    {
+      "ttft": 1.2948691844940186,
+      "total": 35.388938665390015,
+      "decode_time": 34.094069480895996,
+      "tokens": 480,
+      "decode_tps": 14.049364223546242,
+      "sample_text": "<think> Here's a thinking process:  1.  **Analyze the Request:**     *   **Topic",
+      "case": "history_french_rev"
+    },
+    {
+      "ttft": 1.225041151046753,
+      "total": 36.13542652130127,
+      "decode_time": 34.91038537025452,
+      "tokens": 480,
+      "decode_tps": 13.72084538511377,
+      "sample_text": "<think> Here's a thinking process:  1.  **Understand User Request:**    - Topic:",
+      "case": "howto_derailleur"
+    },
+    {
+      "ttft": 1.3356378078460693,
+      "total": 35.46823072433472,
+      "decode_time": 34.13259291648865,
+      "tokens": 480,
+      "decode_tps": 14.033507538438618,
+      "sample_text": "<think> Here's a thinking thinking sequence  1.  **Deconstruct the Prompt:**    ",
+      "case": "story_lighthouse"
+    },
+    {
+      "ttft": 1.136812448501587,
+      "total": 34.8230984210968,
+      "decode_time": 33.686285972595215,
+      "tokens": 480,
+      "decode_tps": 14.219436372109428,
+      "sample_text": "<think> Here's a thinking process that leads to the suggested response:  1.  **U",
+      "case": "code_merge_sort"
+    },
+    {
+      "ttft": 1.298100471496582,
+      "total": 34.8025279045105,
+      "decode_time": 33.504427433013916,
+      "tokens": 480,
+      "decode_tps": 14.29661799049318,
+      "sample_text": "<think> Here's a thinking process that leads to the suggested implementation:  1",
+      "case": "code_lru_cache"
+    },
+    {
+      "ttft": 1.811589241027832,
+      "total": 35.65488386154175,
+      "decode_time": 33.843294620513916,
+      "tokens": 480,
+      "decode_tps": 14.153468371535464,
+      "sample_text": "<think> Thinking Process:  1.  **Analyze the Problem:**     *   Four hikers: A, ",
+      "case": "math_bridge_logic"
+    },
+    {
+      "ttft": 1.4914472103118896,
+      "total": 35.69245672225952,
+      "decode_time": 34.20100951194763,
+      "tokens": 480,
+      "decode_tps": 14.005434542295257,
+      "sample_text": "To calculate the future value of an investment with compound interest, we use th",
+      "case": "math_compound_interest"
+    },
+    {
+      "ttft": 1.2300736904144287,
+      "total": 35.61720585823059,
+      "decode_time": 34.38713216781616,
+      "tokens": 480,
+      "decode_tps": 13.92962918984878,
+      "sample_text": "<think> Thinking Process:  1.  **Analyze the Request:**     *   Topic: Einstein'",
+      "case": "physics_relativity"
+    },
+    {
+      "ttft": 1.367427110671997,
+      "total": 35.677897214889526,
+      "decode_time": 34.31047010421753,
+      "tokens": 480,
+      "decode_tps": 13.960753045500246,
+      "sample_text": "<think> Here's a thinking process that leads to the suggested design for a scala",
+      "case": "system_design"
+    },
+    {
+      "ttft": 1.2123463153839111,
+      "total": 35.8208372592926,
+      "decode_time": 34.60849094390869,
+      "tokens": 480,
+      "decode_tps": 13.840534127198255,
+      "sample_text": "<think> Here's a thinking process that leads to the suggested recursive descent ",
+      "case": "code_parser"
+    },
+    {
+      "ttft": 1.3342535495758057,
+      "total": 36.21842932701111,
+      "decode_time": 34.8841757774353,
+      "tokens": 480,
+      "decode_tps": 13.73115429345587,
+      "sample_text": "<think> Here's a thinking process:  1.  **Understand the User's Request:**    - ",
+      "case": "philosophy_ethics"
+    }
+  ]
+}

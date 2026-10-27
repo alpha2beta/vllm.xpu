@@ -1,0 +1,126 @@
+{
+  "tag": "mtp-k1",
+  "tot_tokens": 5760,
+  "wall_time": 234.26825737953186,
+  "aggregate_decode_tps": 26.345555968295415,
+  "spec_delta": {
+    "spec_decode_num_accepted_tokens_total": 2593.0,
+    "spec_decode_num_drafts_total": 3161.0,
+    "spec_decode_num_accepted_tokens_per_pos_total": 2593.0,
+    "spec_decode_num_draft_tokens_total": 3161.0
+  },
+  "drafts": 3161.0,
+  "accepted": 2593.0,
+  "steps": 3161.0,
+  "acceptance_rate": 0.8203100284720025,
+  "rows": [
+    {
+      "ttft": 1.586534023284912,
+      "total": 17.063529014587402,
+      "decode_time": 15.47699499130249,
+      "tokens": 480,
+      "decode_tps": 30.949160367964236,
+      "sample_text": "<think> Thinking Process:  1.  **Analyze the Request:**     *   **Topic:** How a",
+      "case": "explain_refrigerator"
+    },
+    {
+      "ttft": 1.7789461612701416,
+      "total": 18.446775197982788,
+      "decode_time": 16.667829036712646,
+      "tokens": 480,
+      "decode_tps": 28.7379957488736,
+      "sample_text": "<think> Here's a thinking process:  1.  **Analyze the Request:**     *   **Topic",
+      "case": "history_french_rev"
+    },
+    {
+      "ttft": 0.8750147819519043,
+      "total": 19.242717266082764,
+      "decode_time": 18.36770248413086,
+      "tokens": 480,
+      "decode_tps": 26.078384077368497,
+      "sample_text": "<think> Here's a thinking process:  1.  **Understand User Request:**    - Topic:",
+      "case": "howto_derailleur"
+    },
+    {
+      "ttft": 1.4602491855621338,
+      "total": 24.572959423065186,
+      "decode_time": 23.11271023750305,
+      "tokens": 480,
+      "decode_tps": 20.724527546871894,
+      "sample_text": "<think> Here's a thinking thinking sequence  1.  **Deconstruct the Prompt:**    ",
+      "case": "story_lighthouse"
+    },
+    {
+      "ttft": 1.0484199523925781,
+      "total": 19.381616592407227,
+      "decode_time": 18.33319664001465,
+      "tokens": 480,
+      "decode_tps": 26.12746753364978,
+      "sample_text": "<think> Here's a thinking process that leads to the suggested response:  1.  **U",
+      "case": "code_merge_sort"
+    },
+    {
+      "ttft": 1.2972228527069092,
+      "total": 18.503197193145752,
+      "decode_time": 17.205974340438843,
+      "tokens": 480,
+      "decode_tps": 27.839167403279003,
+      "sample_text": "<think> Here's a thinking process that leads to the suggested implementation:  1",
+      "case": "code_lru_cache"
+    },
+    {
+      "ttft": 1.685626745223999,
+      "total": 19.783534049987793,
+      "decode_time": 18.097907304763794,
+      "tokens": 480,
+      "decode_tps": 26.467148490362526,
+      "sample_text": "<think> Thinking Process:  1.  **Analyze the Problem:**     *   Four hikers: A, ",
+      "case": "math_bridge_logic"
+    },
+    {
+      "ttft": 1.486687421798706,
+      "total": 20.19088363647461,
+      "decode_time": 18.704196214675903,
+      "tokens": 480,
+      "decode_tps": 25.609226641033707,
+      "sample_text": "To calculate the future value of an investment with compound interest, we use th",
+      "case": "math_compound_interest"
+    },
+    {
+      "ttft": 1.2721307277679443,
+      "total": 19.028212070465088,
+      "decode_time": 17.756081342697144,
+      "tokens": 480,
+      "decode_tps": 26.976672991927174,
+      "sample_text": "<think> Thinking Process:  1.  **Analyze the Request:**     *   Topic: Einstein'",
+      "case": "physics_relativity"
+    },
+    {
+      "ttft": 1.1454520225524902,
+      "total": 19.266674757003784,
+      "decode_time": 18.121222734451294,
+      "tokens": 480,
+      "decode_tps": 26.433094886546794,
+      "sample_text": "<think> Here's a thinking process that leads to the suggested design for a scala",
+      "case": "system_design"
+    },
+    {
+      "ttft": 1.2467913627624512,
+      "total": 18.88192391395569,
+      "decode_time": 17.635132551193237,
+      "tokens": 480,
+      "decode_tps": 27.16168980355011,
+      "sample_text": "<think> Here's a thinking process that leads to the suggested recursive descent ",
+      "case": "code_parser"
+    },
+    {
+      "ttft": 1.2058990001678467,
+      "total": 19.904165029525757,
+      "decode_time": 18.69826602935791,
+      "tokens": 480,
+      "decode_tps": 25.61734864868904,
+      "sample_text": "<think> Here's a thinking process:  1.  **Understand the User's Request:**    - ",
+      "case": "philosophy_ethics"
+    }
+  ]
+}
